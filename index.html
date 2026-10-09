@@ -44,7 +44,11 @@
     -webkit-touch-callout: none;
     touch-action: manipulation;
     overflow: hidden;
+    transition: grid-template-rows .5s ease;
   }
+  /* The half whose turn it is grows a little, pushing the bar towards the other player. */
+  body.turn-white { grid-template-rows: 1.6fr auto 1fr; }
+  body.turn-black { grid-template-rows: 1fr auto 1.6fr; }
 
   .half {
     position: relative;
@@ -57,8 +61,10 @@
     -webkit-tap-highlight-color: transparent;
   }
   /* The top half faces the player across the board. */
-  #white { background: var(--white-bg); color: var(--white-fg); transform: rotate(180deg); }
-  #black { background: var(--black-bg); color: var(--black-fg); }
+  #white { background-color: var(--white-bg); color: var(--white-fg); transform: rotate(180deg); }
+  #black { background-color: var(--black-bg); color: var(--black-fg); }
+  /* Soft fade from the pink middle bar into each half (its top edge, also for the turned-around one). */
+  .half { background-image: linear-gradient(var(--bar), transparent 28px); transition: background-color .4s, color .4s; }
 
   .name {
     display: flex;
@@ -70,6 +76,8 @@
     text-transform: uppercase;
   }
   .stone { width: 1em; height: 1em; border-radius: 50%; }
+  /* Once both players have moved, the stone alone says whose half it is. */
+  .quiet .name [data-t] { display: none; }
   #black .stone { background: radial-gradient(circle at 35% 35%, #666, #000 70%); box-shadow: 0 0 0 1px #777; }
   #white .stone { background: radial-gradient(circle at 35% 35%, #fff, #cfcac0 80%); box-shadow: 0 0 0 1px #999; }
 
@@ -96,7 +104,14 @@
     height: 44px;
     pointer-events: none;
   }
-  .running::after { background-color: var(--run); }
+  /* Its inner edge is wavy: a wave on top, solid below. */
+  .running::after {
+    background-color: var(--run);
+    --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 10'%3E%3Cpath d='M0 10V5Q10 0 20 5T40 5V10Z'/%3E%3C/svg%3E") top / 40px 10px repeat-x,
+            linear-gradient(#000 0 0) bottom / 100% calc(100% - 9px) no-repeat;
+    -webkit-mask: var(--wave);
+    mask: var(--wave);
+  }
   /* A small heart in the middle of the bar, in the player's colour, gently pulsing. */
   .running::before {
     z-index: 1;
@@ -106,7 +121,7 @@
     animation: pulse 2.4s ease-in-out infinite;
   }
   @keyframes pulse { 50% { opacity: .45; } }
-  @media (prefers-reduced-motion: reduce) { .running::before { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .running::before { animation: none; } body { transition: none; } }
   #black.running::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
   #white.running::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
 
@@ -115,7 +130,7 @@
   .over .time { order: -1; font-size: min(11vw, 6vh); opacity: .6; } /* time on top, then name, then LOST / WON */
   .over .hint { font-size: min(14vw, 10vh); font-weight: 800; line-height: 1.05; letter-spacing: .03em; opacity: 1; }
   .low .time { color: var(--low); }
-  .critical, .flagged { background: var(--out) !important; color: #fff !important; }
+  .critical, .flagged { background-color: var(--out) !important; color: #fff !important; }
 
   #bar {
     display: flex;
@@ -241,7 +256,7 @@
   .actions { display: flex; gap: 10px; justify-content: flex-end; }
   .actions .primary { background: var(--out); color: #fff; }
   /* Cancel and Set stay at the bottom of the settings, even while scrolling. */
-  #settings .actions { position: sticky; bottom: 0; margin: 0 -24px -24px; padding: 12px 24px 24px; background: #fff5f9; }
+  #settings .actions { flex-direction: row-reverse; justify-content: flex-start; position: sticky; bottom: 0; margin: 0 -24px -24px; padding: 12px 24px 24px; background: #fff5f9; }
 </style>
 </head>
 <body>
@@ -319,8 +334,9 @@
     </div>
     <label class="check"><input id="sound" type="checkbox"> <span data-t="sound">Chime and voice</span></label>
     <div class="actions">
-      <button value="cancel" data-t="cancel">Cancel</button>
+      <!-- Set comes first: the phone's Done key presses the first button in the form. -->
       <button value="set" class="primary" data-t="set">Set</button>
+      <button value="cancel" data-t="cancel">Cancel</button>
     </div>
   </form>
 </dialog>
@@ -707,6 +723,8 @@
   function render() {
     const inGame = state === 'running' || state === 'paused';
     document.body.classList.toggle('over', state === 'over');
+    for (const p of ['black', 'white']) document.body.classList.toggle('turn-' + p, inGame && active === p);
+    document.body.classList.toggle('quiet', inGame && moved.black && moved.white);
     for (const p of ['black', 'white']) {
       const c = clock(p), ms = state === 'over' && loser === p ? 0 : c.time, cl = ui[p].root.classList;
       setText(ui[p].time, fmt(ms));
