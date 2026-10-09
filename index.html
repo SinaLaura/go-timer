@@ -84,22 +84,28 @@
   .waiting .time { opacity: .35; }
   /* One thick bar on the outer edge of the screen; it flips to whoever's turn it is.
      (bottom is the screen edge for both halves, because White's half is turned around) */
-  .running::after {
+  .running::after, .running::before {
     content: "";
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     height: 44px;
-    background-color: var(--run);
+    pointer-events: none;
+  }
+  .running::after { background-color: var(--run); }
+  /* A small heart in the middle of the bar, in the player's colour, gently pulsing. */
+  .running::before {
+    z-index: 1;
     background-position: center;
     background-size: 34px;
     background-repeat: no-repeat;
-    pointer-events: none;
+    animation: pulse 2.4s ease-in-out infinite;
   }
-  /* A small heart in the middle of the bar, in the player's colour. */
-  #black.running::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
-  #white.running::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
+  @keyframes pulse { 50% { opacity: .45; } }
+  @media (prefers-reduced-motion: reduce) { .running::before { animation: none; } }
+  #black.running::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
+  #white.running::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
 
   /* When time is up, who lost / won is the big news, the time steps back. */
   .over .name { font-size: min(8vw, 4.5vh); }
