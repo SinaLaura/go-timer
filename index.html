@@ -30,7 +30,21 @@
     --run: #f07bb0;
     --low: #e8559a;
     --out: #d6006f;
+    /* Themes (picked with the heart on the running clock) change the middle bar, the soft
+       fade from it into each half, and the running bar. Flags go from top to bottom. */
+    --stripes: var(--bar);
+    --edge-top: var(--bar);
+    --edge-bottom: var(--bar);
+    --run-bg: var(--run);
+    --flag-pride: linear-gradient(#e40303 0 16.7%, #ff8c00 0 33.3%, #ffed00 0 50%, #008026 0 66.7%, #004dff 0 83.3%, #750787 0);
+    --flag-trans: linear-gradient(#5bcefa 0 20%, #f5a9b8 0 40%, #fff 0 60%, #f5a9b8 0 80%, #5bcefa 0);
+    --flag-wlw: linear-gradient(#d52d00 0 20%, #ff9a56 0 40%, #fff 0 60%, #d362a4 0 80%, #a30262 0);
   }
+  :root[data-theme=pride] { --flag: var(--flag-pride); --flag-top: #e40303; --edge-top: rgb(228 3 3 / .55); --edge-bottom: rgb(117 7 135 / .55); }
+  :root[data-theme=trans] { --flag: var(--flag-trans); --flag-top: #5bcefa; --edge-top: rgb(91 206 250 / .6); --edge-bottom: rgb(91 206 250 / .6); }
+  :root[data-theme=wlw] { --flag: var(--flag-wlw); --flag-top: #d52d00; --edge-top: rgb(213 45 0 / .55); --edge-bottom: rgb(163 2 98 / .55); }
+  /* The running bar's top 5px is its wavy edge, so the stripes start below it. */
+  :root[data-theme] { --stripes: var(--flag); --run-bg: var(--flag) 0 5px / 100% calc(100% - 5px) no-repeat var(--flag-top); }
   * { box-sizing: border-box; margin: 0; }
   html, body { height: 100%; }
   body {
@@ -49,7 +63,8 @@
   /* The half whose turn it is grows a little, pushing the bar towards the other player. */
   body.turn-white { grid-template-rows: minmax(0, 1.5fr) auto minmax(0, 1fr); }
   body.turn-black { grid-template-rows: minmax(0, .94fr) auto minmax(0, 1.9fr); }
-  body.with-stats { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr); } /* same room for both statistics */
+  body.with-stats { grid-template-rows: minmax(0, .96fr) auto minmax(0, 1fr); } /* white a touch smaller, as in play */
+  body.over { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr); } /* the end screen needs all the room */
 
   .half {
     position: relative;
@@ -65,7 +80,9 @@
   #white { background-color: var(--white-bg); color: var(--white-fg); transform: rotate(180deg); }
   #black { background-color: var(--black-bg); color: var(--black-fg); }
   /* Soft fade from the pink middle bar into each half (its top edge, also for the turned-around one). */
-  .half { background-image: linear-gradient(var(--bar), transparent 28px); transition: background-color .4s, color .4s; }
+  #white { --edge: var(--edge-top); }
+  #black { --edge: var(--edge-bottom); }
+  .half { background-image: linear-gradient(var(--edge), transparent 28px); transition: background-color .4s, color .4s; }
 
   .name {
     display: flex;
@@ -98,7 +115,7 @@
   .waiting .time, .waiting .name, .waiting .periods { opacity: .25; }
   /* One thick bar on the outer edge of the screen; it flips to whoever's turn it is.
      (bottom is the screen edge for both halves, because White's half is turned around) */
-  .running::after, .running::before {
+  .running::after {
     content: "";
     position: absolute;
     bottom: 0;
@@ -109,24 +126,63 @@
   }
   /* Its inner edge is wavy: a wave on top, solid below. */
   .running::after {
-    background-color: var(--run);
+    background: var(--run-bg);
     --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 10'%3E%3Cpath d='M0 10V5Q10 0 20 5T40 5V10Z'/%3E%3C/svg%3E") top / 40px 10px repeat-x,
             linear-gradient(#000 0 0) bottom / 100% calc(100% - 9px) no-repeat;
     -webkit-mask: var(--wave);
     mask: var(--wave);
   }
-  /* A small heart in the middle of the bar, in the player's colour, gently pulsing. */
-  .running::before {
+  /* A small heart in the middle of the bar, in the player's colour, gently pulsing.
+     Tapping it opens the colours. */
+  .heart-btn {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
     z-index: 1;
-    background-position: center;
-    background-size: 27px;
-    background-repeat: no-repeat;
-    animation: pulse 2.4s ease-in-out infinite;
+    width: 64px;
+    height: 44px;
+    min-height: 0;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    translate: -50% 0;
+    place-items: center;
+    -webkit-tap-highlight-color: transparent;
   }
+  .running .heart-btn { display: grid; }
+  .heart-btn svg { width: 27px; height: 27px; animation: pulse 2.4s ease-in-out infinite; }
+  #black .heart-btn svg { fill: #000; }
+  #white .heart-btn svg { fill: #fff; }
+  :root[data-theme] #white .heart-btn svg { stroke: #1c1418; stroke-width: 1.3; } /* stays visible on a white stripe */
   @keyframes pulse { 50% { opacity: .45; } }
-  @media (prefers-reduced-motion: reduce) { .running::before, .stats { animation: none !important; } body, .time { transition: none; } }
-  #black.running::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
-  #white.running::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
+  @media (prefers-reduced-motion: reduce) { .heart-btn svg, .stats, #themes { animation: none !important; } body, .time { transition: none; } }
+
+  /* The colours, just above the heart, facing the player who tapped it. */
+  #themes {
+    position: absolute;
+    bottom: 52px;
+    left: 50%;
+    z-index: 2;
+    display: flex;
+    gap: 2px;
+    padding: 8px 6px;
+    border-radius: 20px;
+    background: #fff5f9;
+    color: var(--bar-fg);
+    box-shadow: 0 6px 24px rgb(40 10 25 / .35);
+    translate: -50% 0;
+    cursor: default;
+    animation: fade-in .25s ease-out;
+  }
+  #themes[hidden] { display: none; }
+  #themes button { display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 0; padding: 4px 6px; border-radius: 14px; background: none; font-size: 13px; font-weight: 700; }
+  #themes .swatch { width: 40px; height: 40px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12); }
+  #themes .on .swatch { outline: 3px solid var(--out); outline-offset: 2px; }
+  [data-pick=pink] .swatch { background: linear-gradient(var(--bar) 0 50%, var(--run) 0); }
+  [data-pick=pride] .swatch { background: var(--flag-pride); }
+  [data-pick=trans] .swatch { background: var(--flag-trans); }
+  [data-pick=wlw] .swatch { background: var(--flag-wlw); }
 
   /* When time is up, who lost / won is the big news, the time steps back. */
   .over .name { font-size: min(8vw, 3.4vh); }
@@ -141,7 +197,7 @@
   /* Statistics: at the end, and while paused after a tap on the middle box. Each player reads their own. */
   .stats { display: none; width: min(80vw, 300px); grid-template-columns: 1fr auto; gap: .15em 1.4em; font-size: clamp(13px, 2.1vh, 17px); }
   /* Clear of the bar: a narrower fade and some room; if it is too tall, the rest goes to the screen edge. */
-  .with-stats .half { gap: 1vh; padding-top: 20px; justify-content: safe center; background-image: linear-gradient(var(--bar), transparent 12px); }
+  .with-stats .half { gap: 1vh; padding-top: 16px; justify-content: safe center; background-image: linear-gradient(var(--edge), transparent 12px); }
   .with-stats .hint:empty { display: none; }
   .with-stats .stats { display: grid; animation: fade-in .6s ease-out; }
   @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } }
@@ -165,6 +221,7 @@
     align-items: center;
     gap: 8px;
     padding: 3px 16px;
+    background: var(--stripes);
     color: var(--bar-fg);
   }
   #bar button { min-height: 38px; padding: 0 14px; }
@@ -301,6 +358,7 @@
   <div class="periods"></div>
   <div class="hint"></div>
   <div class="stats"></div>
+  <button type="button" class="heart-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg></button>
 </section>
 
 <nav id="bar">
@@ -323,7 +381,15 @@
   <div class="periods"></div>
   <div class="hint"></div>
   <div class="stats"></div>
+  <button type="button" class="heart-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg></button>
 </section>
+
+<div id="themes" hidden>
+  <button type="button" data-pick="pink"><span class="swatch"></span>Pink</button>
+  <button type="button" data-pick="pride"><span class="swatch"></span>Pride</button>
+  <button type="button" data-pick="trans"><span class="swatch"></span>Trans</button>
+  <button type="button" data-pick="wlw"><span class="swatch"></span>WLW</button>
+</div>
 
 <dialog id="settings">
   <form method="dialog">
@@ -433,7 +499,7 @@
       mainTime: 'Main time', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Chime and voice',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Last period!' : `Byo-yomi · ${n} left`),
-      cancel: 'Cancel', set: 'Set',
+      cancel: 'Cancel', set: 'Set', colours: 'Colours',
     },
     de: {
       black: 'Schwarz', white: 'Weiß', pause: 'Pause', resume: 'Weiter', reset: 'Neustart',
@@ -452,7 +518,7 @@
       mainTime: 'Grundbedenkzeit', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Klang und Stimme',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Letzte Periode!' : `Byo-yomi · noch ${n}`),
-      cancel: 'Abbrechen', set: 'OK',
+      cancel: 'Abbrechen', set: 'OK', colours: 'Farben',
     },
   };
   let lang = 'en';
@@ -477,6 +543,37 @@
     ui[p].stats.addEventListener('pointerdown', e => pickBar(p, e));
     ui[p].stats.addEventListener('pointermove', e => e.buttons && pickBar(p, e));
   }
+  // Colours: the heart on the running clock opens them; the pick is kept on this device.
+  // They never block the game: a tap anywhere else closes them and still counts.
+  const picker = document.getElementById('themes');
+  const hearts = document.querySelectorAll('.heart-btn');
+  for (const h of hearts) {
+    h.addEventListener('pointerdown', e => e.stopPropagation()); // not a move
+    h.addEventListener('click', () => {
+      const half = h.closest('.half');
+      picker.hidden = !picker.hidden && picker.parentElement === half;
+      half.append(picker);
+    });
+  }
+  picker.addEventListener('pointerdown', e => e.stopPropagation());
+  picker.addEventListener('click', e => {
+    const b = e.target.closest('[data-pick]');
+    if (!b) return;
+    setTheme(b.dataset.pick);
+    try { localStorage.setItem('theme', b.dataset.pick); } catch (e) { /* storage blocked */ }
+    picker.hidden = true;
+  });
+  document.addEventListener('pointerdown', e => {
+    if (!picker.contains(e.target) && !e.target.closest('.heart-btn')) picker.hidden = true;
+  }, true);
+  function setTheme(name) {
+    if (!['pride', 'trans', 'wlw'].includes(name)) name = 'pink';
+    if (name === 'pink') delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = name;
+    for (const b of picker.querySelectorAll('[data-pick]')) b.classList.toggle('on', b.dataset.pick === name);
+  }
+  try { setTheme(localStorage.getItem('theme')); } catch (e) { setTheme('pink'); }
+
   const pauseBtn = document.getElementById('pause');
   const resetBtn = document.getElementById('reset');
   const info = document.getElementById('info');
@@ -904,6 +1001,8 @@
     pauseBtn.classList.toggle('paused', state === 'paused');
     pauseBtn.ariaLabel = pauseBtn.title = state === 'paused' ? t('resume') : t('pause');
     resetBtn.ariaLabel = resetBtn.title = t('reset');
+    for (const h of hearts) h.ariaLabel = h.title = t('colours');
+    if (state !== 'running') picker.hidden = true; // only while a clock runs, like the heart
     info.classList.toggle('plain', inGame); // no pencil: during a game it shows the statistics
     setText(setting, describe(settings));
     setText(system, t(systemKey()));
