@@ -265,12 +265,15 @@
   .chart { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: .6em; touch-action: none; }
   .chart svg { display: block; height: 34px; fill: currentColor; }
   .chart .has-sel rect { opacity: .35; }
+  /* The player's average move time, as a pink dashed line across the bars. */
+  .chart .avg { stroke: var(--run); stroke-width: 2; stroke-dasharray: 5 4; }
+  .flagged .chart .avg { stroke: #ffc2dc; } /* on the bright pink half */
   .chart .has-sel rect.sel { opacity: 1; }
   .chart .readout { min-height: 1.3em; font-size: .9em; font-weight: 700; } /* one line: the title, or the tapped move */
   /* A tap on the statistics shows only the chart, big. */
-  body.charts .stats { grid-template-columns: 1fr; width: min(86vw, 420px); }
-  body.charts .chart { margin-top: 0; gap: 6px; }
-  body.charts .chart svg { height: min(26vh, 170px); }
+  .stats.chart-only { grid-template-columns: 1fr; width: min(86vw, 420px); }
+  .chart-only .chart { margin-top: 0; gap: 6px; }
+  .chart-only .chart svg { height: min(26vh, 170px); }
   .chart small { font-size: .85em; opacity: .7; }
   .chart small.readout { font-weight: 600; }
   .low .time { color: var(--low); }
@@ -315,9 +318,7 @@
     font-size: 14px;
     line-height: 1.15;
   }
-  #info .edit { flex: none; width: 18px; height: 18px; color: var(--out); }
   #info.plain { opacity: 1; background: transparent; border-color: transparent; }
-  #info.plain .edit { display: none; }
   #info.plain > span { visibility: hidden; } /* during a game the time setting is in the statistics */
   #info small:empty { display: none; }
   #info small { display: block; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
@@ -429,7 +430,6 @@
   </button>
   <button id="info">
     <span><small id="system"></small><span id="setting"></span></span>
-    <svg class="edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>
   </button>
   <button id="reset" class="icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 3.5v4h4"/></svg>
@@ -676,7 +676,7 @@
   // Tapping your own half ends your move and starts the other clock.
   function tap(p) {
     unlockSound();
-    if (state === 'ready') { buzz(70); click(p); return start(other(p)); }
+    if (state === 'ready') { click(p); return start(other(p)); }
     if (state !== 'running' || active !== p) return;
     const c = clock(p);
     if (outOfTime(c)) return flag(p);
@@ -687,7 +687,6 @@
     stats[p].times.push(used);
     stats[p].used += used;
     moved[p] = true;
-    buzz(70);
     click(p);
     start(other(p));
   }
@@ -776,20 +775,34 @@
     });
   }
 
-  // A soft, short click after each move: a little lower for Black, a little higher for White.
+  // A soft wooden knock after each move, like a stone set on the board: a short burst of noise,
+  // filtered, with a little low body; a little deeper for Black, a little brighter for White.
+  let noise;
   function click(p) {
     if (!soundOn || !audio) return;
-    const t0 = audio.currentTime, osc = audio.createOscillator(), gain = audio.createGain();
-    const f = p === 'black' ? 1100 : 1500;
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(f, t0);
-    osc.frequency.exponentialRampToValueAtTime(f * .55, t0 + .04);
+    const t0 = audio.currentTime, black = p === 'black';
+    if (!noise) {
+      noise = audio.createBuffer(1, Math.round(audio.sampleRate * .05), audio.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audio.sampleRate * .006));
+    }
+    const src = audio.createBufferSource(), band = audio.createBiquadFilter(), tap = audio.createGain();
+    src.buffer = noise;
+    band.type = 'bandpass';
+    band.frequency.value = black ? 1700 : 2400;
+    band.Q.value = 1.4;
+    tap.gain.value = .5;
+    src.connect(band).connect(tap).connect(audio.destination);
+    src.start(t0);
+    const body = audio.createOscillator(), gain = audio.createGain();
+    body.frequency.setValueAtTime(black ? 190 : 240, t0);
+    body.frequency.exponentialRampToValueAtTime(black ? 140 : 180, t0 + .05);
     gain.gain.setValueAtTime(0.0001, t0);
-    gain.gain.exponentialRampToValueAtTime(0.12, t0 + .003);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + .05);
-    osc.connect(gain).connect(audio.destination);
-    osc.start(t0);
-    osc.stop(t0 + .06);
+    gain.gain.exponentialRampToValueAtTime(.18, t0 + .004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + .07);
+    body.connect(gain).connect(audio.destination);
+    body.start(t0);
+    body.stop(t0 + .08);
   }
 
   function say(text) {
@@ -999,6 +1012,7 @@
   // While the statistics show, a tap switches between the numbers and the chart (both halves);
   // in the chart, a tap on the bars picks a move instead.
   function flipStats(e) {
+    if (!stats.black.times.length && !stats.white.times.length) return; // no moves yet: no chart to show
     if (charts && e.target.closest('.chart svg')) return;
     charts = !charts;
     render();
@@ -1026,12 +1040,14 @@
       const h = Math.max(1, x.ms / max * 40);
       return `<rect x="${i + .15}" y="${40 - h}" width=".7" height="${h}"${i === sel ? ' class="sel"' : ''}/>`;
     }).join('');
+    const times = stats[p].times, avg = times.reduce((a, b) => a + b, 0) / times.length, y = 40 - Math.max(1, avg / max * 40);
+    const line = `<line class="avg" x1="0" x2="${n}" y1="${y}" y2="${y}" vector-effect="non-scaling-stroke"/>`;
     const readout = !b ? '' : b.from === b.to ? t('moveAt')(moveNo(p, b.from), dur(b.ms))
       : t('movesAt')(moveNo(p, b.from), moveNo(p, b.to), dur(b.ms));
     const width = `width: min(100%, ${Math.max(n * 18, 80)}px)`;
     return `<div class="chart">`
       + `<svg class="${b ? 'has-sel' : ''}" style="${width}" viewBox="0 0 ${n} 40"`
-      + ` preserveAspectRatio="none" aria-hidden="true">${rects}</svg>`
+      + ` preserveAspectRatio="none" aria-hidden="true">${rects}${line}</svg>`
       + (b ? `<b class="readout">${readout}</b>` : `<small class="readout">${t('chartTitle')}</small>`) + '</div>';
   }
   function pickBar(p, e) {
@@ -1069,7 +1085,6 @@
       chosen = { black: null, white: null }; // no move picked yet,
       charts = false;                        // and the numbers first
     }
-    document.body.classList.toggle('charts', withStats && charts);
     document.body.classList.toggle('ready', state === 'ready');
     document.body.classList.toggle('over', state === 'over');
     document.body.classList.toggle('with-stats', withStats);
@@ -1081,7 +1096,9 @@
       setText(ui[p].time, fmt(ms));
       setText(ui[p].periods, periodsFor(c));
       setText(ui[p].hint, hintFor(p));
-      const html = !withStats ? '' : charts && stats[p].times.length ? chartFor(p) : statsFor(p);
+      const chart = withStats && charts && stats[p].times.length > 0; // a player without moves keeps the numbers
+      const html = !withStats ? '' : chart ? chartFor(p) : statsFor(p);
+      ui[p].stats.classList.toggle('chart-only', chart);
       if (ui[p].stats.innerHTML !== html) ui[p].stats.innerHTML = html;
       cl.toggle('running', state === 'running' && active === p);
       cl.toggle('waiting', inGame && active !== p);
@@ -1095,7 +1112,7 @@
     resetBtn.ariaLabel = resetBtn.title = t('reset');
     for (const h of hearts) h.ariaLabel = h.title = t('colours');
     if (state !== 'running' && state !== 'ready') picker.hidden = true; // only while the hearts show
-    info.classList.toggle('plain', inGame); // no pencil: during a game it shows the statistics
+    info.classList.toggle('plain', inGame); // during a game it shows the statistics instead
     setText(setting, describe(settings));
     setText(system, t(systemKey()));
   }
