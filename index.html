@@ -63,8 +63,7 @@
   /* The top half faces the player across the board. */
   #white { background-color: var(--white-bg); color: var(--white-fg); transform: rotate(180deg); }
   #black { background-color: var(--black-bg); color: var(--black-fg); }
-  /* Soft fade from the pink middle bar into each half (its top edge, also for the turned-around one). */
-  .half { background-image: linear-gradient(var(--bar), transparent 28px); transition: background-color .4s, color .4s; }
+  .half { transition: background-color .4s, color .4s; }
 
   .name {
     display: flex;
@@ -157,6 +156,21 @@
     padding: 5px 16px;
     color: var(--bar-fg);
   }
+  /* Wavy edges where the bar meets the two halves. */
+  #bar { position: relative; z-index: 1; }
+  #bar::before, #bar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 7px;
+    background: var(--bar);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 10'%3E%3Cpath d='M0 10V5Q10 0 20 5T40 5V10Z'/%3E%3C/svg%3E") 0 0 / 28px 7px repeat-x;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 10'%3E%3Cpath d='M0 10V5Q10 0 20 5T40 5V10Z'/%3E%3C/svg%3E") 0 0 / 28px 7px repeat-x;
+    pointer-events: none;
+  }
+  #bar::before { bottom: calc(100% - 1px); }
+  #bar::after { top: calc(100% - 1px); transform: scaleY(-1); }
   #bar button { min-height: 42px; padding: 0 14px; }
   /* Pause / resume and reset are round icon buttons. */
   #bar .icon { display: grid; place-items: center; flex: none; width: 42px; padding: 0; }
@@ -556,7 +570,6 @@
     loser = p;
     turnUsed = turnTime(); // keeps the last turn in the statistics
     state = 'over';
-    if (navigator.vibrate) navigator.vibrate([400, 150, 400]);
     chime([1760, 1318.5, 1046.5]);
     setTimeout(() => say(t('lostSay')(t(p), t(other(p)))), 600);
     releaseWake();
