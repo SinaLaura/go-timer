@@ -78,8 +78,9 @@
   .stone { width: 1em; height: 1em; border-radius: 50%; }
   /* Once both players have moved, the stone alone says whose half it is. */
   .quiet .name [data-t] { display: none; }
-  #black .stone { background: radial-gradient(circle at 35% 35%, #666, #000 70%); box-shadow: 0 0 0 1px #777; }
-  #white .stone { background: radial-gradient(circle at 35% 35%, #fff, #cfcac0 80%); box-shadow: 0 0 0 1px #999; }
+  /* Flat stones with a little shine, a soft shade and a faint pink edge. */
+  #black .stone { background: radial-gradient(circle at 32% 30%, #fffb 0 .12em, transparent .14em) #2b2328; box-shadow: inset -.1em -.12em 0 #0007, 0 0 0 1px #f07bb066; }
+  #white .stone { background: radial-gradient(circle at 32% 30%, #fff 0 .12em, transparent .14em) #f5e9ed; box-shadow: inset -.1em -.12em 0 #e9cfda, 0 0 0 1px #f07bb066; }
 
   .time {
     font-size: min(24vw, 15vh);
