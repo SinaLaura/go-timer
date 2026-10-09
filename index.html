@@ -178,6 +178,10 @@
   .lang button.on { background: var(--out); color: #fff; }
   .lang button:focus-visible { outline: none; }
   dialog h2 { font-size: 22px; font-weight: 800; margin-bottom: 16px; }
+  dialog.confirm { width: min(320px, calc(100vw - 32px)); }
+  dialog.confirm h2 { margin-bottom: 8px; }
+  dialog.confirm p { margin-bottom: 22px; font-size: 16px; }
+  dialog .actions button:focus-visible { outline: none; } /* no ring on the button that gets focus on opening */
   dialog label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
   .fields { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-size: 16px; }
   dialog input {
@@ -304,6 +308,17 @@
   </form>
 </dialog>
 
+<dialog id="confirmReset" class="confirm">
+  <form method="dialog">
+    <h2 data-t="resetAsk">Reset both clocks?</h2>
+    <p data-t="resetInfo">The game starts again from the beginning.</p>
+    <div class="actions">
+      <button value="cancel" data-t="cancel">Cancel</button>
+      <button value="reset" class="primary" data-t="reset">Reset</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
   // Three time systems: Fischer (seconds added after every move), byo-yomi (a main time,
   // then periods that start again after every move) and a simple timer (just a main time).
@@ -334,7 +349,7 @@
     en: {
       black: 'Black', white: 'White', pause: 'Pause', resume: 'Resume', reset: 'Reset',
       startHint: "Tap here to start Black's clock", yourMove: 'Tap after your move', paused: 'Paused',
-      lost: 'LOST', won: 'WON', resetAsk: 'Reset both clocks?',
+      lost: 'LOST', won: 'WON', resetAsk: 'Reset both clocks?', resetInfo: 'The game starts again from the beginning.',
       lostSay: (l, w) => `${l} lost on time. ${w} wins!`,
       timeSetting: 'Time setting',
       fischerTime: 'Fischer', fischerDesc: 'Main time, plus seconds after every move',
@@ -349,7 +364,7 @@
     de: {
       black: 'Schwarz', white: 'Weiß', pause: 'Pause', resume: 'Weiter', reset: 'Neustart',
       startHint: 'Hier tippen – Schwarz beginnt', yourMove: 'Nach deinem Zug tippen', paused: 'Pausiert',
-      lost: 'VERLOREN', won: 'GEWONNEN', resetAsk: 'Beide Uhren zurücksetzen?',
+      lost: 'VERLOREN', won: 'GEWONNEN', resetAsk: 'Timer zurücksetzen?', resetInfo: 'Das Spiel beginnt dann von vorne.',
       lostSay: (l, w) => `${l} hat die Zeit überschritten. ${w} gewinnt!`,
       timeSetting: 'Bedenkzeit',
       fischerTime: 'Fischer', fischerDesc: 'Grundzeit, plus Sekunden nach jedem Zug',
@@ -516,9 +531,15 @@
   }
 
   pauseBtn.addEventListener('click', togglePause);
+  // During a game, Reset asks first (in our own dialog, not the browser's).
+  const confirmReset = document.getElementById('confirmReset');
   resetBtn.addEventListener('click', () => {
-    if ((state === 'running' || state === 'paused') && !confirm(t('resetAsk'))) return;
-    newGame();
+    if (state !== 'running' && state !== 'paused') return newGame();
+    confirmReset.returnValue = '';
+    confirmReset.showModal();
+  });
+  confirmReset.addEventListener('close', () => {
+    if (confirmReset.returnValue === 'reset') newGame();
   });
 
   // Changing the time setting, only between games.
