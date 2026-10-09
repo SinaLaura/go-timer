@@ -130,7 +130,12 @@
     color: var(--bar-fg);
   }
   dialog::backdrop { background: rgb(40 10 25 / .6); }
-  dialog .group { font-size: 15px; font-weight: 800; color: var(--low); margin-bottom: 2px; }
+  dialog .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+  dialog .group { font-size: 15px; font-weight: 800; color: var(--low); }
+  .lang { display: flex; padding: 2px; border: 1.5px solid #f4b6d1; border-radius: 14px; }
+  .lang button { min-height: 0; padding: 3px 9px; border-radius: 12px; background: transparent; font-size: 12px; font-weight: 700; }
+  .lang button.on { background: var(--out); color: #fff; }
+  .lang button:focus-visible { outline: none; }
   dialog h2 { font-size: 22px; font-weight: 800; margin-bottom: 16px; }
   dialog label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
   .fields { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-size: 16px; }
@@ -172,7 +177,7 @@
 <body>
 
 <section class="half" id="white">
-  <div class="name"><span class="stone"></span>White</div>
+  <div class="name"><span class="stone"></span><span data-t="white">White</span></div>
   <div class="time"></div>
   <div class="hint"></div>
 </section>
@@ -180,42 +185,45 @@
 <nav id="bar">
   <button id="pause">Pause</button>
   <button id="info"><small id="system"></small><span id="setting"></span></button>
-  <button id="reset">Reset</button>
+  <button id="reset" data-t="reset">Reset</button>
 </nav>
 
 <section class="half" id="black">
-  <div class="name"><span class="stone"></span>Black</div>
+  <div class="name"><span class="stone"></span><span data-t="black">Black</span></div>
   <div class="time"></div>
   <div class="hint"></div>
 </section>
 
 <dialog id="settings">
   <form method="dialog">
-    <div class="group">A Go Girls* App by Sina</div>
-    <h2>Time setting</h2>
+    <div class="top">
+      <div class="group" data-t="byline">A Go Girls* App by Sina</div>
+      <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
+    </div>
+    <h2 data-t="timeSetting">Time setting</h2>
     <label class="option">
       <input id="modeFischer" type="radio" name="mode">
-      <span><b>Fischer time</b><small>45 min, plus 15 s after every move</small></span>
+      <span><b data-t="fischerTime">Fischer time</b><small data-t="fischerDesc">45 min, plus 15 s after every move</small></span>
     </label>
     <label class="option">
       <input id="modeOwn" type="radio" name="mode">
-      <span><b>Your own time</b><small>Choose the times yourself</small></span>
+      <span><b data-t="ownTime">Your own time</b><small data-t="ownDesc">Choose the times yourself</small></span>
     </label>
     <div id="ownFields" class="own">
-      <label>Main time</label>
+      <label data-t="mainTime">Main time</label>
       <div class="fields">
         <input id="mainMin" type="number" inputmode="numeric" min="0" max="600"> min
         <input id="mainSec" type="number" inputmode="numeric" min="0" max="59"> s
       </div>
-      <label>Added after each move</label>
+      <label data-t="added">Added after each move</label>
       <div class="fields">
         <input id="incSec" type="number" inputmode="numeric" min="0" max="600"> s
       </div>
     </div>
-    <label class="check"><input id="sound" type="checkbox"> Chime and voice</label>
+    <label class="check"><input id="sound" type="checkbox"> <span data-t="sound">Chime and voice</span></label>
     <div class="actions">
-      <button value="cancel">Cancel</button>
-      <button value="set" class="primary">Set</button>
+      <button value="cancel" data-t="cancel">Cancel</button>
+      <button value="set" class="primary" data-t="set">Set</button>
     </div>
   </form>
 </dialog>
@@ -228,7 +236,36 @@
   const LOW = 60 * 1000;      // pink digits from here
   const CRITICAL = 10 * 1000; // bright pink half and a chime from here
 
-  const NAMES = { black: 'Black', white: 'White' };
+  // English and German texts; the EN | DE switch sits in the settings dialog.
+  const TEXT = {
+    en: {
+      black: 'Black', white: 'White', pause: 'Pause', resume: 'Resume', reset: 'Reset',
+      startHint: "Tap here to start Black's clock", yourMove: 'Tap after your move', paused: 'Paused',
+      lost: 'Lost on time', won: 'Wins on time', resetAsk: 'Reset both clocks?',
+      lostSay: (l, w) => `${l} lost on time. ${w} wins!`,
+      byline: 'A Go Girls* App by Sina', timeSetting: 'Time setting',
+      fischerTime: 'Fischer time', fischerDesc: '45 min, plus 15 s after every move',
+      ownTime: 'Your own time', ownDesc: 'Choose the times yourself',
+      mainTime: 'Main time', added: 'Added after each move', sound: 'Chime and voice',
+      cancel: 'Cancel', set: 'Set',
+    },
+    de: {
+      black: 'Schwarz', white: 'Weiß', pause: 'Pause', resume: 'Weiter', reset: 'Neustart',
+      startHint: 'Hier tippen – Schwarz beginnt', yourMove: 'Nach deinem Zug tippen', paused: 'Pausiert',
+      lost: 'Zeit abgelaufen', won: 'Gewinnt auf Zeit', resetAsk: 'Beide Uhren zurücksetzen?',
+      lostSay: (l, w) => `${l} hat die Zeit überschritten. ${w} gewinnt!`,
+      byline: 'Eine Go Girls* App von Sina', timeSetting: 'Bedenkzeit',
+      fischerTime: 'Fischer-Zeit', fischerDesc: '45 min, plus 15 s nach jedem Zug',
+      ownTime: 'Eigene Zeit', ownDesc: 'Zeiten selbst wählen',
+      mainTime: 'Grundzeit', added: 'Dazu nach jedem Zug', sound: 'Klang und Stimme',
+      cancel: 'Abbrechen', set: 'OK',
+    },
+  };
+  let lang = 'en';
+  try { lang = localStorage.getItem('lang') || ''; } catch (e) { /* storage blocked */ }
+  if (!TEXT[lang]) lang = navigator.language.startsWith('de') ? 'de' : 'en';
+  const t = key => TEXT[lang][key];
+
   const other = p => (p === 'black' ? 'white' : 'black');
 
   // state: 'ready' | 'running' | 'paused' | 'over'
@@ -307,14 +344,14 @@
     state = 'over';
     if (navigator.vibrate) navigator.vibrate([400, 150, 400]);
     chime([1760, 1318.5, 1046.5]);
-    setTimeout(() => say(`${NAMES[p]} lost on time. ${NAMES[other(p)]} wins!`), 600);
+    setTimeout(() => say(t('lostSay')(t(p), t(other(p)))), 600);
     releaseWake();
     render();
   }
 
   // A soft chime (no beeps) and a female voice, both switchable in the settings.
   let soundOn = true, audio, speechUnlocked = false;
-  const FEMALE = /samantha|zira|aria|jenny|ava|allison|susan|karen|moira|tessa|fiona|victoria|serena|libby|sonia|emma|hazel|female/i;
+  const FEMALE = /samantha|zira|aria|jenny|ava|allison|susan|karen|moira|tessa|fiona|victoria|serena|libby|sonia|emma|hazel|female|seraphina|katja|amala|hedda|anna|helena|petra|marlene|vicki/i;
   if ('speechSynthesis' in window) speechSynthesis.getVoices(); // starts loading the voices
 
   // Phones only allow sound after a tap, so this runs on every tap.
@@ -348,14 +385,15 @@
 
   function say(text) {
     if (!soundOn || !('speechSynthesis' in window)) return;
-    // Prefer a female voice, the natural-sounding ones when online, then American English.
+    // Prefer a female voice, the natural-sounding ones when online, then en-US / de-DE.
+    const locale = lang === 'de' ? 'de-DE' : 'en-US';
     const score = v => (FEMALE.test(v.name) ? 4 : 0) + (navigator.onLine && /natural/i.test(v.name) ? 2 : 0)
-      + (v.localService ? 1 : 0) + (v.lang === 'en-US' ? 1 : 0);
-    const best = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'))
+      + (v.localService ? 1 : 0) + (v.lang === locale ? 1 : 0);
+    const best = speechSynthesis.getVoices().filter(v => v.lang.startsWith(lang))
       .reduce((a, v) => (!a || score(v) > score(a) ? v : a), null);
     const u = new SpeechSynthesisUtterance(text);
     u.voice = best && FEMALE.test(best.name) ? best : null; // otherwise the phone's default voice
-    u.lang = 'en-US';
+    u.lang = locale;
     u.pitch = 1.15;
     u.rate = 0.95;
     speechSynthesis.cancel();
@@ -364,7 +402,7 @@
 
   pauseBtn.addEventListener('click', togglePause);
   resetBtn.addEventListener('click', () => {
-    if ((state === 'running' || state === 'paused') && !confirm('Reset both clocks?')) return;
+    if ((state === 'running' || state === 'paused') && !confirm(t('resetAsk'))) return;
     newGame();
   });
 
@@ -405,6 +443,16 @@
     newGame();
   });
 
+  function setLang(l) {
+    lang = l;
+    try { localStorage.setItem('lang', l); } catch (e) { /* storage blocked */ }
+    document.documentElement.lang = l;
+    for (const el of document.querySelectorAll('[data-t]')) el.textContent = t(el.dataset.t);
+    for (const b of document.querySelectorAll('[data-lang]')) b.classList.toggle('on', b.dataset.lang === l);
+    render();
+  }
+  for (const b of document.querySelectorAll('[data-lang]')) b.addEventListener('click', () => setLang(b.dataset.lang));
+
   function describe(s) {
     const m = Math.floor(s.main / 60000), sec = s.main % 60000 / 1000;
     const main = [m && `${m} min`, sec && `${sec} s`].filter(Boolean).join(' ');
@@ -440,10 +488,10 @@
   }
 
   function hintFor(p) {
-    if (state === 'ready') return p === 'white' ? "Tap here to start Black's clock" : '';
-    if (state === 'paused') return 'Paused';
-    if (state === 'over') return p === loser ? 'Lost on time' : 'Wins on time';
-    return active === p ? 'Tap after your move' : '';
+    if (state === 'ready') return p === 'white' ? t('startHint') : '';
+    if (state === 'paused') return t('paused');
+    if (state === 'over') return p === loser ? t('lost') : t('won');
+    return active === p ? t('yourMove') : '';
   }
 
   function render() {
@@ -459,7 +507,7 @@
       cl.toggle('flagged', state === 'over' && loser === p);
     }
     pauseBtn.disabled = !inGame;
-    setText(pauseBtn, state === 'paused' ? 'Resume' : 'Pause');
+    setText(pauseBtn, state === 'paused' ? t('resume') : t('pause'));
     info.disabled = inGame;
     setText(setting, describe(settings));
     // "Fischer" only for Fischer time; your own time just shows the times.
@@ -479,6 +527,7 @@
   }
 
   newGame();
+  setLang(lang);
   loop();
 </script>
 </body>
