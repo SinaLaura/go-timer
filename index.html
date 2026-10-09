@@ -115,6 +115,7 @@
     line-height: 1.25;
   }
   #info:disabled { opacity: 1; border-color: transparent; }
+  #info small:empty { display: none; }
   #info small { display: block; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
 
   button:focus-visible, input:focus-visible { outline: 3px solid var(--low); outline-offset: 2px; }
@@ -145,6 +146,8 @@
     font-size: 20px;
     text-align: center;
   }
+  dialog .check { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 16px; }
+  dialog .check input { width: 24px; height: 24px; padding: 0; accent-color: var(--out); }
   dialog .preset { width: 100%; margin-bottom: 18px; padding: 8px 20px; background: var(--bar); line-height: 1.25; }
   dialog .preset small { display: block; font-size: 14px; font-weight: 500; }
   .actions { display: flex; gap: 10px; justify-content: flex-end; }
@@ -161,7 +164,7 @@
 
 <nav id="bar">
   <button id="pause">Pause</button>
-  <button id="info"><small>Fischer</small><span id="setting"></span></button>
+  <button id="info"><small id="system"></small><span id="setting"></span></button>
   <button id="reset">Reset</button>
 </nav>
 
@@ -173,7 +176,7 @@
 
 <dialog id="settings">
   <form method="dialog">
-    <div class="group">Go Girls*</div>
+    <div class="group">A Go Girls* App · by Sina</div>
     <h2>Fischer time</h2>
     <p>A main time, plus a few seconds added after every move.</p>
     <button type="button" class="preset" id="mannheim">Mannheimer Aji 2026<small>45 min + 15 s</small></button>
@@ -186,6 +189,7 @@
     <div class="fields">
       <input id="incSec" type="number" inputmode="numeric" min="0" max="600"> s
     </div>
+    <label class="check"><input id="sound" type="checkbox"> Chime and voice</label>
     <div class="actions">
       <button value="cancel">Cancel</button>
       <button value="set" class="primary">Set</button>
@@ -194,16 +198,17 @@
 </dialog>
 
 <script>
-  // Fischer time; starts on the Mannheim preset, 45 min + 15 s.
+  // Fischer time; starts on the Mannheimer Aji 2026 preset, 45 min + 15 s.
   const MANNHEIM = { main: 45 * 60 * 1000, inc: 15 * 1000 };
   let settings = { ...MANNHEIM };
-  const LOW = 60 * 1000;      // orange from here
-  const CRITICAL = 10 * 1000; // red from here
+  const LOW = 60 * 1000;      // pink digits from here
+  const CRITICAL = 10 * 1000; // bright pink half and a chime from here
 
+  const NAMES = { black: 'Black', white: 'White' };
   const other = p => (p === 'black' ? 'white' : 'black');
 
   // state: 'ready' | 'running' | 'paused' | 'over'
-  let state, active, loser, left, turnStart, wakeLock;
+  let state, active, loser, left, warned, turnStart, wakeLock;
 
   const ui = {};
   for (const p of ['black', 'white']) {
@@ -215,12 +220,14 @@
   const resetBtn = document.getElementById('reset');
   const info = document.getElementById('info');
   const setting = document.getElementById('setting');
+  const system = document.getElementById('system');
   document.addEventListener('contextmenu', e => e.preventDefault());
 
   function newGame() {
     state = 'ready';
     active = loser = null;
     left = { black: settings.main, white: settings.main };
+    warned = { black: false, white: false };
     releaseWake();
     render();
   }
@@ -233,12 +240,20 @@
 
   // Tapping your own half ends your move and starts the other clock.
   function tap(p) {
+    unlockSound();
     if (state === 'ready') return start(other(p));
     if (state !== 'running' || active !== p) return;
     const t = timeLeft(p);
     if (t <= 0) return flag(p);
     left[p] = t + settings.inc;
+    warned[p] = left[p] < CRITICAL; // chime again next time it drops under 10 s
     start(other(p));
+  }
+
+  function warn(p) {
+    warned[p] = true;
+    chime([1318.5, 1760]);
+    if (navigator.vibrate) navigator.vibrate(150);
   }
 
   function start(p) {
@@ -250,6 +265,7 @@
   }
 
   function togglePause() {
+    unlockSound();
     if (state === 'running') {
       left[active] = timeLeft(active);
       state = 'paused';
@@ -266,8 +282,60 @@
     loser = p;
     state = 'over';
     if (navigator.vibrate) navigator.vibrate([400, 150, 400]);
+    chime([1760, 1318.5, 1046.5]);
+    setTimeout(() => say(`${NAMES[p]} lost on time. ${NAMES[other(p)]} wins!`), 600);
     releaseWake();
     render();
+  }
+
+  // A soft chime (no beeps) and a female voice, both switchable in the settings.
+  let soundOn = true, audio, speechUnlocked = false;
+  const FEMALE = /samantha|zira|aria|jenny|ava|allison|susan|karen|moira|tessa|fiona|victoria|serena|libby|sonia|emma|hazel|female/i;
+  if ('speechSynthesis' in window) speechSynthesis.getVoices(); // starts loading the voices
+
+  // Phones only allow sound after a tap, so this runs on every tap.
+  function unlockSound() {
+    if (!soundOn) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+    } catch (e) { /* no Web Audio */ }
+    if (!speechUnlocked && 'speechSynthesis' in window) {
+      speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+      speechUnlocked = true;
+    }
+  }
+
+  function chime(freqs) {
+    if (!soundOn || !audio) return;
+    const t0 = audio.currentTime;
+    freqs.forEach((f, i) => {
+      const t = t0 + i * 0.15, osc = audio.createOscillator(), gain = audio.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.25, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+      osc.connect(gain).connect(audio.destination);
+      osc.start(t);
+      osc.stop(t + 1);
+    });
+  }
+
+  function say(text) {
+    if (!soundOn || !('speechSynthesis' in window)) return;
+    // Prefer a female voice, the natural-sounding ones when online, then American English.
+    const score = v => (FEMALE.test(v.name) ? 4 : 0) + (navigator.onLine && /natural/i.test(v.name) ? 2 : 0)
+      + (v.localService ? 1 : 0) + (v.lang === 'en-US' ? 1 : 0);
+    const best = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'))
+      .reduce((a, v) => (!a || score(v) > score(a) ? v : a), null);
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = best && FEMALE.test(best.name) ? best : null; // otherwise the phone's default voice
+    u.lang = 'en-US';
+    u.pitch = 1.15;
+    u.rate = 0.95;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
   }
 
   pauseBtn.addEventListener('click', togglePause);
@@ -287,12 +355,15 @@
   }
   info.addEventListener('click', () => {
     fillForm(settings);
+    field('sound').checked = soundOn;
     dialog.returnValue = '';
     dialog.showModal();
   });
   field('mannheim').addEventListener('click', () => fillForm(MANNHEIM));
   dialog.addEventListener('close', () => {
     if (dialog.returnValue !== 'set') return;
+    soundOn = field('sound').checked;
+    unlockSound();
     const num = id => Math.max(0, Math.floor(Number(field(id).value) || 0));
     const main = (num('mainMin') * 60 + num('mainSec')) * 1000;
     if (main <= 0) return;
@@ -357,12 +428,18 @@
     setText(pauseBtn, state === 'paused' ? 'Resume' : 'Pause');
     info.disabled = inGame;
     setText(setting, describe(settings));
+    // "Fischer" only on the preset; a changed time just shows the times.
+    setText(system, settings.main === MANNHEIM.main && settings.inc === MANNHEIM.inc ? 'Fischer' : '');
   }
 
   function loop() {
     if (state === 'running') {
-      if (timeLeft(active) <= 0) flag(active);
-      else render();
+      const t = timeLeft(active);
+      if (t <= 0) flag(active);
+      else {
+        if (t < CRITICAL && !warned[active]) warn(active);
+        render();
+      }
     }
     requestAnimationFrame(loop);
   }
