@@ -133,19 +133,18 @@
   .over .hint { font-size: min(12vw, 8vh); font-weight: 800; line-height: 1.05; letter-spacing: .03em; opacity: 1; }
 
   /* Statistics: at the end, and while paused after a tap on the middle box. Each player reads their own. */
-  .stats { display: none; width: min(80vw, 300px); grid-template-columns: 1fr auto; gap: .2em 1.4em; font-size: clamp(13px, 2.1vh, 17px); }
-  .with-stats .half { gap: 1vh; }
+  .stats { display: none; width: min(80vw, 300px); grid-template-columns: 1fr auto; gap: .15em 1.4em; font-size: clamp(13px, 2.1vh, 17px); }
+  .with-stats .half { gap: 1vh; padding-top: 12px; justify-content: safe center; } /* never under the bar: if it is too tall, the rest goes to the screen edge */
   .with-stats .hint:empty { display: none; }
   .with-stats .stats { display: grid; }
-  .with-stats:not(.over) .time { font-size: min(16vw, 9vh); }
+  .with-stats:not(.over) .time { font-size: min(14vw, 7.5vh); }
   .stats span { opacity: .7; }
   .stats b { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
   .stats .total { margin-top: .35em; }
   .chart { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: .6em; touch-action: none; }
-  .chart svg { display: block; height: 40px; fill: currentColor; }
+  .chart svg { display: block; height: 34px; fill: currentColor; }
   .chart .has-sel rect { opacity: .35; }
   .chart .has-sel rect.sel { opacity: 1; }
-  .chart .axis { display: flex; justify-content: space-between; gap: 8px; font-size: .85em; }
   .chart .readout { min-height: 1.3em; font-size: .9em; font-weight: 700; } /* keeps its line, so nothing jumps on a tap */
   .chart small { font-size: .85em; opacity: .7; }
   .low .time { color: var(--low); }
@@ -155,12 +154,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 16px;
+    padding: 5px 16px;
     color: var(--bar-fg);
   }
-  #bar button { padding: 0 14px; }
+  #bar button { min-height: 42px; padding: 0 14px; }
   /* Pause / resume and reset are round icon buttons. */
-  #bar .icon { display: grid; place-items: center; flex: none; width: 48px; padding: 0; }
+  #bar .icon { display: grid; place-items: center; flex: none; width: 42px; padding: 0; }
   #bar .icon svg { width: 22px; height: 22px; }
   #pause .play, #pause.paused .bars { display: none; }
   #pause.paused .play { display: block; }
@@ -203,10 +202,10 @@
     /* --vv-*: the part of the screen not covered by the phone's keyboard (set in the script) */
     top: var(--vv-top, 0px);
     bottom: var(--vv-bottom, 0px);
-    max-height: calc(var(--vv-h, 100dvh) - 32px);
+    max-height: calc(var(--vv-h, 100dvh) - 24px);
     overflow-y: auto;
     scroll-padding-bottom: 90px; /* a focused field never hides behind the Set bar */
-    padding: 24px;
+    padding: 20px;
     border: 0;
     border-radius: 20px;
     background: #fff5f9;
@@ -221,16 +220,16 @@
   .lang button { min-height: 0; padding: 3px 9px; border-radius: 12px; background: transparent; font-size: 12px; font-weight: 700; }
   .lang button.on { background: var(--out); color: #fff; }
   .lang button:focus-visible { outline: none; }
-  dialog h2 { font-size: 22px; font-weight: 800; margin-bottom: 16px; }
+  dialog h2 { font-size: 22px; font-weight: 800; margin-bottom: 12px; }
   dialog.confirm { width: min(320px, calc(100vw - 32px)); }
   dialog.confirm h2 { margin-bottom: 8px; }
   dialog.confirm p { margin-bottom: 22px; font-size: 16px; }
   dialog .actions button:focus-visible { outline: none; } /* no ring on the button that gets focus on opening */
   dialog label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-  .fields { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-size: 16px; }
+  .fields { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 16px; }
   dialog input {
     width: 76px;
-    padding: 10px;
+    padding: 8px;
     border: 2px solid #f4b6d1;
     border-radius: 12px;
     background: #fff;
@@ -240,14 +239,14 @@
     text-align: center;
   }
   dialog input.wrong { border-color: var(--out); background: #ffe3ef; }
-  dialog .check { display: flex; align-items: center; gap: 10px; margin: 6px 0 20px; font-size: 16px; }
+  dialog .check { display: flex; align-items: center; gap: 10px; margin: 4px 0 14px; font-size: 16px; }
   dialog .check input, dialog .option input { flex: none; width: 24px; height: 24px; padding: 0; accent-color: var(--out); }
   dialog .option {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 10px;
-    padding: 12px 14px;
+    margin-bottom: 8px;
+    padding: 9px 14px;
     border: 2px solid #f4b6d1;
     border-radius: 14px;
     background: #fff;
@@ -276,7 +275,7 @@
   .actions { display: flex; gap: 10px; justify-content: flex-end; }
   .actions .primary { background: var(--out); color: #fff; }
   /* Cancel and Set stay at the bottom of the settings, even while scrolling. */
-  #settings .actions { flex-direction: row-reverse; justify-content: flex-start; position: sticky; bottom: 0; margin: 0 -24px -24px; padding: 12px 24px 24px; background: #fff5f9; }
+  #settings .actions { flex-direction: row-reverse; justify-content: flex-start; position: sticky; bottom: 0; margin: 0 -20px -20px; padding: 10px 20px 20px; background: #fff5f9; }
 </style>
 </head>
 <body>
@@ -813,12 +812,11 @@
     }).join('');
     const readout = !b ? '' : b.from === b.to ? t('moveAt')(moveNo(p, b.from), dur(b.ms))
       : t('movesAt')(moveNo(p, b.from), moveNo(p, b.to), dur(b.ms));
-    const width = `width: min(100%, ${Math.max(n * 10, 40)}px)`, last = bars[n - 1].to;
+    const width = `width: min(100%, ${Math.max(n * 10, 40)}px)`;
     return `<div class="chart"><small>${t('chartTitle')}</small>`
       + `<svg class="${b ? 'has-sel' : ''}" style="${width}" viewBox="0 0 ${n} 40"`
       + ` preserveAspectRatio="none" aria-hidden="true">${rects}</svg>`
-      + `<div class="axis" style="${width}"><small>${moveNo(p, 0)}</small>`
-      + `<small>${last ? moveNo(p, last) : ''}</small></div><b class="readout">${readout}</b></div>`;
+      + `<b class="readout">${readout}</b></div>`;
   }
   function pickBar(p, e) {
     const svg = ui[p].stats.querySelector('svg');
