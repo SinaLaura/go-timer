@@ -21,7 +21,7 @@
     --white-fg: #1c1418;
     --bar: #f8cfe0;
     --bar-fg: #6b1d44;
-    --run: #f49ac1;
+    --run: #f07bb0;
     --low: #e8559a;
     --out: #d6006f;
   }
@@ -80,7 +80,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    border: 8px solid var(--run);
+    border: 16px solid var(--run);
     pointer-events: none;
   }
   .low .time { color: var(--low); }
@@ -108,13 +108,19 @@
   /* The time setting doubles as the button that changes it. */
   #info {
     flex: 1;
-    padding: 4px 8px;
-    background: transparent;
-    border: 2px dashed #e08ab0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background: rgb(255 255 255 / .6);
+    border: 2px solid #e08ab0;
     font-size: 15px;
     line-height: 1.25;
   }
-  #info:disabled { opacity: 1; border-color: transparent; }
+  #info .edit { flex: none; width: 18px; height: 18px; color: var(--out); }
+  #info:disabled { opacity: 1; background: transparent; border-color: transparent; }
+  #info:disabled .edit { display: none; }
   #info small:empty { display: none; }
   #info small { display: block; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
 
@@ -132,6 +138,7 @@
   dialog::backdrop { background: rgb(40 10 25 / .6); }
   dialog .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
   dialog .group { font-size: 15px; font-weight: 800; color: var(--low); }
+  dialog .heart { width: 14px; height: 14px; margin-left: 2px; vertical-align: -1px; fill: var(--black-bg); }
   .lang { display: flex; padding: 2px; border: 1.5px solid #f4b6d1; border-radius: 14px; }
   .lang button { min-height: 0; padding: 3px 9px; border-radius: 12px; background: transparent; font-size: 12px; font-weight: 700; }
   .lang button.on { background: var(--out); color: #fff; }
@@ -184,7 +191,10 @@
 
 <nav id="bar">
   <button id="pause">Pause</button>
-  <button id="info"><small id="system"></small><span id="setting"></span></button>
+  <button id="info">
+    <span><small id="system"></small><span id="setting"></span></span>
+    <svg class="edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>
+  </button>
   <button id="reset" data-t="reset">Reset</button>
 </nav>
 
@@ -197,7 +207,7 @@
 <dialog id="settings">
   <form method="dialog">
     <div class="top">
-      <div class="group">A Go Girls* App by Sina</div>
+      <div class="group">A Go Girls* App by Sina <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>

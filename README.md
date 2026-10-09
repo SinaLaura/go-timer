@@ -1,6 +1,6 @@
 # Go timer
 
-*A Go Girls\* App by Sina*
+*A Go Girls\* App by Sina* 🖤
 
 A game clock for Go that runs in the browser, on a phone lying next to the board.
 
@@ -9,9 +9,9 @@ A game clock for Go that runs in the browser, on a phone lying next to the board
 ## How to use
 
 - Put the phone next to the board. The top half is turned around for the player across from you.
-- Tap White's half to start Black's clock. After each move, tap your own half and the other clock starts.
+- Tap White's half to start Black's clock. After each move, tap your own half and the other clock starts. The player whose turn it is has a thick pink frame around her half.
 - **Pause** and **Reset** are in the middle bar.
-- Tap the time in the middle to change it: **Fischer time** (45 min, plus 15 s after every move) or **your own time**. The EN / DE switch is there too.
+- Between games, tap the box with the pencil in the middle to change the time: **Fischer time** (45 min, plus 15 s after every move) or **your own time**. You can also switch between English and German there (EN / DE) and turn the chime and voice on or off.
 
 ## What it does
 
@@ -19,6 +19,7 @@ A game clock for Go that runs in the browser, on a phone lying next to the board
 - Warnings: the digits turn pink under 1 minute. Under 10 seconds the whole half turns bright pink, with a soft chime.
 - When someone runs out of time, a voice says who lost, in English or German. On Android the phone also vibrates.
 - The screen stays on during a game.
+- In English or German: it starts in your phone's language and remembers your choice.
 
 ## How it's built
 
