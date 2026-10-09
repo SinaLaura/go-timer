@@ -6,7 +6,11 @@
 <meta name="theme-color" content="#f8cfe0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Go timer</title>
+<meta name="apple-mobile-web-app-title" content="Go Girls* Timer">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Go Girls* Timer</title>
 <style>
   /* Nunito (SIL Open Font License), embedded so the clock works offline. */
   @font-face {
@@ -76,20 +80,20 @@
   .hint { padding: 0 16px; font-size: clamp(14px, 2.3vh, 20px); text-align: center; opacity: .75; min-height: 1.3em; }
 
   .waiting .time { opacity: .35; }
-  /* One thick bar on the edge next to the middle bar; it flips to whoever's turn it is.
-     (top is the inner edge for both halves, because White's half is turned around) */
+  /* One thick bar on the outer edge of the screen; it flips to whoever's turn it is.
+     (bottom is the screen edge for both halves, because White's half is turned around) */
   .running::after {
     content: "";
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
-    height: 28px;
+    height: 44px;
     background: var(--run);
     pointer-events: none;
   }
-  /* The colon blinks twice a second on the running clock. */
-  .running .colon { animation: blink .5s steps(1) infinite; }
+  /* The colon blinks once a second on the running clock. */
+  .running .colon { animation: blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
 
   /* When time is up, who lost / won is the big news, the time steps back. */
