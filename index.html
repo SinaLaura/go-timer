@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#f8cfe0">
+<meta name="theme-color" content="#1c1418">
 <meta name="color-scheme" content="only light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -43,24 +43,24 @@
     --flag-wlw: linear-gradient(#d52d00 18%, #ff9a56 22% 38%, #fff 42% 58%, #d362a4 62% 78%, #a30262 82%); /* the actual flag, like trans */
   }
   :root[data-theme] { --stripes: var(--flag); --glow: .55; }
-  /* White's half is turned around, so its gradients run "to left" to look the same on the screen. */
+  /* Black's half is turned around, so its gradients run "to left" to look the same on the screen. */
   :root[data-theme=pride] {
     --flag: var(--flag-pride);
     --glow: 0; /* the waves are the border */
-    --run-white: linear-gradient(to left, #e40303, #ff8c00, #ffed00);
-    --run-black: linear-gradient(to right, #008026, #004dff, #750787);
+    --run-black: linear-gradient(to left, #e40303, #ff8c00, #ffed00);
+    --run-white: linear-gradient(to right, #008026, #004dff, #750787);
   }
   /* Pride: the middle bar is a rainbow ribbon that waves: every wave up is a rainbow,
      every wave down one upside down. Around it, each half's own colour. */
   :root[data-theme=pride] #bar {
-    --top: var(--white-bg);
-    --bottom: var(--black-bg);
+    --top: var(--black-bg);
+    --bottom: var(--white-bg);
     position: relative;
     z-index: 1;
     background: linear-gradient(var(--top) 50%, var(--bottom) 0);
   }
-  :root[data-theme=pride]:has(#white:is(.critical, .flagged)) #bar { --top: var(--out); }
-  :root[data-theme=pride]:has(#black:is(.critical, .flagged)) #bar { --bottom: var(--out); }
+  :root[data-theme=pride]:has(#black:is(.critical, .flagged)) #bar { --top: var(--out); }
+  :root[data-theme=pride]:has(#white:is(.critical, .flagged)) #bar { --bottom: var(--out); }
   :root[data-theme=pride] #bar::before {
     content: "";
     position: absolute;
@@ -75,9 +75,9 @@
   :root[data-theme=pride] #bar .icon { box-shadow: 0 1px 5px rgb(40 10 25 / .25); } /* white buttons on white and rainbow */
   :root[data-theme=trans] { --flag: var(--flag-trans); --glow-bg: #5bcefa; --run-white: #f5a9b8; --run-black: #5bcefa; }
   :root[data-theme=wlw] {
-    /* The flag spread over the screen, upside down: its dark pink side on White's edge,
-       its dark orange side on Black's (outermost on the screen edge). The top 5px of a bar is its wavy edge. */
-    --flag: linear-gradient(#a30262 18%, #d362a4 22% 38%, #fff 42% 58%, #ff9a56 62% 78%, #d52d00 82%);
+    /* The flag spread over the screen: its dark orange side on Black's edge (top),
+       its dark pink side on White's (outermost on the screen edge). The top 5px of a bar is its wavy edge. */
+    --flag: var(--flag-wlw);
     --run-white: linear-gradient(#d362a4 23.5px, #a30262 25.5px);
     --run-black: linear-gradient(#ff9a56 23.5px, #d52d00 25.5px);
   }
@@ -88,7 +88,7 @@
   html, body { height: 100%; }
   body {
     display: grid;
-    grid-template-rows: minmax(0, .94fr) auto minmax(0, 1fr); /* white a touch smaller: bright areas look bigger than dark ones */
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, .94fr); /* white a touch smaller: bright areas look bigger than dark ones */
     height: 100dvh;
     background: var(--bar);
     font-family: Nunito, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -100,9 +100,9 @@
     transition: grid-template-rows .5s ease;
   }
   /* The half whose turn it is grows a little, pushing the bar towards the other player. */
-  body.turn-white { grid-template-rows: minmax(0, 1.5fr) auto minmax(0, 1fr); }
-  body.turn-black { grid-template-rows: minmax(0, .94fr) auto minmax(0, 1.9fr); }
-  body.with-stats { grid-template-rows: minmax(0, .96fr) auto minmax(0, 1fr); } /* white a touch smaller, as in play */
+  body.turn-black { grid-template-rows: minmax(0, 1.9fr) auto minmax(0, .94fr); }
+  body.turn-white { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1.5fr); }
+  body.with-stats { grid-template-rows: minmax(0, 1fr) auto minmax(0, .96fr); } /* white a touch smaller, as in play */
   body.over { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr); } /* the end screen needs all the room */
 
   .half {
@@ -116,8 +116,8 @@
     -webkit-tap-highlight-color: transparent;
   }
   /* The top half faces the player across the board. */
-  #white { background-color: var(--white-bg); color: var(--white-fg); transform: rotate(180deg); }
-  #black { background-color: var(--black-bg); color: var(--black-fg); }
+  #black { background-color: var(--black-bg); color: var(--black-fg); transform: rotate(180deg); }
+  #white { background-color: var(--white-bg); color: var(--white-fg); }
   #white { --run-bg: var(--run-white); }
   #black { --run-bg: var(--run-black); }
   .half { isolation: isolate; transition: background-color .4s, color .4s; }
@@ -136,7 +136,7 @@
     mask: linear-gradient(#000 2px, transparent);
     pointer-events: none;
   }
-  #white::before { top: -1px; scale: -1 1; } /* mirrored back, so the colours line up with the bar; 1px into the bar, so no light seam shows */
+  #black::before { top: -1px; scale: -1 1; } /* mirrored back, so the colours line up with the bar; 1px into the bar, so no light seam shows */
   .with-stats .half::before { height: 12px; }
 
   .name {
@@ -169,7 +169,7 @@
 
   .waiting .time, .waiting .name, .waiting .periods { opacity: .25; }
   /* One thick bar on the outer edge of the screen; it flips to whoever's turn it is.
-     (bottom is the screen edge for both halves, because White's half is turned around) */
+     (bottom is the screen edge for both halves, because Black's half is turned around) */
   .running::after {
     content: "";
     position: absolute;
@@ -205,7 +205,9 @@
     place-items: center;
     -webkit-tap-highlight-color: transparent;
   }
-  .running .heart-btn { display: grid; }
+  .running .heart-btn, body.ready .heart-btn { display: grid; }
+  /* Before the game there are no bars behind the hearts, so both are pink. */
+  :root body.ready #black .heart-btn svg, :root body.ready #white .heart-btn svg { fill: var(--run); stroke: none; }
   .heart-btn svg { width: 27px; height: 27px; animation: pulse 2.4s ease-in-out infinite; }
   #black .heart-btn svg { fill: #000; }
   #white .heart-btn svg { fill: #fff; }
@@ -246,7 +248,6 @@
   .over.with-stats .flagged .time { display: none; } /* 0.0 says nothing new on the end screen */
   .over .stats .mode { display: none; } /* the bar shows the time setting again */
   .over.with-stats .half { gap: .4vh; padding-top: 14px; }
-  .over .chart svg { height: 26px; }
   .over .hint { font-size: min(12vw, 5.5vh); font-weight: 800; line-height: 1.05; letter-spacing: .03em; opacity: 1; }
 
   /* Statistics: at the end, and while paused after a tap on the middle box. Each player reads their own. */
@@ -266,6 +267,10 @@
   .chart .has-sel rect { opacity: .35; }
   .chart .has-sel rect.sel { opacity: 1; }
   .chart .readout { min-height: 1.3em; font-size: .9em; font-weight: 700; } /* one line: the title, or the tapped move */
+  /* A tap on the statistics shows only the chart, big. */
+  body.charts .stats { grid-template-columns: 1fr; width: min(86vw, 420px); }
+  body.charts .chart { margin-top: 0; gap: 6px; }
+  body.charts .chart svg { height: min(26vh, 170px); }
   .chart small { font-size: .85em; opacity: .7; }
   .chart small.readout { font-weight: 600; }
   .low .time { color: var(--low); }
@@ -407,8 +412,9 @@
 </head>
 <body>
 
-<section class="half" id="white">
-  <div class="name"><span class="stone"></span><span data-t="white">White</span></div>
+
+<section class="half" id="black">
+  <div class="name"><span class="stone"></span><span data-t="black">Black</span></div>
   <div class="time"></div>
   <div class="periods"></div>
   <div class="hint"></div>
@@ -430,8 +436,8 @@
   </button>
 </nav>
 
-<section class="half" id="black">
-  <div class="name"><span class="stone"></span><span data-t="black">Black</span></div>
+<section class="half" id="white">
+  <div class="name"><span class="stone"></span><span data-t="white">White</span></div>
   <div class="time"></div>
   <div class="periods"></div>
   <div class="hint"></div>
@@ -489,7 +495,7 @@
         <span id="againText"></span>
       </button>
     </div>
-    <label class="check"><input id="sound" type="checkbox"> <span data-t="sound">Chime and voice</span></label>
+    <label class="check"><input id="sound" type="checkbox"> <span data-t="sound">Sounds and voice</span></label>
     <div class="actions">
       <!-- Set comes first: the phone's Done key presses the first button in the form. -->
       <button value="set" class="primary" data-t="set">Set</button>
@@ -551,9 +557,10 @@
       byoTime: 'Byo-yomi', byoDesc: 'Main time, then periods that start again after every move',
       simpleTime: 'Simple timer', simpleDesc: 'Just a main time, nothing added', simpleShort: 'Timer',
       resetTo: s => `Reset to ${s}`,
-      mainTime: 'Main time', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Chime and voice',
+      mainTime: 'Main time', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Sounds and voice',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Last period!' : `Byo-yomi · ${n} left`),
+      byoSay: (n, start) => (start ? 'Byo-yomi. ' : '') + (n === 1 ? 'Last period!' : start ? `${n} periods.` : `${n} periods left.`),
       cancel: 'Cancel', set: 'Set', colours: 'Colours',
     },
     de: {
@@ -570,9 +577,10 @@
       byoTime: 'Byo-yomi', byoDesc: 'Grundbedenkzeit, dann Perioden, die nach jedem Zug neu beginnen',
       simpleTime: 'Einfacher Timer', simpleDesc: 'Nur Grundbedenkzeit, ohne Zusatzzeit', simpleShort: 'Timer',
       resetTo: s => `Zurück auf ${s}`,
-      mainTime: 'Grundbedenkzeit', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Klang und Stimme',
+      mainTime: 'Grundbedenkzeit', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Klänge und Stimme',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Letzte Periode!' : `Byo-yomi · noch ${n}`),
+      byoSay: (n, start) => (start ? 'Byo-yomi. ' : '') + (n === 1 ? 'Letzte Periode!' : start ? `${n} Perioden.` : `Noch ${n} Perioden.`),
       cancel: 'Abbrechen', set: 'OK', colours: 'Farben',
     },
   };
@@ -587,14 +595,14 @@
   // left: main time per player; periods: byo-yomi periods per player;
   // turnUsed + turnStart: time used so far in the current turn (pausing keeps turnUsed).
   // stats: time used per player, and the time of each move; showStats: shown while paused;
-  // chosen: the bar tapped in each player's chart.
-  let state, active, loser, left, periods, warned, moved, turnUsed, turnStart, seen, wakeLock, stats, showStats, chosen;
+  // chosen: the bar tapped in each player's chart; charts: the chart shown instead of the numbers.
+  let state, active, loser, left, periods, warned, moved, turnUsed, turnStart, seen, wakeLock, stats, showStats, chosen, charts;
 
   const ui = {};
   for (const p of ['black', 'white']) {
     const root = document.getElementById(p);
     ui[p] = { root, time: root.querySelector('.time'), periods: root.querySelector('.periods'), hint: root.querySelector('.hint'), stats: root.querySelector('.stats') };
-    root.addEventListener('pointerdown', () => tap(p));
+    root.addEventListener('pointerdown', e => (document.body.classList.contains('with-stats') ? flipStats(e) : tap(p)));
     ui[p].stats.addEventListener('pointerdown', e => pickBar(p, e));
     ui[p].stats.addEventListener('pointermove', e => e.buttons && pickBar(p, e));
   }
@@ -648,6 +656,7 @@
     stats = { black: { used: 0, times: [] }, white: { used: 0, times: [] } };
     showStats = false;
     chosen = { black: null, white: null };
+    charts = false;
     releaseWake();
     render();
   }
@@ -667,7 +676,7 @@
   // Tapping your own half ends your move and starts the other clock.
   function tap(p) {
     unlockSound();
-    if (state === 'ready') { buzz(30); return start(other(p)); }
+    if (state === 'ready') { buzz(70); click(p); return start(other(p)); }
     if (state !== 'running' || active !== p) return;
     const c = clock(p);
     if (outOfTime(c)) return flag(p);
@@ -678,7 +687,8 @@
     stats[p].times.push(used);
     stats[p].used += used;
     moved[p] = true;
-    buzz(30);
+    buzz(70);
+    click(p);
     start(other(p));
   }
 
@@ -707,12 +717,12 @@
       turnUsed += performance.now() - turnStart;
       state = 'paused';
       showStats = true;
-      buzz(60);
+      buzz(100);
     } else if (state === 'paused') {
       turnStart = performance.now();
       state = 'running';
       showStats = false;
-      buzz(60);
+      buzz(100);
       keepAwake();
     }
     render();
@@ -731,7 +741,7 @@
     render();
   }
 
-  // A soft chime (no beeps) and a female voice, both switchable in the settings.
+  // A soft chime (no beeps), a click on each move and a female voice, all switchable in the settings.
   let soundOn = true, audio, speechUnlocked = false;
   try { soundOn = localStorage.getItem('sound') !== 'off'; } catch (e) { /* storage blocked */ }
   const FEMALE = /samantha|zira|aria|jenny|ava|allison|susan|karen|moira|tessa|fiona|victoria|serena|libby|sonia|emma|hazel|female|seraphina|katja|amala|hedda|anna|helena|petra|marlene|vicki/i;
@@ -764,6 +774,22 @@
       osc.start(t);
       osc.stop(t + 1);
     });
+  }
+
+  // A soft, short click after each move: a little lower for Black, a little higher for White.
+  function click(p) {
+    if (!soundOn || !audio) return;
+    const t0 = audio.currentTime, osc = audio.createOscillator(), gain = audio.createGain();
+    const f = p === 'black' ? 1100 : 1500;
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(f, t0);
+    osc.frequency.exponentialRampToValueAtTime(f * .55, t0 + .04);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.12, t0 + .003);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + .05);
+    osc.connect(gain).connect(audio.destination);
+    osc.start(t0);
+    osc.stop(t0 + .06);
   }
 
   function say(text) {
@@ -968,8 +994,14 @@
     return row(systemKey(), describe(settings), 'mode') + row('moves', n) + row('timeUsed', dur(used(p)))
       + row('perMove', n ? dur(s.used / n) : '–') + row('longest', dur(Math.max(0, ...s.times)))
       + (isByo(settings) ? row('periodsLeft', `${Math.max(0, clock(p).periods)} / ${settings.periods}`) : '')
-      + row('wholeGame', dur(used('black') + used('white')), 'total')
-      + chartFor(p);
+      + row('wholeGame', dur(used('black') + used('white')), 'total');
+  }
+  // While the statistics show, a tap switches between the numbers and the chart (both halves);
+  // in the chart, a tap on the bars picks a move instead.
+  function flipStats(e) {
+    if (charts && e.target.closest('.chart svg')) return;
+    charts = !charts;
+    render();
   }
 
   // Time per move: one bar per move, from the first move (left) to the last (right),
@@ -996,7 +1028,7 @@
     }).join('');
     const readout = !b ? '' : b.from === b.to ? t('moveAt')(moveNo(p, b.from), dur(b.ms))
       : t('movesAt')(moveNo(p, b.from), moveNo(p, b.to), dur(b.ms));
-    const width = `width: min(100%, ${Math.max(n * 10, 40)}px)`;
+    const width = `width: min(100%, ${Math.max(n * 18, 80)}px)`;
     return `<div class="chart">`
       + `<svg class="${b ? 'has-sel' : ''}" style="${width}" viewBox="0 0 ${n} 40"`
       + ` preserveAspectRatio="none" aria-hidden="true">${rects}</svg>`
@@ -1007,7 +1039,7 @@
     if (!svg) return;
     const r = svg.getBoundingClientRect(), n = barsFor(p).length;
     let f = (e.clientX - r.left) / r.width;
-    if (p === 'white') f = 1 - f; // White's half is turned around
+    if (p === 'black') f = 1 - f; // Black's half is turned around
     const i = Math.floor(f * n);
     if (i < 0 || i >= n || i === chosen[p]) return;
     chosen[p] = i;
@@ -1033,7 +1065,12 @@
   function render() {
     const inGame = state === 'running' || state === 'paused';
     const withStats = state === 'over' || (state === 'paused' && showStats);
-    if (withStats && !document.body.classList.contains('with-stats')) chosen = { black: null, white: null }; // no move picked yet
+    if (withStats && !document.body.classList.contains('with-stats')) {
+      chosen = { black: null, white: null }; // no move picked yet,
+      charts = false;                        // and the numbers first
+    }
+    document.body.classList.toggle('charts', withStats && charts);
+    document.body.classList.toggle('ready', state === 'ready');
     document.body.classList.toggle('over', state === 'over');
     document.body.classList.toggle('with-stats', withStats);
     // Both halves the same size while the statistics show, so they fit.
@@ -1044,7 +1081,7 @@
       setText(ui[p].time, fmt(ms));
       setText(ui[p].periods, periodsFor(c));
       setText(ui[p].hint, hintFor(p));
-      const html = withStats ? statsFor(p) : '';
+      const html = !withStats ? '' : charts && stats[p].times.length ? chartFor(p) : statsFor(p);
       if (ui[p].stats.innerHTML !== html) ui[p].stats.innerHTML = html;
       cl.toggle('running', state === 'running' && active === p);
       cl.toggle('waiting', inGame && active !== p);
@@ -1057,7 +1094,7 @@
     pauseBtn.ariaLabel = pauseBtn.title = state === 'paused' ? t('resume') : t('pause');
     resetBtn.ariaLabel = resetBtn.title = t('reset');
     for (const h of hearts) h.ariaLabel = h.title = t('colours');
-    if (state !== 'running') picker.hidden = true; // only while a clock runs, like the heart
+    if (state !== 'running' && state !== 'ready') picker.hidden = true; // only while the hearts show
     info.classList.toggle('plain', inGame); // no pencil: during a game it shows the statistics
     setText(setting, describe(settings));
     setText(system, t(systemKey()));
@@ -1072,10 +1109,12 @@
         // A soft chime under 10 s (again in every byo-yomi period)...
         if (c.time >= CRITICAL) warned[active] = false;
         else if (!warned[active]) warn(active);
-        // ...and a lower one when byo-yomi starts or a period is used up.
+        // ...and a lower one when byo-yomi starts or a period is used up; then the voice says how many are left.
         if (c.byo !== seen.byo || c.periods !== seen.periods) {
           chime([1046.5, 784]);
           if (navigator.vibrate) navigator.vibrate(300);
+          const text = t('byoSay')(c.periods, !seen.byo);
+          setTimeout(() => say(text), 500);
         }
         seen = c;
         render();
