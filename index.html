@@ -90,7 +90,8 @@
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto minmax(0, .94fr); /* white a touch smaller: bright areas look bigger than dark ones */
     height: 100dvh;
-    background: var(--bar);
+    /* Shows only through hairline gaps at the edges of Black's turned-around half, so it has her colour. */
+    background: var(--black-bg);
     font-family: Nunito, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     user-select: none;
     -webkit-user-select: none;
@@ -99,6 +100,7 @@
     overflow: hidden;
     transition: grid-template-rows .5s ease;
   }
+  body:has(#black:is(.critical, .flagged)) { background: var(--out); }
   /* The half whose turn it is grows a little, pushing the bar towards the other player. */
   body.turn-black { grid-template-rows: minmax(0, 1.9fr) auto minmax(0, .94fr); }
   body.turn-white { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1.5fr); }
@@ -775,34 +777,21 @@
     });
   }
 
-  // A soft wooden knock after each move, like a stone set on the board: a short burst of noise,
-  // filtered, with a little low body; a little deeper for Black, a little brighter for White.
-  let noise;
+  // A soft pop after each move: a short, clean tone that slides down a little;
+  // a little lower for Black, a little higher for White.
   function click(p) {
     if (!soundOn || !audio) return;
-    const t0 = audio.currentTime, black = p === 'black';
-    if (!noise) {
-      noise = audio.createBuffer(1, Math.round(audio.sampleRate * .05), audio.sampleRate);
-      const d = noise.getChannelData(0);
-      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audio.sampleRate * .006));
-    }
-    const src = audio.createBufferSource(), band = audio.createBiquadFilter(), tap = audio.createGain();
-    src.buffer = noise;
-    band.type = 'bandpass';
-    band.frequency.value = black ? 1700 : 2400;
-    band.Q.value = 1.4;
-    tap.gain.value = .5;
-    src.connect(band).connect(tap).connect(audio.destination);
-    src.start(t0);
-    const body = audio.createOscillator(), gain = audio.createGain();
-    body.frequency.setValueAtTime(black ? 190 : 240, t0);
-    body.frequency.exponentialRampToValueAtTime(black ? 140 : 180, t0 + .05);
-    gain.gain.setValueAtTime(0.0001, t0);
-    gain.gain.exponentialRampToValueAtTime(.18, t0 + .004);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + .07);
-    body.connect(gain).connect(audio.destination);
-    body.start(t0);
-    body.stop(t0 + .08);
+    const t0 = audio.currentTime, k = p === 'black' ? .88 : 1.12;
+    const osc = audio.createOscillator(), gain = audio.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(650 * k, t0);
+    osc.frequency.setTargetAtTime(500 * k, t0, .015);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(.5, t0 + .001);
+    gain.gain.setTargetAtTime(0, t0 + .001, .02);
+    osc.connect(gain).connect(audio.destination);
+    osc.start(t0);
+    osc.stop(t0 + .15);
   }
 
   function say(text) {
