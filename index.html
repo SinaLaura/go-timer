@@ -1134,6 +1134,11 @@
   newGame();
   setLang(lang);
   loop();
+
+  // Keep a copy on the phone, so the app opens offline too (see sw.js).
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* no offline copy, still works online */ });
+  }
 </script>
 </body>
 </html>
