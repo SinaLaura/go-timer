@@ -1,6 +1,6 @@
 {
   "name": "Go Girls* Timer",
-  "short_name": "Go Girls* Timer",
+  "short_name": "Go Girls*",
   "description": "A game clock for Go. A Go Girls* App by Sina.",
   "start_url": "./",
   "scope": "./",

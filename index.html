@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#f8cfe0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Go Girls* Timer">
+<meta name="apple-mobile-web-app-title" content="Go Girls*">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -89,12 +89,12 @@
     left: 0;
     right: 0;
     height: 44px;
-    background: var(--run);
+    background: var(--run) center / 28px no-repeat;
     pointer-events: none;
   }
-  /* The colon blinks once a second on the running clock. */
-  .running .colon { animation: blink 1s steps(1) infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
+  /* A small heart in the middle of the bar, in the player's colour. */
+  #black.running::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%231c1418' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
+  #white.running::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
 
   /* When time is up, who lost / won is the big news, the time steps back. */
   .over .time { font-size: min(13vw, 8vh); opacity: .6; }
@@ -520,14 +520,6 @@
   function setText(el, text) {
     if (el.textContent !== text) el.textContent = text;
   }
-
-  // Like setText, but wraps each colon so it can blink.
-  function setTime(el, text) {
-    if (el.dataset.text === text) return;
-    el.dataset.text = text;
-    el.innerHTML = text.replaceAll(':', '<span class="colon">:</span>');
-  }
-
   function hintFor(p) {
     if (state === 'ready') return p === 'white' ? t('startHint') : '';
     if (state === 'paused') return t('paused');
@@ -540,7 +532,7 @@
     document.body.classList.toggle('over', state === 'over');
     for (const p of ['black', 'white']) {
       const t = timeLeft(p), cl = ui[p].root.classList;
-      setTime(ui[p].time, fmt(t));
+      setText(ui[p].time, fmt(t));
       setText(ui[p].hint, hintFor(p));
       cl.toggle('running', state === 'running' && active === p);
       cl.toggle('waiting', inGame && active !== p);
