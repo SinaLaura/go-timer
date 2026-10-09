@@ -243,6 +243,11 @@
   const FISCHER = { main: 45 * 60 * 1000, inc: 15 * 1000 };
   const isFischer = s => s.main === FISCHER.main && s.inc === FISCHER.inc;
   let settings = { ...FISCHER };
+  // The last chosen time is remembered on this device.
+  try {
+    const saved = JSON.parse(localStorage.getItem('time'));
+    if (saved && saved.main > 0 && saved.inc >= 0) settings = { main: saved.main, inc: saved.inc };
+  } catch (e) { /* nothing saved yet, or storage blocked */ }
   const LOW = 60 * 1000;      // pink digits from here
   const CRITICAL = 10 * 1000; // bright pink half and a chime from here
 
@@ -450,6 +455,7 @@
       if (main <= 0) return;
       settings = { main, inc: num('incSec') * 1000 };
     }
+    try { localStorage.setItem('time', JSON.stringify(settings)); } catch (e) { /* storage blocked */ }
     newGame();
   });
 
