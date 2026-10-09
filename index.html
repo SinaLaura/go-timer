@@ -562,7 +562,8 @@
       mainTime: 'Main time', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Sounds and voice',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Last period!' : `Byo-yomi · ${n} left`),
-      byoSay: (n, start) => (start ? 'Byo-yomi. ' : '') + (n === 1 ? 'Last period!' : start ? `${n} periods.` : `${n} periods left.`),
+      // spelt for the voice, so it says "bee-oh-yoh-mee"
+      byoSay: (n, start) => (start ? 'Bee-oh-yoh-mee. ' : '') + (n === 1 ? 'Last period!' : start ? `${n} periods.` : `${n} periods left.`),
       cancel: 'Cancel', set: 'Set', colours: 'Colours',
     },
     de: {
@@ -582,7 +583,8 @@
       mainTime: 'Grundbedenkzeit', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Klänge und Stimme',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Letzte Periode!' : `Byo-yomi · noch ${n}`),
-      byoSay: (n, start) => (start ? 'Byo-yomi. ' : '') + (n === 1 ? 'Letzte Periode!' : start ? `${n} Perioden.` : `Noch ${n} Perioden.`),
+      // für die Stimme geschrieben, damit sie "Bio-jo-mi" sagt
+      byoSay: (n, start) => (start ? 'Bio-jomi. ' : '') + (n === 1 ? 'Letzte Periode!' : start ? `${n} Perioden.` : `Noch ${n} Perioden.`),
       cancel: 'Abbrechen', set: 'OK', colours: 'Farben',
     },
   };
