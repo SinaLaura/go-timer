@@ -29,3 +29,7 @@ A game clock for Go that runs in the browser, on a phone lying next to the board
 ## How it's built
 
 One `index.html` file: HTML, CSS and JavaScript, with no framework, no build step and no server. The icon files and `manifest.webmanifest` only give the app its name and icon on the home screen. Built by Sina with [Claude](https://claude.com/claude-code).
+
+## Licence
+
+[MIT](LICENSE): free to use, change and share, as long as the copyright notice stays in. The embedded Nunito font is under the SIL Open Font License.
