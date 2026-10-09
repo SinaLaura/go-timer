@@ -130,7 +130,15 @@
   .over .name { font-size: min(8vw, 4.5vh); }
   .over .stone { display: none; } /* the name says it all here */
   .over .time { order: -1; font-size: min(11vw, 6vh); opacity: .6; } /* time on top, then name, then LOST / WON */
-  .over .hint { font-size: min(14vw, 10vh); font-weight: 800; line-height: 1.05; letter-spacing: .03em; opacity: 1; }
+  .over .hint { font-size: min(12vw, 8vh); font-weight: 800; line-height: 1.05; letter-spacing: .03em; opacity: 1; }
+
+  /* Statistics: at the end, and while paused after a tap on the middle box. Each player reads their own. */
+  .stats { display: none; grid-template-columns: auto auto; gap: .2em 1.4em; font-size: clamp(13px, 2.1vh, 17px); }
+  .with-stats .stats { display: grid; }
+  .with-stats:not(.over) .time { font-size: min(16vw, 9vh); }
+  .stats span { opacity: .7; }
+  .stats b { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
+  .stats .total { margin-top: .35em; }
   .low .time { color: var(--low); }
   .critical, .flagged { background-color: var(--out) !important; color: #fff !important; }
 
@@ -173,8 +181,8 @@
     line-height: 1.25;
   }
   #info .edit { flex: none; width: 18px; height: 18px; color: var(--out); }
-  #info:disabled { opacity: 1; background: transparent; border-color: transparent; }
-  #info:disabled .edit { display: none; }
+  #info.plain { opacity: 1; background: transparent; border-color: transparent; }
+  #info.plain .edit { display: none; }
   #info small:empty { display: none; }
   #info small { display: block; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
 
@@ -269,6 +277,7 @@
   <div class="time"></div>
   <div class="periods"></div>
   <div class="hint"></div>
+  <div class="stats"></div>
 </section>
 
 <nav id="bar">
@@ -290,6 +299,7 @@
   <div class="time"></div>
   <div class="periods"></div>
   <div class="hint"></div>
+  <div class="stats"></div>
 </section>
 
 <dialog id="settings">
@@ -387,6 +397,8 @@
       black: 'Black', white: 'White', pause: 'Pause', resume: 'Resume', reset: 'Reset',
       startHint: "Tap here to start Black's clock", yourMove: 'Tap after your move', paused: 'Paused',
       lost: 'LOST', won: 'WON', resetAsk: 'Reset timer?', resetInfo: 'The game starts again from the beginning.',
+      moves: 'Moves', timeUsed: 'Time used', perMove: 'Per move', longest: 'Longest move',
+      periodsLeft: 'Periods left', wholeGame: 'Whole game',
       lostSay: (l, w) => `${l} lost on time. ${w} wins!`,
       timeSetting: 'Time setting',
       fischerTime: 'Fischer', fischerDesc: 'Main time, plus seconds after every move',
@@ -402,6 +414,8 @@
       black: 'Schwarz', white: 'Weiß', pause: 'Pause', resume: 'Weiter', reset: 'Neustart',
       startHint: 'Hier tippen – Schwarz beginnt', yourMove: 'Nach deinem Zug tippen', paused: 'Pausiert',
       lost: 'VERLOREN', won: 'GEWONNEN', resetAsk: 'Timer zurücksetzen?', resetInfo: 'Das Spiel beginnt dann von vorne.',
+      moves: 'Züge', timeUsed: 'Verbrauchte Zeit', perMove: 'Pro Zug', longest: 'Längster Zug',
+      periodsLeft: 'Perioden übrig', wholeGame: 'Ganzes Spiel',
       lostSay: (l, w) => `${l} hat die Zeit überschritten. ${w} gewinnt!`,
       timeSetting: 'Bedenkzeit',
       fischerTime: 'Fischer', fischerDesc: 'Grundbedenkzeit, plus Sekunden nach jedem Zug',
@@ -424,12 +438,13 @@
   // state: 'ready' | 'running' | 'paused' | 'over'
   // left: main time per player; periods: byo-yomi periods per player;
   // turnUsed + turnStart: time used so far in the current turn (pausing keeps turnUsed).
-  let state, active, loser, left, periods, warned, moved, turnUsed, turnStart, seen, wakeLock;
+  // stats: moves, time used for them and the longest one, per player; showStats: shown while paused.
+  let state, active, loser, left, periods, warned, moved, turnUsed, turnStart, seen, wakeLock, stats, showStats;
 
   const ui = {};
   for (const p of ['black', 'white']) {
     const root = document.getElementById(p);
-    ui[p] = { root, time: root.querySelector('.time'), periods: root.querySelector('.periods'), hint: root.querySelector('.hint') };
+    ui[p] = { root, time: root.querySelector('.time'), periods: root.querySelector('.periods'), hint: root.querySelector('.hint'), stats: root.querySelector('.stats') };
     root.addEventListener('pointerdown', () => tap(p));
   }
   const pauseBtn = document.getElementById('pause');
@@ -448,15 +463,18 @@
     periods = { black: settings.periods || 0, white: settings.periods || 0 };
     warned = { black: false, white: false };
     moved = { black: false, white: false };
+    stats = { black: { moves: 0, used: 0, longest: 0 }, white: { moves: 0, used: 0, longest: 0 } };
+    showStats = false;
     releaseWake();
     render();
   }
 
   // A player's clock right now, measured from the real clock rather than counted ticks.
   // time: the main time left, or in byo-yomi the time left in the current period.
+  const turnTime = () => turnUsed + (state === 'running' ? performance.now() - turnStart : 0);
   function clock(p) {
     const inTurn = active === p && (state === 'running' || state === 'paused');
-    const used = inTurn ? turnUsed + (state === 'running' ? performance.now() - turnStart : 0) : 0;
+    const used = inTurn ? turnTime() : 0;
     if (!isByo(settings) || left[p] - used > 0) return { time: left[p] - used, periods: periods[p], byo: false };
     const over = used - left[p], gone = Math.floor(over / settings.period);
     return { time: settings.period - over % settings.period, periods: periods[p] - gone, byo: true };
@@ -466,16 +484,24 @@
   // Tapping your own half ends your move and starts the other clock.
   function tap(p) {
     unlockSound();
-    if (state === 'ready') return start(other(p));
+    if (state === 'ready') { buzz(30); return start(other(p)); }
     if (state !== 'running' || active !== p) return;
     const c = clock(p);
     if (outOfTime(c)) return flag(p);
     if (!isByo(settings)) left[p] = c.time + (settings.inc || 0);
     else if (!c.byo) left[p] = c.time;
     else { left[p] = 0; periods[p] = c.periods; } // the period starts again on the next turn
+    const s = stats[p], used = turnTime();
+    s.moves++;
+    s.used += used;
+    s.longest = Math.max(s.longest, used);
     moved[p] = true;
+    buzz(30);
     start(other(p));
   }
+
+  // A short vibration, so a tap can be felt (Android; iPhones don't allow it).
+  const buzz = ms => navigator.vibrate && navigator.vibrate(ms);
 
   function warn(p) {
     warned[p] = true;
@@ -498,9 +524,12 @@
     if (state === 'running') {
       turnUsed += performance.now() - turnStart;
       state = 'paused';
+      buzz(60);
     } else if (state === 'paused') {
       turnStart = performance.now();
       state = 'running';
+      showStats = false;
+      buzz(60);
       keepAwake();
     }
     render();
@@ -510,6 +539,7 @@
     left[p] = 0;
     periods[p] = 0;
     loser = p;
+    turnUsed = turnTime(); // keeps the last turn in the statistics
     state = 'over';
     if (navigator.vibrate) navigator.vibrate([400, 150, 400]);
     chime([1760, 1318.5, 1046.5]);
@@ -581,7 +611,7 @@
     if (confirmReset.returnValue === 'reset') newGame();
   });
 
-  // Changing the time setting: between games, or while paused (a new time starts a new game).
+  // Changing the time setting, only between games.
   const dialog = document.getElementById('settings');
   const field = id => document.getElementById(id);
   const numbers = () => [...dialog.querySelectorAll('input[type=number]')].filter(i => !i.closest('[hidden]'));
@@ -659,6 +689,12 @@
   field('again').addEventListener('click', () => fillForm(draft[picked] = { ...DEFAULTS[picked] }));
 
   info.addEventListener('click', () => {
+    // During a game, the middle box pauses and shows or hides the statistics instead.
+    if (state === 'running' || state === 'paused') {
+      showStats = state === 'running' || !showStats;
+      if (state === 'running') togglePause();
+      return render();
+    }
     draft = structuredClone(saved);
     picked = null;
     radios.find(r => r.value === settings.system).checked = true;
@@ -673,10 +709,9 @@
     unlockSound();
     const s = readForm();
     if (!valid(s)) return;
-    const same = JSON.stringify(s) === JSON.stringify(settings);
     saved[picked] = settings = s;
     store();
-    if (state !== 'paused' || !same) newGame(); // paused, only the chime changed: the game goes on
+    newGame();
   });
 
   function setLang(l) {
@@ -718,9 +753,23 @@
   function fmt(ms) {
     if (ms < 0) ms = 0;
     if (ms < CRITICAL) return (Math.ceil(ms / 100) / 10).toFixed(1);
-    const s = Math.ceil(ms / 1000);
+    return hms(Math.ceil(ms / 1000));
+  }
+  // e.g. "0:42", "38:12" or "1:12:40"
+  function hms(s) {
     const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = String(s % 60).padStart(2, '0');
     return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+  }
+  const dur = ms => hms(Math.round(ms / 1000));
+
+  // A player's statistics, as label / value pairs; the last turn counts as time used, not as a move.
+  function statsFor(p) {
+    const s = stats[p], used = q => stats[q].used + (q === active ? turnTime() : 0);
+    const row = (key, value, cls = '') => `<span class="${cls}">${t(key)}</span><b class="${cls}">${value}</b>`;
+    return row('moves', s.moves) + row('timeUsed', dur(used(p)))
+      + row('perMove', s.moves ? dur(s.used / s.moves) : '–') + row('longest', dur(s.longest))
+      + (isByo(settings) ? row('periodsLeft', `${Math.max(0, clock(p).periods)} / ${settings.periods}`) : '')
+      + row('wholeGame', dur(used('black') + used('white')), 'total');
   }
 
   function setText(el, text) {
@@ -741,14 +790,19 @@
 
   function render() {
     const inGame = state === 'running' || state === 'paused';
+    const withStats = state === 'over' || (state === 'paused' && showStats);
     document.body.classList.toggle('over', state === 'over');
-    for (const p of ['black', 'white']) document.body.classList.toggle('turn-' + p, inGame && active === p);
+    document.body.classList.toggle('with-stats', withStats);
+    // Both halves the same size while the statistics show, so they fit.
+    for (const p of ['black', 'white']) document.body.classList.toggle('turn-' + p, inGame && active === p && !withStats);
     document.body.classList.toggle('quiet', inGame && moved.black && moved.white);
     for (const p of ['black', 'white']) {
       const c = clock(p), ms = state === 'over' && loser === p ? 0 : c.time, cl = ui[p].root.classList;
       setText(ui[p].time, fmt(ms));
       setText(ui[p].periods, periodsFor(c));
       setText(ui[p].hint, hintFor(p));
+      const html = withStats ? statsFor(p) : '';
+      if (ui[p].stats.innerHTML !== html) ui[p].stats.innerHTML = html;
       cl.toggle('running', state === 'running' && active === p);
       cl.toggle('waiting', inGame && active !== p);
       cl.toggle('low', ms < LOW && ms >= CRITICAL);
@@ -759,7 +813,7 @@
     pauseBtn.classList.toggle('paused', state === 'paused');
     pauseBtn.ariaLabel = pauseBtn.title = state === 'paused' ? t('resume') : t('pause');
     resetBtn.ariaLabel = resetBtn.title = t('reset');
-    info.disabled = state === 'running'; // while paused, Set starts a new game with the new time
+    info.classList.toggle('plain', inGame); // no pencil: during a game it shows the statistics
     setText(setting, describe(settings));
     setText(system, t(settings.system === 'simple' ? 'simpleShort' : settings.system + 'Time')); // Fischer, Byo-yomi or Timer
   }
