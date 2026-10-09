@@ -222,6 +222,7 @@
     font-size: 20px;
     text-align: center;
   }
+  dialog input.wrong { border-color: var(--out); background: #ffe3ef; }
   dialog .check { display: flex; align-items: center; gap: 10px; margin: 6px 0 20px; font-size: 16px; }
   dialog .check input, dialog .option input { flex: none; width: 24px; height: 24px; padding: 0; accent-color: var(--out); }
   dialog .option {
@@ -366,7 +367,8 @@
   const isByo = s => s.system === 'byo';
   const valid = s => !!s && s.system in DEFAULTS && (isByo(s)
     ? s.main >= 0 && s.periods >= 1 && s.period >= 1000
-    : s.main > 0 && (s.system === 'simple' || s.inc >= 0));
+    : s.system === 'simple' ? s.main > 0
+    : s.inc >= 0 && s.main + s.inc > 0); // Fischer may start at 0 if something is added
   let saved = structuredClone(DEFAULTS), settings = saved.fischer;
   try {
     const stored = JSON.parse(localStorage.getItem('clock'));
@@ -440,7 +442,9 @@
   function newGame() {
     state = 'ready';
     active = loser = null;
-    left = { black: settings.main, white: settings.main };
+    // Fischer with no main time: each player starts with one increment for the first move.
+    const first = settings.main || settings.inc || 0;
+    left = { black: first, white: first };
     periods = { black: settings.periods || 0, white: settings.periods || 0 };
     warned = { black: false, white: false };
     moved = { black: false, white: false };
@@ -589,8 +593,18 @@
     e.preventDefault();
     const list = numbers(), next = list[list.indexOf(e.target) + 1];
     if (next && e.target.type === 'number') next.focus();
-    else dialog.close('set');
+    else form.requestSubmit(setBtn);
   });
+
+  // Set only closes with a time that works; otherwise the time fields turn pink.
+  const form = dialog.querySelector('form'), setBtn = form.querySelector('[value=set]');
+  form.addEventListener('submit', e => {
+    if (e.submitter !== setBtn || valid(readForm())) return;
+    e.preventDefault();
+    for (const id of ['mainMin', 'mainSec', 'incSec']) field(id).classList.add('wrong');
+  });
+  const unmark = () => { for (const i of dialog.querySelectorAll('.wrong')) i.classList.remove('wrong'); };
+  dialog.addEventListener('input', unmark);
 
   // While the phone's keyboard is open, the dialogs fit into the part of the screen above it.
   const vv = window.visualViewport;
@@ -620,6 +634,7 @@
     }
     field('incRow').hidden = s.system !== 'fischer';
     field('byoRow').hidden = !isByo(s);
+    unmark();
     const list = numbers();
     for (const i of list) i.enterKeyHint = i === list.at(-1) ? 'done' : 'next';
     setText(field('againText'), t('resetTo')(describe(DEFAULTS[s.system])));
@@ -679,6 +694,7 @@
     const m = Math.floor(s.main / 60000), sec = s.main % 60000 / 1000;
     const main = [m && `${m} min`, sec && `${sec} s`].filter(Boolean).join(' ');
     const extra = isByo(s) ? `${s.periods} × ${s.period / 1000} s` : s.inc ? `${s.inc / 1000} s` : '';
+    if (!main && s.system === 'fischer') return `0 min + ${extra}`;
     return main && extra ? `${main} + ${extra}` : main || extra; // e.g. just "30 min", or "3 × 30 s"
   }
 
