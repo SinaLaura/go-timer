@@ -1,7 +1,7 @@
 # Go timer
 
 A game clock for Go that runs in the browser, on a phone lying next to the board.
-Built by Sina and Maya with Claude. First app project, started October 2026.
+Built by Sina with Claude. First app project, started October 2026.
 
 **Why now:** Sina plays the Go tournament in Mannheim on **24–25 Oct 2026**, with
 **45 min + 15 s Fischer** time. A clock set to exactly that makes practice games feel
@@ -58,7 +58,7 @@ After that, every change Claude pushes goes live by itself.
 
 ## Working together
 
-- **Sina** (she/her) and **Maya** build this together, with Claude doing most of the
+- **Sina** (she/her) builds this, with Claude doing most of the
   typing. Keep explanations short. Show the result: open `index.html` in the browser
   after each change.
 - Small steps: one feature at a time, test it in the browser, then commit with a short
