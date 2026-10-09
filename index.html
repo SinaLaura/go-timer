@@ -30,21 +30,32 @@
     --run: #f07bb0;
     --low: #e8559a;
     --out: #d6006f;
-    /* Themes (picked with the heart on the running clock) change the middle bar, the soft
-       fade from it into each half, and the running bar. Flags go from top to bottom. */
+    /* Themes (picked with the heart on the running clock): the whole flag in the middle bar,
+       glowing softly into both halves, and each player's own part of it in their running bar.
+       All smooth gradients, from left to right as seen on the screen. */
     --stripes: var(--bar);
-    --edge-top: var(--bar);
-    --edge-bottom: var(--bar);
-    --run-bg: var(--run);
-    --flag-pride: linear-gradient(#e40303 0 16.7%, #ff8c00 0 33.3%, #ffed00 0 50%, #008026 0 66.7%, #004dff 0 83.3%, #750787 0);
-    --flag-trans: linear-gradient(#5bcefa 0 20%, #f5a9b8 0 40%, #fff 0 60%, #f5a9b8 0 80%, #5bcefa 0);
-    --flag-wlw: linear-gradient(#d52d00 0 20%, #ff9a56 0 40%, #fff 0 60%, #d362a4 0 80%, #a30262 0);
+    --glow: 1;
+    --run-white: var(--run);
+    --run-black: var(--run);
+    --flag-pride: linear-gradient(to right, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787);
+    /* Trans: the actual flag, in stripes from top to bottom (with soft edges) */
+    --flag-trans: linear-gradient(#5bcefa 18%, #f5a9b8 22% 38%, #fff 42% 58%, #f5a9b8 62% 78%, #5bcefa 82%);
+    --flag-wlw: linear-gradient(to right, #d52d00, #ff9a56, #fff, #d362a4, #a30262);
   }
-  :root[data-theme=pride] { --flag: var(--flag-pride); --flag-top: #e40303; --edge-top: rgb(228 3 3 / .55); --edge-bottom: rgb(117 7 135 / .55); }
-  :root[data-theme=trans] { --flag: var(--flag-trans); --flag-top: #5bcefa; --edge-top: rgb(91 206 250 / .6); --edge-bottom: rgb(91 206 250 / .6); }
-  :root[data-theme=wlw] { --flag: var(--flag-wlw); --flag-top: #d52d00; --edge-top: rgb(213 45 0 / .55); --edge-bottom: rgb(163 2 98 / .55); }
-  /* The running bar's top 5px is its wavy edge, so the stripes start below it. */
-  :root[data-theme] { --stripes: var(--flag); --run-bg: var(--flag) 0 5px / 100% calc(100% - 5px) no-repeat var(--flag-top); }
+  :root[data-theme] { --stripes: var(--flag); --glow: .55; }
+  /* White's half is turned around, so its gradients run "to left" to look the same on the screen. */
+  :root[data-theme=pride] {
+    --flag: var(--flag-pride);
+    --run-white: linear-gradient(to left, #e40303, #ff8c00, #ffed00);
+    --run-black: linear-gradient(to right, #008026, #004dff, #750787);
+  }
+  :root[data-theme=trans] { --flag: var(--flag-trans); --glow-bg: #5bcefa; --run-white: #f5a9b8; --run-black: #5bcefa; }
+  :root[data-theme=wlw] {
+    --flag: var(--flag-wlw);
+    /* Both edges: the actual flag, upright for each player. Its top 5px is the wavy edge, so the stripes start below. */
+    --run-white: linear-gradient(#d52d00 12px, #ff9a56 13.6px 19.8px, #fff 21.4px 27.6px, #d362a4 29.2px 35.4px, #a30262 37px);
+    --run-black: var(--run-white);
+  }
   * { box-sizing: border-box; margin: 0; }
   html, body { height: 100%; }
   body {
@@ -79,10 +90,26 @@
   /* The top half faces the player across the board. */
   #white { background-color: var(--white-bg); color: var(--white-fg); transform: rotate(180deg); }
   #black { background-color: var(--black-bg); color: var(--black-fg); }
-  /* Soft fade from the pink middle bar into each half (its top edge, also for the turned-around one). */
-  #white { --edge: var(--edge-top); }
-  #black { --edge: var(--edge-bottom); }
-  .half { background-image: linear-gradient(var(--edge), transparent 28px); transition: background-color .4s, color .4s; }
+  #white { --run-bg: var(--run-white); }
+  #black { --run-bg: var(--run-black); }
+  .half { isolation: isolate; transition: background-color .4s, color .4s; }
+  /* Soft fade from the middle bar into each half (its top edge, also for the turned-around one). */
+  .half::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    height: 28px;
+    background: var(--glow-bg, var(--stripes)); /* a striped flag glows in its outer stripe */
+    opacity: var(--glow);
+    -webkit-mask: linear-gradient(#000 2px, transparent);
+    mask: linear-gradient(#000 2px, transparent);
+    pointer-events: none;
+  }
+  #white::before { scale: -1 1; } /* mirrored back, so the colours line up with the bar */
+  .with-stats .half::before { height: 12px; }
 
   .name {
     display: flex;
@@ -197,7 +224,7 @@
   /* Statistics: at the end, and while paused after a tap on the middle box. Each player reads their own. */
   .stats { display: none; width: min(80vw, 300px); grid-template-columns: 1fr auto; gap: .15em 1.4em; font-size: clamp(13px, 2.1vh, 17px); }
   /* Clear of the bar: a narrower fade and some room; if it is too tall, the rest goes to the screen edge. */
-  .with-stats .half { gap: 1vh; padding-top: 16px; justify-content: safe center; background-image: linear-gradient(var(--edge), transparent 12px); }
+  .with-stats .half { gap: 1vh; padding-top: 16px; justify-content: safe center; }
   .with-stats .hint:empty { display: none; }
   .with-stats .stats { display: grid; animation: fade-in .6s ease-out; }
   @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } }
