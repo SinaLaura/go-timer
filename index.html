@@ -63,7 +63,8 @@
   /* The top half faces the player across the board. */
   #white { background-color: var(--white-bg); color: var(--white-fg); transform: rotate(180deg); }
   #black { background-color: var(--black-bg); color: var(--black-fg); }
-  .half { transition: background-color .4s, color .4s; }
+  /* Soft fade from the pink middle bar into each half (its top edge, also for the turned-around one). */
+  .half { background-image: linear-gradient(var(--bar), transparent 28px); transition: background-color .4s, color .4s; }
 
   .name {
     display: flex;
@@ -140,6 +141,7 @@
   .stats span { opacity: .7; }
   .stats b { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
   .stats .total { margin-top: .35em; }
+  .stats .mode { margin-bottom: .35em; }
   .chart { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: .6em; touch-action: none; }
   .chart svg { display: block; height: 34px; fill: currentColor; }
   .chart .has-sel rect { opacity: .35; }
@@ -153,27 +155,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 5px 16px;
+    padding: 3px 16px;
     color: var(--bar-fg);
   }
-  /* Wavy edges where the bar meets the two halves. */
-  #bar { position: relative; z-index: 1; }
-  #bar::before, #bar::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 7px;
-    background: var(--bar);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 10'%3E%3Cpath d='M0 10V5Q10 0 20 5T40 5V10Z'/%3E%3C/svg%3E") 0 0 / 28px 7px repeat-x;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 10'%3E%3Cpath d='M0 10V5Q10 0 20 5T40 5V10Z'/%3E%3C/svg%3E") 0 0 / 28px 7px repeat-x;
-    pointer-events: none;
-  }
-  #bar::before { bottom: calc(100% - 1px); }
-  #bar::after { top: calc(100% - 1px); transform: scaleY(-1); }
-  #bar button { min-height: 42px; padding: 0 14px; }
+  #bar button { min-height: 38px; padding: 0 14px; }
   /* Pause / resume and reset are round icon buttons. */
-  #bar .icon { display: grid; place-items: center; flex: none; width: 42px; padding: 0; }
+  #bar .icon { display: grid; place-items: center; flex: none; width: 38px; padding: 0; }
   #bar .icon svg { width: 22px; height: 22px; }
   #pause .play, #pause.paused .bars { display: none; }
   #pause.paused .play { display: block; }
@@ -196,15 +183,16 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 4px 10px;
+    padding: 1px 10px;
     background: rgb(255 255 255 / .6);
     border: 2px solid #e08ab0;
     font-size: 14px;
-    line-height: 1.25;
+    line-height: 1.15;
   }
   #info .edit { flex: none; width: 18px; height: 18px; color: var(--out); }
   #info.plain { opacity: 1; background: transparent; border-color: transparent; }
   #info.plain .edit { display: none; }
+  #info.plain > span { visibility: hidden; } /* during a game the time setting is in the statistics */
   #info small:empty { display: none; }
   #info small { display: block; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
 
@@ -557,6 +545,7 @@
     if (state === 'running') {
       turnUsed += performance.now() - turnStart;
       state = 'paused';
+      showStats = true;
       buzz(60);
     } else if (state === 'paused') {
       turnStart = performance.now();
@@ -576,6 +565,7 @@
     state = 'over';
     chime([1760, 1318.5, 1046.5]);
     setTimeout(() => say(t('lostSay')(t(p), t(other(p)))), 600);
+    if (!soundOn) buzz([180, 120, 180]); // without sound: two short pulses, so it is noticed
     releaseWake();
     render();
   }
@@ -812,7 +802,7 @@
   function statsFor(p) {
     const s = stats[p], n = s.times.length, used = q => stats[q].used + (q === active ? turnTime() : 0);
     const row = (key, value, cls = '') => `<span class="${cls}">${t(key)}</span><b class="${cls}">${value}</b>`;
-    return row('moves', n) + row('timeUsed', dur(used(p)))
+    return row(systemKey(), describe(settings), 'mode') + row('moves', n) + row('timeUsed', dur(used(p)))
       + row('perMove', n ? dur(s.used / n) : '–') + row('longest', dur(Math.max(0, ...s.times)))
       + (isByo(settings) ? row('periodsLeft', `${Math.max(0, clock(p).periods)} / ${settings.periods}`) : '')
       + row('wholeGame', dur(used('black') + used('white')), 'total')
@@ -904,8 +894,9 @@
     resetBtn.ariaLabel = resetBtn.title = t('reset');
     info.classList.toggle('plain', inGame); // no pencil: during a game it shows the statistics
     setText(setting, describe(settings));
-    setText(system, t(settings.system === 'simple' ? 'simpleShort' : settings.system + 'Time')); // Fischer, Byo-yomi or Timer
+    setText(system, t(systemKey()));
   }
+  function systemKey() { return settings.system === 'simple' ? 'simpleShort' : settings.system + 'Time'; } // Fischer, Byo-yomi or Timer
 
   function loop() {
     if (state === 'running') {
