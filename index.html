@@ -98,7 +98,7 @@
   .running::before {
     z-index: 1;
     background-position: center;
-    background-size: 34px;
+    background-size: 27px;
     background-repeat: no-repeat;
     animation: pulse 2.4s ease-in-out infinite;
   }
@@ -109,7 +109,7 @@
 
   /* When time is up, who lost / won is the big news, the time steps back. */
   .over .name { font-size: min(8vw, 4.5vh); }
-  .over .time { font-size: min(11vw, 6vh); opacity: .6; }
+  .over .time { order: -1; font-size: min(11vw, 6vh); opacity: .6; } /* time on top, then name, then LOST / WON */
   .over .hint { font-size: min(14vw, 10vh); font-weight: 800; line-height: 1.05; letter-spacing: .03em; opacity: 1; }
   .low .time { color: var(--low); }
   .critical, .flagged { background: var(--out) !important; color: #fff !important; }
