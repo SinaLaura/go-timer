@@ -133,12 +133,21 @@
   .over .hint { font-size: min(12vw, 8vh); font-weight: 800; line-height: 1.05; letter-spacing: .03em; opacity: 1; }
 
   /* Statistics: at the end, and while paused after a tap on the middle box. Each player reads their own. */
-  .stats { display: none; grid-template-columns: auto auto; gap: .2em 1.4em; font-size: clamp(13px, 2.1vh, 17px); }
+  .stats { display: none; width: min(80vw, 300px); grid-template-columns: 1fr auto; gap: .2em 1.4em; font-size: clamp(13px, 2.1vh, 17px); }
+  .with-stats .half { gap: 1vh; }
+  .with-stats .hint:empty { display: none; }
   .with-stats .stats { display: grid; }
   .with-stats:not(.over) .time { font-size: min(16vw, 9vh); }
   .stats span { opacity: .7; }
   .stats b { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
   .stats .total { margin-top: .35em; }
+  .chart { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: .6em; touch-action: none; }
+  .chart svg { display: block; height: 40px; fill: currentColor; }
+  .chart .has-sel rect { opacity: .35; }
+  .chart .has-sel rect.sel { opacity: 1; }
+  .chart .axis { display: flex; justify-content: space-between; gap: 8px; font-size: .85em; }
+  .chart .readout { min-height: 1.3em; font-size: .9em; font-weight: 700; } /* keeps its line, so nothing jumps on a tap */
+  .chart small { font-size: .85em; opacity: .7; }
   .low .time { color: var(--low); }
   .critical, .flagged { background-color: var(--out) !important; color: #fff !important; }
 
@@ -397,7 +406,9 @@
       black: 'Black', white: 'White', pause: 'Pause', resume: 'Resume', reset: 'Reset',
       startHint: "Tap here to start Black's clock", yourMove: 'Tap after your move', paused: 'Paused',
       lost: 'LOST', won: 'WON', resetAsk: 'Reset timer?', resetInfo: 'The game starts again from the beginning.',
-      moves: 'Moves', timeUsed: 'Time used', perMove: 'Per move', longest: 'Longest move',
+      moves: 'Moves', timeUsed: 'Time used', perMove: 'Avg. move', longest: 'Longest move',
+      chartTitle: 'Time per move', moveAt: (n, d) => `move ${n} · ${d}`,
+      movesAt: (a, b, d) => `moves ${a}–${b} · avg. ${d}`,
       periodsLeft: 'Periods left', wholeGame: 'Whole game',
       lostSay: (l, w) => `${l} lost on time. ${w} wins!`,
       timeSetting: 'Time setting',
@@ -414,7 +425,9 @@
       black: 'Schwarz', white: 'Weiß', pause: 'Pause', resume: 'Weiter', reset: 'Neustart',
       startHint: 'Hier tippen – Schwarz beginnt', yourMove: 'Nach deinem Zug tippen', paused: 'Pausiert',
       lost: 'VERLOREN', won: 'GEWONNEN', resetAsk: 'Timer zurücksetzen?', resetInfo: 'Das Spiel beginnt dann von vorne.',
-      moves: 'Züge', timeUsed: 'Verbrauchte Zeit', perMove: 'Pro Zug', longest: 'Längster Zug',
+      moves: 'Züge', timeUsed: 'Verbrauchte Zeit', perMove: 'Ø Zug', longest: 'Längster Zug',
+      chartTitle: 'Zeit pro Zug', moveAt: (n, d) => `Zug ${n} · ${d}`,
+      movesAt: (a, b, d) => `Züge ${a}–${b} · Ø ${d}`,
       periodsLeft: 'Perioden übrig', wholeGame: 'Ganzes Spiel',
       lostSay: (l, w) => `${l} hat die Zeit überschritten. ${w} gewinnt!`,
       timeSetting: 'Bedenkzeit',
@@ -438,14 +451,17 @@
   // state: 'ready' | 'running' | 'paused' | 'over'
   // left: main time per player; periods: byo-yomi periods per player;
   // turnUsed + turnStart: time used so far in the current turn (pausing keeps turnUsed).
-  // stats: moves, time used for them and the longest one, per player; showStats: shown while paused.
-  let state, active, loser, left, periods, warned, moved, turnUsed, turnStart, seen, wakeLock, stats, showStats;
+  // stats: time used per player, and the time of each move; showStats: shown while paused;
+  // chosen: the bar tapped in each player's chart.
+  let state, active, loser, left, periods, warned, moved, turnUsed, turnStart, seen, wakeLock, stats, showStats, chosen;
 
   const ui = {};
   for (const p of ['black', 'white']) {
     const root = document.getElementById(p);
     ui[p] = { root, time: root.querySelector('.time'), periods: root.querySelector('.periods'), hint: root.querySelector('.hint'), stats: root.querySelector('.stats') };
     root.addEventListener('pointerdown', () => tap(p));
+    ui[p].stats.addEventListener('pointerdown', e => pickBar(p, e));
+    ui[p].stats.addEventListener('pointermove', e => e.buttons && pickBar(p, e));
   }
   const pauseBtn = document.getElementById('pause');
   const resetBtn = document.getElementById('reset');
@@ -463,8 +479,9 @@
     periods = { black: settings.periods || 0, white: settings.periods || 0 };
     warned = { black: false, white: false };
     moved = { black: false, white: false };
-    stats = { black: { moves: 0, used: 0, longest: 0 }, white: { moves: 0, used: 0, longest: 0 } };
+    stats = { black: { used: 0, times: [] }, white: { used: 0, times: [] } };
     showStats = false;
+    chosen = { black: null, white: null };
     releaseWake();
     render();
   }
@@ -491,10 +508,9 @@
     if (!isByo(settings)) left[p] = c.time + (settings.inc || 0);
     else if (!c.byo) left[p] = c.time;
     else { left[p] = 0; periods[p] = c.periods; } // the period starts again on the next turn
-    const s = stats[p], used = turnTime();
-    s.moves++;
-    s.used += used;
-    s.longest = Math.max(s.longest, used);
+    const used = turnTime();
+    stats[p].times.push(used);
+    stats[p].used += used;
     moved[p] = true;
     buzz(30);
     start(other(p));
@@ -764,12 +780,56 @@
 
   // A player's statistics, as label / value pairs; the last turn counts as time used, not as a move.
   function statsFor(p) {
-    const s = stats[p], used = q => stats[q].used + (q === active ? turnTime() : 0);
+    const s = stats[p], n = s.times.length, used = q => stats[q].used + (q === active ? turnTime() : 0);
     const row = (key, value, cls = '') => `<span class="${cls}">${t(key)}</span><b class="${cls}">${value}</b>`;
-    return row('moves', s.moves) + row('timeUsed', dur(used(p)))
-      + row('perMove', s.moves ? dur(s.used / s.moves) : '–') + row('longest', dur(s.longest))
+    return row('moves', n) + row('timeUsed', dur(used(p)))
+      + row('perMove', n ? dur(s.used / n) : '–') + row('longest', dur(Math.max(0, ...s.times)))
       + (isByo(settings) ? row('periodsLeft', `${Math.max(0, clock(p).periods)} / ${settings.periods}`) : '')
-      + row('wholeGame', dur(used('black') + used('white')), 'total');
+      + row('wholeGame', dur(used('black') + used('white')), 'total')
+      + chartFor(p);
+  }
+
+  // Time per move: one bar per move, from the first move (left) to the last (right),
+  // on the same scale for both players. Tapping or sliding along the bars shows a move's time.
+  // Never more than 100 bars: in longer games, neighbouring moves share a bar (their average).
+  const MAX_BARS = 100;
+  const moveNo = (p, i) => (p === 'black' ? 2 * i + 1 : 2 * i + 2); // Black moves first
+  function barsFor(p) {
+    const k = Math.ceil(Math.max(stats.black.times.length, stats.white.times.length) / MAX_BARS) || 1;
+    const times = stats[p].times, bars = [];
+    for (let from = 0; from < times.length; from += k) {
+      const part = times.slice(from, from + k);
+      bars.push({ from, to: from + part.length - 1, ms: part.reduce((a, b) => a + b, 0) / part.length });
+    }
+    return bars;
+  }
+  function chartFor(p) {
+    const bars = barsFor(p), n = bars.length, sel = chosen[p], b = bars[sel];
+    if (!n) return '';
+    const max = Math.max(1, ...barsFor('black').map(x => x.ms), ...barsFor('white').map(x => x.ms));
+    const rects = bars.map((x, i) => {
+      const h = Math.max(1, x.ms / max * 40);
+      return `<rect x="${i + .15}" y="${40 - h}" width=".7" height="${h}"${i === sel ? ' class="sel"' : ''}/>`;
+    }).join('');
+    const readout = !b ? '' : b.from === b.to ? t('moveAt')(moveNo(p, b.from), dur(b.ms))
+      : t('movesAt')(moveNo(p, b.from), moveNo(p, b.to), dur(b.ms));
+    const width = `width: min(100%, ${Math.max(n * 10, 40)}px)`, last = bars[n - 1].to;
+    return `<div class="chart"><small>${t('chartTitle')}</small>`
+      + `<svg class="${b ? 'has-sel' : ''}" style="${width}" viewBox="0 0 ${n} 40"`
+      + ` preserveAspectRatio="none" aria-hidden="true">${rects}</svg>`
+      + `<div class="axis" style="${width}"><small>${moveNo(p, 0)}</small>`
+      + `<small>${last ? moveNo(p, last) : ''}</small></div><b class="readout">${readout}</b></div>`;
+  }
+  function pickBar(p, e) {
+    const svg = ui[p].stats.querySelector('svg');
+    if (!svg) return;
+    const r = svg.getBoundingClientRect(), n = barsFor(p).length;
+    let f = (e.clientX - r.left) / r.width;
+    if (p === 'white') f = 1 - f; // White's half is turned around
+    const i = Math.floor(f * n);
+    if (i < 0 || i >= n || i === chosen[p]) return;
+    chosen[p] = i;
+    render();
   }
 
   function setText(el, text) {
@@ -777,7 +837,7 @@
   }
   function hintFor(p) {
     if (state === 'ready') return p === 'white' ? t('startHint') : '';
-    if (state === 'paused') return t('paused');
+    if (state === 'paused') return showStats ? '' : t('paused'); // room for the statistics
     if (state === 'over') return p === loser ? t('lost') : t('won');
     return active === p && !moved[p] ? t('yourMove') : ''; // only until each player has moved once
   }
