@@ -40,22 +40,50 @@
     --flag-pride: linear-gradient(to right, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787);
     /* Trans: the actual flag, in stripes from top to bottom (with soft edges) */
     --flag-trans: linear-gradient(#5bcefa 18%, #f5a9b8 22% 38%, #fff 42% 58%, #f5a9b8 62% 78%, #5bcefa 82%);
-    --flag-wlw: linear-gradient(to right, #d52d00, #ff9a56, #fff, #d362a4, #a30262);
+    --flag-wlw: linear-gradient(#d52d00 18%, #ff9a56 22% 38%, #fff 42% 58%, #d362a4 62% 78%, #a30262 82%); /* the actual flag, like trans */
   }
   :root[data-theme] { --stripes: var(--flag); --glow: .55; }
   /* White's half is turned around, so its gradients run "to left" to look the same on the screen. */
   :root[data-theme=pride] {
     --flag: var(--flag-pride);
+    --glow: 0; /* the waves are the border */
     --run-white: linear-gradient(to left, #e40303, #ff8c00, #ffed00);
     --run-black: linear-gradient(to right, #008026, #004dff, #750787);
   }
+  /* Pride: the middle bar is a rainbow ribbon that waves: every wave up is a rainbow,
+     every wave down one upside down. Around it, each half's own colour. */
+  :root[data-theme=pride] #bar {
+    --top: var(--white-bg);
+    --bottom: var(--black-bg);
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(var(--top) 50%, var(--bottom) 0);
+  }
+  :root[data-theme=pride]:has(#white:is(.critical, .flagged)) #bar { --top: var(--out); }
+  :root[data-theme=pride]:has(#black:is(.critical, .flagged)) #bar { --bottom: var(--out); }
+  :root[data-theme=pride] #bar::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(50% - 30.5px);
+    height: 61px;
+    z-index: -1;
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='84' height='61' fill='none' stroke-width='7.5'><path stroke='%23e40303' d='M-97.12 18.92A45.50 45.50 0 0 1 -28.88 18.92A10.50 10.50 0 0 0 -13.12 18.92A45.50 45.50 0 0 1 55.12 18.92A10.50 10.50 0 0 0 70.88 18.92A45.50 45.50 0 0 1 139.12 18.92A10.50 10.50 0 0 0 154.88 18.92A45.50 45.50 0 0 1 223.12 18.92A10.50 10.50 0 0 0 238.88 18.92'/><path stroke='%23ff8c00' d='M-91.88 23.55A38.50 38.50 0 0 1 -34.12 23.55A17.50 17.50 0 0 0 -7.88 23.55A38.50 38.50 0 0 1 49.88 23.55A17.50 17.50 0 0 0 76.12 23.55A38.50 38.50 0 0 1 133.88 23.55A17.50 17.50 0 0 0 160.12 23.55A38.50 38.50 0 0 1 217.88 23.55A17.50 17.50 0 0 0 244.12 23.55'/><path stroke='%23ffed00' d='M-86.62 28.18A31.50 31.50 0 0 1 -39.38 28.18A24.50 24.50 0 0 0 -2.62 28.18A31.50 31.50 0 0 1 44.62 28.18A24.50 24.50 0 0 0 81.38 28.18A31.50 31.50 0 0 1 128.62 28.18A24.50 24.50 0 0 0 165.38 28.18A31.50 31.50 0 0 1 212.62 28.18A24.50 24.50 0 0 0 249.38 28.18'/><path stroke='%23008026' d='M-81.38 32.82A24.50 24.50 0 0 1 -44.62 32.82A31.50 31.50 0 0 0 2.62 32.82A24.50 24.50 0 0 1 39.38 32.82A31.50 31.50 0 0 0 86.62 32.82A24.50 24.50 0 0 1 123.38 32.82A31.50 31.50 0 0 0 170.62 32.82A24.50 24.50 0 0 1 207.38 32.82A31.50 31.50 0 0 0 254.62 32.82'/><path stroke='%23004dff' d='M-76.12 37.45A17.50 17.50 0 0 1 -49.88 37.45A38.50 38.50 0 0 0 7.88 37.45A17.50 17.50 0 0 1 34.12 37.45A38.50 38.50 0 0 0 91.88 37.45A17.50 17.50 0 0 1 118.12 37.45A38.50 38.50 0 0 0 175.88 37.45A17.50 17.50 0 0 1 202.12 37.45A38.50 38.50 0 0 0 259.88 37.45'/><path stroke='%23750787' d='M-70.88 42.08A10.50 10.50 0 0 1 -55.12 42.08A45.50 45.50 0 0 0 13.12 42.08A10.50 10.50 0 0 1 28.88 42.08A45.50 45.50 0 0 0 97.12 42.08A10.50 10.50 0 0 1 112.88 42.08A45.50 45.50 0 0 0 181.12 42.08A10.50 10.50 0 0 1 196.88 42.08A45.50 45.50 0 0 0 265.12 42.08'/></svg>") 50% 0 / 84px 61px repeat-x;
+    pointer-events: none;
+  }
+  :root[data-theme=pride] #bar .icon { box-shadow: 0 1px 5px rgb(40 10 25 / .25); } /* white buttons on white and rainbow */
   :root[data-theme=trans] { --flag: var(--flag-trans); --glow-bg: #5bcefa; --run-white: #f5a9b8; --run-black: #5bcefa; }
   :root[data-theme=wlw] {
-    --flag: var(--flag-wlw);
-    /* Both edges: the actual flag, upright for each player. Its top 5px is the wavy edge, so the stripes start below. */
-    --run-white: linear-gradient(#d52d00 12px, #ff9a56 13.6px 19.8px, #fff 21.4px 27.6px, #d362a4 29.2px 35.4px, #a30262 37px);
-    --run-black: var(--run-white);
+    /* The flag spread over the screen, upside down: its dark pink side on White's edge,
+       its dark orange side on Black's (outermost on the screen edge). The top 5px of a bar is its wavy edge. */
+    --flag: linear-gradient(#a30262 18%, #d362a4 22% 38%, #fff 42% 58%, #ff9a56 62% 78%, #d52d00 82%);
+    --run-white: linear-gradient(#d362a4 23.5px, #a30262 25.5px);
+    --run-black: linear-gradient(#ff9a56 23.5px, #d52d00 25.5px);
   }
+  /* Each half glows in the flag stripe next to it. */
+  :root[data-theme=wlw] #white { --glow-bg: #a30262; }
+  :root[data-theme=wlw] #black { --glow-bg: #d52d00; }
   * { box-sizing: border-box; margin: 0; }
   html, body { height: 100%; }
   body {
@@ -203,7 +231,7 @@
     animation: fade-in .25s ease-out;
   }
   #themes[hidden] { display: none; }
-  #themes button { display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 0; padding: 4px 6px; border-radius: 14px; background: none; font-size: 13px; font-weight: 700; }
+  #themes button { display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 0; padding: 4px 6px; border-radius: 14px; background: none; font-size: 13px; font-weight: 700; white-space: nowrap; }
   #themes .swatch { width: 40px; height: 40px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12); }
   #themes .on .swatch { outline: 3px solid var(--out); outline-offset: 2px; }
   [data-pick=pink] .swatch { background: linear-gradient(var(--bar) 0 50%, var(--run) 0); }
@@ -412,10 +440,10 @@
 </section>
 
 <div id="themes" hidden>
-  <button type="button" data-pick="pink"><span class="swatch"></span>Pink</button>
-  <button type="button" data-pick="pride"><span class="swatch"></span>Pride</button>
+  <button type="button" data-pick="pink"><span class="swatch"></span>Go Girls*</button>
+  <button type="button" data-pick="wlw"><span class="swatch"></span>wlw</button>
   <button type="button" data-pick="trans"><span class="swatch"></span>Trans</button>
-  <button type="button" data-pick="wlw"><span class="swatch"></span>WLW</button>
+  <button type="button" data-pick="pride"><span class="swatch"></span>Pride</button>
 </div>
 
 <dialog id="settings">
