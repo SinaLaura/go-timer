@@ -238,15 +238,6 @@
   [data-pick=pride] .swatch { background: var(--flag-pride); }
   [data-pick=trans] .swatch { background: var(--flag-trans); }
   [data-pick=wlw] .swatch { background: var(--flag-wlw); }
-  [data-pick=surprise] .swatch {
-    display: grid;
-    place-items: center;
-    background: conic-gradient(#f07bb0, #ff9a56, #ffed00, #5bcefa, #a30262, #f07bb0);
-    color: #fff;
-    font-size: 22px;
-    font-weight: 800;
-    text-shadow: 0 1px 3px rgb(0 0 0 / .45);
-  }
 
   /* When time is up, who lost / won is the big news, the time steps back. */
   .over .name { font-size: min(8vw, 3.4vh); }
@@ -453,7 +444,6 @@
   <button type="button" data-pick="wlw"><span class="swatch"></span>wlw</button>
   <button type="button" data-pick="trans"><span class="swatch"></span>Trans</button>
   <button type="button" data-pick="pride"><span class="swatch"></span>Pride</button>
-  <button type="button" data-pick="surprise"><span class="swatch">?</span><span data-t="surprise">Surprise</span></button>
 </div>
 
 <dialog id="settings">
@@ -564,7 +554,7 @@
       mainTime: 'Main time', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Chime and voice',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Last period!' : `Byo-yomi · ${n} left`),
-      cancel: 'Cancel', set: 'Set', colours: 'Colours', surprise: 'Surprise',
+      cancel: 'Cancel', set: 'Set', colours: 'Colours',
     },
     de: {
       black: 'Schwarz', white: 'Weiß', pause: 'Pause', resume: 'Weiter', reset: 'Neustart',
@@ -583,7 +573,7 @@
       mainTime: 'Grundbedenkzeit', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Klang und Stimme',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Letzte Periode!' : `Byo-yomi · noch ${n}`),
-      cancel: 'Abbrechen', set: 'OK', colours: 'Farben', surprise: 'Surprise',
+      cancel: 'Abbrechen', set: 'OK', colours: 'Farben',
     },
   };
   let lang = 'en';
@@ -631,44 +621,11 @@
   document.addEventListener('pointerdown', e => {
     if (!picker.contains(e.target) && !e.target.closest('.heart-btn')) picker.hidden = true;
   }, true);
-  // Surprise: new colours for every game (and right away when it is picked).
-  const THEMES = ['pink', 'wlw', 'trans', 'pride', 'surprise'];
-  let themePick = 'pink';
   function setTheme(name) {
-    themePick = THEMES.includes(name) ? name : 'pink';
-    showTheme(themePick);
-    for (const b of picker.querySelectorAll('[data-pick]')) b.classList.toggle('on', b.dataset.pick === themePick);
-  }
-  function showTheme(name) {
-    const root = document.documentElement;
-    for (const v of ['--flag', '--run-white', '--run-black']) root.style.removeProperty(v);
-    for (const p of ['black', 'white']) ui[p].root.style.removeProperty('--glow-bg');
-    if (name === 'pink') delete root.dataset.theme;
-    else root.dataset.theme = name;
-    if (name === 'surprise') surpriseColours();
-  }
-  // 3 to 5 soft, bright colours from a random colour scheme, as a smooth gradient from left
-  // to right (neighbours on the colour wheel, so they blend nicely) or as stripes from top
-  // to bottom like a flag (opposites too). Each player gets their part, as in Pride and wlw.
-  function surpriseColours() {
-    const rnd = (a, b) => a + Math.random() * (b - a), pick = list => list[Math.floor(rnd(0, list.length))];
-    const smooth = Math.random() < .5, n = 3 + Math.floor(rnd(0, 3)), hue = rnd(0, 360);
-    const step = pick(smooth ? [36, 48, 60, 72] : [36, 60, 72, 120, 150]);
-    const c = Array.from({ length: n }, (_, i) => `hsl(${Math.round(hue + i * step) % 360} ${Math.round(rnd(62, 85))}% ${Math.round(rnd(56, 70))}%)`);
-    const set = (v, x, el = document.documentElement) => el.style.setProperty(v, x);
-    if (smooth) {
-      const half = Math.ceil(n / 2);
-      set('--flag', `linear-gradient(to right, ${c.join(', ')})`);
-      set('--run-white', `linear-gradient(to left, ${c.slice(0, half).join(', ')})`);
-      set('--run-black', `linear-gradient(to right, ${c.slice(n - half).join(', ')})`);
-    } else {
-      const k = 100 / n, stops = c.map((x, i) => `${x} ${i ? `${(i * k + 2).toFixed(1)}%` : ''} ${i < n - 1 ? `${((i + 1) * k - 2).toFixed(1)}%` : ''}`);
-      set('--flag', `linear-gradient(${stops.join(', ')})`);
-      set('--run-white', `linear-gradient(${c[1]} 23.5px, ${c[0]} 25.5px)`);
-      set('--run-black', `linear-gradient(${c[n - 2]} 23.5px, ${c[n - 1]} 25.5px)`);
-      set('--glow-bg', c[0], ui.white.root);
-      set('--glow-bg', c[n - 1], ui.black.root);
-    }
+    if (!['pride', 'trans', 'wlw'].includes(name)) name = 'pink';
+    if (name === 'pink') delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = name;
+    for (const b of picker.querySelectorAll('[data-pick]')) b.classList.toggle('on', b.dataset.pick === name);
   }
   try { setTheme(localStorage.getItem('theme')); } catch (e) { setTheme('pink'); }
 
@@ -680,7 +637,6 @@
   document.addEventListener('contextmenu', e => e.preventDefault());
 
   function newGame() {
-    if (themePick === 'surprise') showTheme('surprise');
     state = 'ready';
     active = loser = null;
     // Fischer with no main time: each player starts with one increment for the first move.
