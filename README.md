@@ -28,7 +28,7 @@ A game clock for Go that runs in the browser, on a phone lying next to the board
 
 ## How it's built
 
-One `index.html` file: HTML, CSS and JavaScript, with no framework, no build step and no server. The icon files and `manifest.webmanifest` only give the app its name and icon on the home screen. Built by Sina with [Claude](https://claude.com/claude-code).
+One `index.html` file: HTML, CSS and JavaScript, with no framework, no build step and no server. The icon files and `manifest.webmanifest` only give the app its name and icon on the home screen. Built by Sina with [Claude](https://claude.com/claude-code) in one afternoon: about 3 hours from first plan to a working app, on 9 Oct 2026. It was her first app.
 
 ## Licence
 
