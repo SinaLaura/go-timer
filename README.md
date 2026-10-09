@@ -9,7 +9,7 @@ A game clock for Go that runs in the browser, on a phone lying next to the board
 ## How to use
 
 - Put the phone next to the board. The top half is turned around for the player across from you.
-- Tap White's half to start Black's clock. After each move, tap your own half and the other clock starts. The player whose turn it is has a thick pink frame around her half.
+- Tap White's half to start Black's clock. After each move, tap your own half and the other clock starts. A thick pink bar next to the middle flips to the player whose turn it is, and the colon of her clock blinks.
 - **Pause** and **Reset** are in the middle bar.
 - Between games, tap the box with the pencil in the middle to change the time: **Fischer time** (45 min, plus 15 s after every move) or **your own time**. You can also switch between English and German there (EN / DE) and turn the chime and voice on or off.
 

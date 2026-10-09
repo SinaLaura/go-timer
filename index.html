@@ -73,16 +73,28 @@
     font-variant-numeric: tabular-nums;
     line-height: 1;
   }
-  .hint { font-size: clamp(14px, 2.3vh, 20px); opacity: .75; min-height: 1.3em; }
+  .hint { padding: 0 16px; font-size: clamp(14px, 2.3vh, 20px); text-align: center; opacity: .75; min-height: 1.3em; }
 
   .waiting .time { opacity: .35; }
+  /* One thick bar on the edge next to the middle bar; it flips to whoever's turn it is.
+     (top is the inner edge for both halves, because White's half is turned around) */
   .running::after {
     content: "";
     position: absolute;
-    inset: 0;
-    border: 16px solid var(--run);
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 28px;
+    background: var(--run);
     pointer-events: none;
   }
+  /* The colon blinks twice a second on the running clock. */
+  .running .colon { animation: blink .5s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* When time is up, who lost / won is the big news, the time steps back. */
+  .over .time { font-size: min(13vw, 8vh); opacity: .6; }
+  .over .hint { font-size: min(10vw, 6vh); font-weight: 800; line-height: 1.15; opacity: 1; }
   .low .time { color: var(--low); }
   .critical, .flagged { background: var(--out) !important; color: #fff !important; }
 
@@ -284,7 +296,7 @@
   const other = p => (p === 'black' ? 'white' : 'black');
 
   // state: 'ready' | 'running' | 'paused' | 'over'
-  let state, active, loser, left, warned, turnStart, wakeLock;
+  let state, active, loser, left, warned, moved, turnStart, wakeLock;
 
   const ui = {};
   for (const p of ['black', 'white']) {
@@ -304,6 +316,7 @@
     active = loser = null;
     left = { black: settings.main, white: settings.main };
     warned = { black: false, white: false };
+    moved = { black: false, white: false };
     releaseWake();
     render();
   }
@@ -322,6 +335,7 @@
     const t = timeLeft(p);
     if (t <= 0) return flag(p);
     left[p] = t + settings.inc;
+    moved[p] = true;
     warned[p] = left[p] < CRITICAL; // chime again next time it drops under 10 s
     start(other(p));
   }
@@ -503,18 +517,26 @@
     if (el.textContent !== text) el.textContent = text;
   }
 
+  // Like setText, but wraps each colon so it can blink.
+  function setTime(el, text) {
+    if (el.dataset.text === text) return;
+    el.dataset.text = text;
+    el.innerHTML = text.replaceAll(':', '<span class="colon">:</span>');
+  }
+
   function hintFor(p) {
     if (state === 'ready') return p === 'white' ? t('startHint') : '';
     if (state === 'paused') return t('paused');
     if (state === 'over') return p === loser ? t('lost') : t('won');
-    return active === p ? t('yourMove') : '';
+    return active === p && !moved[p] ? t('yourMove') : ''; // only until each player has moved once
   }
 
   function render() {
     const inGame = state === 'running' || state === 'paused';
+    document.body.classList.toggle('over', state === 'over');
     for (const p of ['black', 'white']) {
       const t = timeLeft(p), cl = ui[p].root.classList;
-      setText(ui[p].time, fmt(t));
+      setTime(ui[p].time, fmt(t));
       setText(ui[p].hint, hintFor(p));
       cl.toggle('running', state === 'running' && active === p);
       cl.toggle('waiting', inGame && active !== p);
