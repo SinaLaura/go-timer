@@ -84,7 +84,7 @@
   .periods { font-size: clamp(15px, 2.5vh, 22px); font-weight: 700; }
   .periods:empty, .over .periods { display: none; }
 
-  .waiting .time { opacity: .35; }
+  .waiting .time, .waiting .name { opacity: .35; }
   /* One thick bar on the outer edge of the screen; it flips to whoever's turn it is.
      (bottom is the screen edge for both halves, because White's half is turned around) */
   .running::after, .running::before {
@@ -125,6 +125,11 @@
     color: var(--bar-fg);
   }
   #bar button { padding: 0 14px; }
+  /* Pause / resume and reset are round icon buttons. */
+  #bar .icon { display: grid; place-items: center; flex: none; width: 48px; padding: 0; }
+  #bar .icon svg { width: 22px; height: 22px; }
+  #pause .play, #pause.paused .bars { display: none; }
+  #pause.paused .play { display: block; }
   button {
     min-height: 48px;
     padding: 0 20px;
@@ -243,12 +248,17 @@
 </section>
 
 <nav id="bar">
-  <button id="pause">Pause</button>
+  <button id="pause" class="icon">
+    <svg class="bars" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.5"/><rect x="14" y="4.5" width="4" height="15" rx="1.5"/></svg>
+    <svg class="play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.9 1.3 1.6.8l10-6.8c.6-.4.6-1.2 0-1.6l-10-6.8C8.9 3.9 8 4.4 8 5.2z"/></svg>
+  </button>
   <button id="info">
     <span><small id="system"></small><span id="setting"></span></span>
     <svg class="edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>
   </button>
-  <button id="reset" data-t="reset">Reset</button>
+  <button id="reset" class="icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 3.5v4h4"/></svg>
+  </button>
 </nav>
 
 <section class="half" id="black">
@@ -677,7 +687,9 @@
       cl.toggle('flagged', state === 'over' && loser === p);
     }
     pauseBtn.disabled = !inGame;
-    setText(pauseBtn, state === 'paused' ? t('resume') : t('pause'));
+    pauseBtn.classList.toggle('paused', state === 'paused');
+    pauseBtn.ariaLabel = pauseBtn.title = state === 'paused' ? t('resume') : t('pause');
+    resetBtn.ariaLabel = resetBtn.title = t('reset');
     info.disabled = inGame;
     setText(setting, describe(settings));
     setText(system, t(settings.system === 'simple' ? 'simpleShort' : settings.system + 'Time')); // Fischer, Byo-yomi or Timer
