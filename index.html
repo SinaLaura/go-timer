@@ -211,6 +211,19 @@
   dialog .option b { display: block; font-size: 17px; font-weight: 800; }
   dialog .option small { display: block; font-size: 14px; }
   dialog .own { padding: 6px 4px 0; }
+  dialog .again {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 0;
+    margin: -6px 0 12px;
+    padding: 4px 0;
+    background: none;
+    color: var(--out);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  dialog .again svg { width: 16px; height: 16px; }
   .actions { display: flex; gap: 10px; justify-content: flex-end; }
   .actions .primary { background: var(--out); color: #fff; }
 </style>
@@ -248,18 +261,18 @@
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
     <label class="option">
-      <input id="modeFischer" type="radio" name="mode">
-      <span><b data-t="fischerTime">Fischer time</b><small data-t="fischerDesc">45 min, plus 15 s after every move</small></span>
+      <input type="radio" name="mode" value="fischer">
+      <span><b data-t="fischerTime">Fischer</b><small data-t="fischerDesc">Main time, plus seconds after every move</small></span>
     </label>
     <label class="option">
-      <input id="modeOwn" type="radio" name="mode">
-      <span><b data-t="ownTime">Your own time</b><small data-t="ownDesc">Choose the times yourself</small></span>
-    </label>
-    <label class="option">
-      <input id="modeByo" type="radio" name="mode">
+      <input type="radio" name="mode" value="byo">
       <span><b data-t="byoTime">Byo-yomi</b><small data-t="byoDesc">Main time, then periods</small></span>
     </label>
-    <div id="ownFields" class="own">
+    <label class="option">
+      <input type="radio" name="mode" value="simple">
+      <span><b data-t="simpleTime">Simple timer</b><small data-t="simpleDesc">Just a main time, nothing added</small></span>
+    </label>
+    <div class="own">
       <label data-t="mainTime">Main time</label>
       <div class="fields">
         <input id="mainMin" type="number" inputmode="numeric" min="0" max="600"> min
@@ -278,6 +291,10 @@
           <input id="periodSec" type="number" inputmode="numeric" min="1" max="600"> s
         </div>
       </div>
+      <button type="button" id="again" class="again">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        <span id="againText"></span>
+      </button>
     </div>
     <label class="check"><input id="sound" type="checkbox"> <span data-t="sound">Chime and voice</span></label>
     <div class="actions">
@@ -288,22 +305,27 @@
 </dialog>
 
 <script>
-  // Starts on Fischer time, 45 min + 15 s. Players can also set their own Fischer time,
-  // or byo-yomi: a main time, then periods that start again after every move.
-  const FISCHER = { system: 'fischer', main: 45 * 60 * 1000, inc: 15 * 1000 };
-  const BYO = { system: 'byo', main: 30 * 60 * 1000, periods: 5, period: 30 * 1000 }; // suggested in the form
+  // Three time systems: Fischer (seconds added after every move), byo-yomi (a main time,
+  // then periods that start again after every move) and a simple timer (just a main time).
+  // Each keeps its own last values on this device; reset brings back these.
+  const DEFAULTS = {
+    fischer: { system: 'fischer', main: 45 * 60 * 1000, inc: 15 * 1000 },
+    byo: { system: 'byo', main: 30 * 60 * 1000, periods: 5, period: 30 * 1000 },
+    simple: { system: 'simple', main: 30 * 60 * 1000 },
+  };
   const isByo = s => s.system === 'byo';
-  const isFischer = s => !isByo(s) && s.main === FISCHER.main && s.inc === FISCHER.inc;
-  let settings = { ...FISCHER };
-  // The last chosen time is remembered on this device.
+  const valid = s => !!s && s.system in DEFAULTS && (isByo(s)
+    ? s.main >= 0 && s.periods >= 1 && s.period >= 1000
+    : s.main > 0 && (s.system === 'simple' || s.inc >= 0));
+  let saved = structuredClone(DEFAULTS), settings = saved.fischer;
   try {
-    const saved = JSON.parse(localStorage.getItem('time'));
-    if (saved && isByo(saved) && saved.main >= 0 && saved.periods >= 1 && saved.period >= 1000) {
-      settings = { system: 'byo', main: saved.main, periods: saved.periods, period: saved.period };
-    } else if (saved && saved.main > 0 && saved.inc >= 0) {
-      settings = { system: 'fischer', main: saved.main, inc: saved.inc };
-    }
+    const stored = JSON.parse(localStorage.getItem('clock'));
+    for (const sys in DEFAULTS) if (valid(stored?.[sys]) && stored[sys].system === sys) saved[sys] = stored[sys];
+    if (stored?.use in DEFAULTS) settings = saved[stored.use];
   } catch (e) { /* nothing saved yet, or storage blocked */ }
+  const store = () => {
+    try { localStorage.setItem('clock', JSON.stringify({ ...saved, use: settings.system })); } catch (e) { /* storage blocked */ }
+  };
   const LOW = 60 * 1000;      // pink digits from here
   const CRITICAL = 10 * 1000; // bright pink half and a chime from here
 
@@ -315,9 +337,10 @@
       lost: 'LOST', won: 'WON', resetAsk: 'Reset both clocks?',
       lostSay: (l, w) => `${l} lost on time. ${w} wins!`,
       timeSetting: 'Time setting',
-      fischerTime: 'Fischer time', fischerDesc: '45 min, plus 15 s after every move',
-      ownTime: 'Your own time', ownDesc: 'Main time, plus seconds after every move',
+      fischerTime: 'Fischer', fischerDesc: 'Main time, plus seconds after every move',
       byoTime: 'Byo-yomi', byoDesc: 'Main time, then periods that start again after every move',
+      simpleTime: 'Simple timer', simpleDesc: 'Just a main time, nothing added', simpleShort: 'Timer',
+      resetTo: s => `Reset to ${s}`,
       mainTime: 'Main time', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Chime and voice',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Last period!' : `Byo-yomi · ${n} left`),
@@ -329,9 +352,10 @@
       lost: 'VERLOREN', won: 'GEWONNEN', resetAsk: 'Beide Uhren zurücksetzen?',
       lostSay: (l, w) => `${l} hat die Zeit überschritten. ${w} gewinnt!`,
       timeSetting: 'Bedenkzeit',
-      fischerTime: 'Fischer-Zeit', fischerDesc: '45 min, plus 15 s nach jedem Zug',
-      ownTime: 'Eigene Zeit', ownDesc: 'Grundzeit, plus Sekunden nach jedem Zug',
+      fischerTime: 'Fischer', fischerDesc: 'Grundzeit, plus Sekunden nach jedem Zug',
       byoTime: 'Byo-yomi', byoDesc: 'Grundzeit, dann Perioden, die nach jedem Zug neu beginnen',
+      simpleTime: 'Einfacher Timer', simpleDesc: 'Nur eine Grundzeit, ohne Zusatzzeit', simpleShort: 'Timer',
+      resetTo: s => `Zurück auf ${s}`,
       mainTime: 'Grundzeit', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Klang und Stimme',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Letzte Periode!' : `Byo-yomi · noch ${n}`),
@@ -392,7 +416,7 @@
     if (state !== 'running' || active !== p) return;
     const c = clock(p);
     if (outOfTime(c)) return flag(p);
-    if (!isByo(settings)) left[p] = c.time + settings.inc;
+    if (!isByo(settings)) left[p] = c.time + (settings.inc || 0);
     else if (!c.byo) left[p] = c.time;
     else { left[p] = 0; periods[p] = c.periods; } // the period starts again on the next turn
     moved[p] = true;
@@ -501,26 +525,47 @@
   const dialog = document.getElementById('settings');
   const field = id => document.getElementById(id);
 
+  // The form shows the picked system's values; while switching between systems,
+  // each keeps what was typed (draft). Set uses the picked one.
+  const radios = [...document.querySelectorAll('input[name=mode]')];
+  let draft, picked;
+
   function fillForm(s) {
     field('mainMin').value = Math.floor(s.main / 60000);
     field('mainSec').value = s.main % 60000 / 1000;
-    field('incSec').value = (s.inc ?? FISCHER.inc) / 1000;
-    field('periods').value = s.periods ?? BYO.periods;
-    field('periodSec').value = (s.period ?? BYO.period) / 1000;
+    if (s.system === 'fischer') field('incSec').value = s.inc / 1000;
+    if (isByo(s)) {
+      field('periods').value = s.periods;
+      field('periodSec').value = s.period / 1000;
+    }
+    field('incRow').hidden = s.system !== 'fischer';
+    field('byoRow').hidden = !isByo(s);
+    setText(field('againText'), t('resetTo')(describe(DEFAULTS[s.system])));
   }
-  // The number fields only show for "Your own time" and "Byo-yomi", each with its own extra row.
-  const showFields = () => {
-    const own = field('modeOwn').checked, byo = field('modeByo').checked;
-    field('ownFields').hidden = !own && !byo;
-    field('incRow').hidden = !own;
-    field('byoRow').hidden = !byo;
-  };
-  for (const id of ['modeFischer', 'modeOwn', 'modeByo']) field(id).addEventListener('change', showFields);
+  function readForm() {
+    const num = id => Math.max(0, Math.floor(Number(field(id).value) || 0));
+    const s = { system: picked, main: (num('mainMin') * 60 + num('mainSec')) * 1000 };
+    if (picked === 'fischer') s.inc = num('incSec') * 1000;
+    if (picked === 'byo') {
+      s.periods = num('periods');
+      s.period = num('periodSec') * 1000;
+    }
+    return s;
+  }
+  function pick(sys) {
+    if (picked) draft[picked] = readForm();
+    picked = sys;
+    fillForm(draft[sys]);
+  }
+  for (const r of radios) r.addEventListener('change', () => pick(r.value));
+  // Reset: back to the standard values of the picked system.
+  field('again').addEventListener('click', () => fillForm(draft[picked] = { ...DEFAULTS[picked] }));
 
   info.addEventListener('click', () => {
-    fillForm(settings);
-    field(isByo(settings) ? 'modeByo' : isFischer(settings) ? 'modeFischer' : 'modeOwn').checked = true;
-    showFields();
+    draft = structuredClone(saved);
+    picked = null;
+    radios.find(r => r.value === settings.system).checked = true;
+    pick(settings.system);
     field('sound').checked = soundOn;
     dialog.returnValue = '';
     dialog.showModal();
@@ -529,18 +574,10 @@
     if (dialog.returnValue !== 'set') return;
     soundOn = field('sound').checked;
     unlockSound();
-    const num = id => Math.max(0, Math.floor(Number(field(id).value) || 0));
-    const main = (num('mainMin') * 60 + num('mainSec')) * 1000;
-    if (field('modeFischer').checked) {
-      settings = { ...FISCHER };
-    } else if (field('modeByo').checked) {
-      if (num('periods') < 1 || num('periodSec') < 1) return;
-      settings = { system: 'byo', main, periods: num('periods'), period: num('periodSec') * 1000 };
-    } else {
-      if (main <= 0) return;
-      settings = { system: 'fischer', main, inc: num('incSec') * 1000 };
-    }
-    try { localStorage.setItem('time', JSON.stringify(settings)); } catch (e) { /* storage blocked */ }
+    const s = readForm();
+    if (!valid(s)) return;
+    saved[picked] = settings = s;
+    store();
     newGame();
   });
 
@@ -550,6 +587,7 @@
     document.documentElement.lang = l;
     for (const el of document.querySelectorAll('[data-t]')) el.textContent = t(el.dataset.t);
     for (const b of document.querySelectorAll('[data-lang]')) b.classList.toggle('on', b.dataset.lang === l);
+    if (picked) setText(field('againText'), t('resetTo')(describe(DEFAULTS[picked])));
     render();
   }
   for (const b of document.querySelectorAll('[data-lang]')) b.addEventListener('click', () => setLang(b.dataset.lang));
@@ -558,8 +596,8 @@
   function describe(s) {
     const m = Math.floor(s.main / 60000), sec = s.main % 60000 / 1000;
     const main = [m && `${m} min`, sec && `${sec} s`].filter(Boolean).join(' ');
-    const extra = isByo(s) ? `${s.periods} × ${s.period / 1000} s` : `${s.inc / 1000} s`;
-    return main ? `${main} + ${extra}` : extra; // byo-yomi without main time: just "3 × 30 s"
+    const extra = isByo(s) ? `${s.periods} × ${s.period / 1000} s` : s.inc ? `${s.inc / 1000} s` : '';
+    return main && extra ? `${main} + ${extra}` : main || extra; // e.g. just "30 min", or "3 × 30 s"
   }
 
   // Keep the screen on while a game is in progress.
@@ -620,8 +658,7 @@
     setText(pauseBtn, state === 'paused' ? t('resume') : t('pause'));
     info.disabled = inGame;
     setText(setting, describe(settings));
-    // "Fischer" only for Fischer time, "Byo-yomi" for byo-yomi; your own time just shows the times.
-    setText(system, isByo(settings) ? 'Byo-yomi' : isFischer(settings) ? 'Fischer' : '');
+    setText(system, t(settings.system === 'simple' ? 'simpleShort' : settings.system + 'Time')); // Fischer, Byo-yomi or Timer
   }
 
   function loop() {
