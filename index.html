@@ -35,7 +35,7 @@
   html, body { height: 100%; }
   body {
     display: grid;
-    grid-template-rows: .94fr auto 1fr; /* white a touch smaller: bright areas look bigger than dark ones */
+    grid-template-rows: minmax(0, .94fr) auto minmax(0, 1fr); /* white a touch smaller: bright areas look bigger than dark ones */
     height: 100dvh;
     background: var(--bar);
     font-family: Nunito, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -47,8 +47,9 @@
     transition: grid-template-rows .5s ease;
   }
   /* The half whose turn it is grows a little, pushing the bar towards the other player. */
-  body.turn-white { grid-template-rows: 1.5fr auto 1fr; }
-  body.turn-black { grid-template-rows: .94fr auto 1.9fr; }
+  body.turn-white { grid-template-rows: minmax(0, 1.5fr) auto minmax(0, 1fr); }
+  body.turn-black { grid-template-rows: minmax(0, .94fr) auto minmax(0, 1.9fr); }
+  body.with-stats { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr); } /* same room for both statistics */
 
   .half {
     position: relative;
@@ -87,6 +88,7 @@
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     line-height: 1;
+    transition: font-size .5s ease;
   }
   .hint { padding: 0 16px; font-size: clamp(14px, 2.3vh, 20px); text-align: center; opacity: .75; min-height: 1.3em; }
   /* Byo-yomi: the periods still to come, or how many are left */
@@ -122,21 +124,27 @@
     animation: pulse 2.4s ease-in-out infinite;
   }
   @keyframes pulse { 50% { opacity: .45; } }
-  @media (prefers-reduced-motion: reduce) { .running::before { animation: none; } body { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .running::before, .stats { animation: none !important; } body, .time { transition: none; } }
   #black.running::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
   #white.running::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z'/%3E%3C/svg%3E"); }
 
   /* When time is up, who lost / won is the big news, the time steps back. */
-  .over .name { font-size: min(8vw, 4.5vh); }
+  .over .name { font-size: min(8vw, 3.4vh); }
   .over .stone { display: none; } /* the name says it all here */
-  .over .time { order: -1; font-size: min(11vw, 6vh); opacity: .6; } /* time on top, then name, then LOST / WON */
-  .over .hint { font-size: min(12vw, 8vh); font-weight: 800; line-height: 1.05; letter-spacing: .03em; opacity: 1; }
+  .over .time { order: -1; font-size: min(11vw, 4.2vh); opacity: .6; } /* time on top, then name, then LOST / WON */
+  .over.with-stats .flagged .time { display: none; } /* 0.0 says nothing new on the end screen */
+  .over .stats .mode { display: none; } /* the bar shows the time setting again */
+  .over.with-stats .half { gap: .4vh; padding-top: 14px; }
+  .over .chart svg { height: 26px; }
+  .over .hint { font-size: min(12vw, 5.5vh); font-weight: 800; line-height: 1.05; letter-spacing: .03em; opacity: 1; }
 
   /* Statistics: at the end, and while paused after a tap on the middle box. Each player reads their own. */
   .stats { display: none; width: min(80vw, 300px); grid-template-columns: 1fr auto; gap: .15em 1.4em; font-size: clamp(13px, 2.1vh, 17px); }
-  .with-stats .half { gap: 1vh; padding-top: 12px; justify-content: safe center; } /* never under the bar: if it is too tall, the rest goes to the screen edge */
+  /* Clear of the bar: a narrower fade and some room; if it is too tall, the rest goes to the screen edge. */
+  .with-stats .half { gap: 1vh; padding-top: 20px; justify-content: safe center; background-image: linear-gradient(var(--bar), transparent 12px); }
   .with-stats .hint:empty { display: none; }
-  .with-stats .stats { display: grid; }
+  .with-stats .stats { display: grid; animation: fade-in .6s ease-out; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } }
   .with-stats:not(.over) .time { font-size: min(14vw, 7.5vh); }
   .stats span { opacity: .7; }
   .stats b { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
@@ -146,8 +154,9 @@
   .chart svg { display: block; height: 34px; fill: currentColor; }
   .chart .has-sel rect { opacity: .35; }
   .chart .has-sel rect.sel { opacity: 1; }
-  .chart .readout { min-height: 1.3em; font-size: .9em; font-weight: 700; } /* keeps its line, so nothing jumps on a tap */
+  .chart .readout { min-height: 1.3em; font-size: .9em; font-weight: 700; } /* one line: the title, or the tapped move */
   .chart small { font-size: .85em; opacity: .7; }
+  .chart small.readout { font-weight: 600; }
   .low .time { color: var(--low); }
   .critical, .flagged { background-color: var(--out) !important; color: #fff !important; }
 
@@ -565,13 +574,14 @@
     state = 'over';
     chime([1760, 1318.5, 1046.5]);
     setTimeout(() => say(t('lostSay')(t(p), t(other(p)))), 600);
-    if (!soundOn) buzz([180, 120, 180]); // without sound: two short pulses, so it is noticed
+    if (!soundOn) buzz(400); // without sound: one soft vibration, so it is noticed
     releaseWake();
     render();
   }
 
   // A soft chime (no beeps) and a female voice, both switchable in the settings.
   let soundOn = true, audio, speechUnlocked = false;
+  try { soundOn = localStorage.getItem('sound') !== 'off'; } catch (e) { /* storage blocked */ }
   const FEMALE = /samantha|zira|aria|jenny|ava|allison|susan|karen|moira|tessa|fiona|victoria|serena|libby|sonia|emma|hazel|female|seraphina|katja|amala|hedda|anna|helena|petra|marlene|vicki/i;
   if ('speechSynthesis' in window) speechSynthesis.getVoices(); // starts loading the voices
 
@@ -741,6 +751,7 @@
   dialog.addEventListener('close', () => {
     if (dialog.returnValue !== 'set') return;
     soundOn = field('sound').checked;
+    try { localStorage.setItem('sound', soundOn ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
     unlockSound();
     const s = readForm();
     if (!valid(s)) return;
@@ -834,10 +845,10 @@
     const readout = !b ? '' : b.from === b.to ? t('moveAt')(moveNo(p, b.from), dur(b.ms))
       : t('movesAt')(moveNo(p, b.from), moveNo(p, b.to), dur(b.ms));
     const width = `width: min(100%, ${Math.max(n * 10, 40)}px)`;
-    return `<div class="chart"><small>${t('chartTitle')}</small>`
+    return `<div class="chart">`
       + `<svg class="${b ? 'has-sel' : ''}" style="${width}" viewBox="0 0 ${n} 40"`
       + ` preserveAspectRatio="none" aria-hidden="true">${rects}</svg>`
-      + `<b class="readout">${readout}</b></div>`;
+      + (b ? `<b class="readout">${readout}</b>` : `<small class="readout">${t('chartTitle')}</small>`) + '</div>';
   }
   function pickBar(p, e) {
     const svg = ui[p].stats.querySelector('svg');
@@ -870,6 +881,7 @@
   function render() {
     const inGame = state === 'running' || state === 'paused';
     const withStats = state === 'over' || (state === 'paused' && showStats);
+    if (withStats && !document.body.classList.contains('with-stats')) chosen = { black: null, white: null }; // no move picked yet
     document.body.classList.toggle('over', state === 'over');
     document.body.classList.toggle('with-stats', withStats);
     // Both halves the same size while the statistics show, so they fit.
