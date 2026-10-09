@@ -13,7 +13,7 @@ A game clock for Go that runs in the browser, on a phone lying next to the board
 - Put the phone next to the board. The top half is turned around for the player across from you.
 - Tap White's half to start Black's clock. After each move, tap your own half and the other clock starts. A thick pink bar with a little heart on the edge of the screen flips to the player whose turn it is.
 - **Pause** and **Reset** are in the middle bar.
-- Between games, tap the box with the pencil in the middle to change the time: **Fischer**, **byo-yomi** or a **simple timer**, each with the times you like. A reset button brings each one back to a standard setting. The clock remembers your choice and your times for next time. You can also switch between English and German there (EN / DE) and turn the chime and voice on or off.
+- Between games or while paused, tap the box with the pencil in the middle to change the time: **Fischer**, **byo-yomi** or a **simple timer**, each with the times you like. During a paused game, a new time starts a new game. A reset button brings each one back to a standard setting. The clock remembers your choice and your times for next time. You can also switch between English and German there (EN / DE) and turn the chime and voice on or off.
 
 ## What it does
 

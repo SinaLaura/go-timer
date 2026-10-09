@@ -581,7 +581,7 @@
     if (confirmReset.returnValue === 'reset') newGame();
   });
 
-  // Changing the time setting, only between games.
+  // Changing the time setting: between games, or while paused (a new time starts a new game).
   const dialog = document.getElementById('settings');
   const field = id => document.getElementById(id);
   const numbers = () => [...dialog.querySelectorAll('input[type=number]')].filter(i => !i.closest('[hidden]'));
@@ -673,9 +673,10 @@
     unlockSound();
     const s = readForm();
     if (!valid(s)) return;
+    const same = JSON.stringify(s) === JSON.stringify(settings);
     saved[picked] = settings = s;
     store();
-    newGame();
+    if (state !== 'paused' || !same) newGame(); // paused, only the chime changed: the game goes on
   });
 
   function setLang(l) {
@@ -758,7 +759,7 @@
     pauseBtn.classList.toggle('paused', state === 'paused');
     pauseBtn.ariaLabel = pauseBtn.title = state === 'paused' ? t('resume') : t('pause');
     resetBtn.ariaLabel = resetBtn.title = t('reset');
-    info.disabled = inGame;
+    info.disabled = state === 'running'; // while paused, Set starts a new game with the new time
     setText(setting, describe(settings));
     setText(system, t(settings.system === 'simple' ? 'simpleShort' : settings.system + 'Time')); // Fischer, Byo-yomi or Timer
   }
