@@ -6,20 +6,20 @@
 
 A game clock for Go that runs in the browser, on a phone lying next to the board.
 
-**Open it: https://sinalaura.github.io/go-timer**. On your phone, add it to the home screen and it works like an app, even offline.
+**Open it: https://sinalaura.github.io/go-timer**. On your phone, add it to the home screen and it opens like an app. Once it's open, it needs no internet.
 
 ## How to use
 
 - Put the phone next to the board. The top half is turned around for the player across from you.
 - Tap White's half to start Black's clock. After each move, tap your own half and the other clock starts. A thick pink bar with a little heart on the edge of the screen flips to the player whose turn it is.
 - **Pause** and **Reset** are in the middle bar.
-- Between games, tap the box with the pencil in the middle to change the time: **Fischer time** (45 min, plus 15 s after every move) or **your own time**. You can also switch between English and German there (EN / DE) and turn the chime and voice on or off.
+- Between games, tap the box with the pencil in the middle to change the time: **Fischer time** (45 min, plus 15 s after every move) or **your own time**. The clock remembers your choice for next time. You can also switch between English and German there (EN / DE) and turn the chime and voice on or off.
 
 ## What it does
 
 - Fischer time: a main time, plus a few seconds added after every move.
 - Warnings: the digits turn pink under 1 minute. Under 10 seconds the whole half turns bright pink, with a soft chime.
-- When someone runs out of time, a voice says who lost, in English or German. On Android the phone also vibrates.
+- When someone runs out of time, each half shows a big **LOST** or **WON**, and a voice says who lost, in English or German. On Android the phone also vibrates.
 - The screen stays on during a game.
 - In English or German: it starts in your phone's language and remembers your choice.
 
