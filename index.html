@@ -166,8 +166,12 @@
   dialog {
     margin: auto;
     width: min(360px, calc(100vw - 32px));
-    max-height: calc(100dvh - 32px);
+    /* --vv-*: the part of the screen not covered by the phone's keyboard (set in the script) */
+    top: var(--vv-top, 0px);
+    bottom: var(--vv-bottom, 0px);
+    max-height: calc(var(--vv-h, 100dvh) - 32px);
     overflow-y: auto;
+    scroll-padding-bottom: 90px; /* a focused field never hides behind the Set bar */
     padding: 24px;
     border: 0;
     border-radius: 20px;
@@ -236,6 +240,8 @@
   dialog .again svg { width: 16px; height: 16px; }
   .actions { display: flex; gap: 10px; justify-content: flex-end; }
   .actions .primary { background: var(--out); color: #fff; }
+  /* Cancel and Set stay at the bottom of the settings, even while scrolling. */
+  #settings .actions { position: sticky; bottom: 0; margin: 0 -24px -24px; padding: 12px 24px 24px; background: #fff5f9; }
 </style>
 </head>
 <body>
@@ -556,6 +562,30 @@
   // Changing the time setting, only between games.
   const dialog = document.getElementById('settings');
   const field = id => document.getElementById(id);
+  const numbers = () => [...dialog.querySelectorAll('input[type=number]')].filter(i => !i.closest('[hidden]'));
+
+  // Enter on the phone keyboard goes on to the next number, and sets the time after the last one.
+  // (Otherwise Enter would press the first button in the form: Cancel.)
+  dialog.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault();
+    const list = numbers(), next = list[list.indexOf(e.target) + 1];
+    if (next && e.target.type === 'number') next.focus();
+    else dialog.close('set');
+  });
+
+  // While the phone's keyboard is open, the dialogs fit into the part of the screen above it.
+  const vv = window.visualViewport;
+  function fitAboveKeyboard() {
+    const root = document.documentElement.style;
+    root.setProperty('--vv-top', vv.offsetTop + 'px');
+    root.setProperty('--vv-bottom', Math.max(0, innerHeight - vv.offsetTop - vv.height) + 'px');
+    root.setProperty('--vv-h', vv.height + 'px');
+  }
+  if (vv) {
+    vv.addEventListener('resize', fitAboveKeyboard);
+    vv.addEventListener('scroll', fitAboveKeyboard);
+  }
 
   // The form shows the picked system's values; while switching between systems,
   // each keeps what was typed (draft). Set uses the picked one.
@@ -572,6 +602,8 @@
     }
     field('incRow').hidden = s.system !== 'fischer';
     field('byoRow').hidden = !isByo(s);
+    const list = numbers();
+    for (const i of list) i.enterKeyHint = i === list.at(-1) ? 'done' : 'next';
     setText(field('againText'), t('resetTo')(describe(DEFAULTS[s.system])));
   }
   function readForm() {
