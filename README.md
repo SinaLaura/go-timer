@@ -4,33 +4,43 @@
 
 *A Go Girls\* App by Sina* 🖤
 
-A game clock for Go that runs in the browser, on a phone lying next to the board.
+A Go clock for your phone, lying next to the board.
 
-**Open it: https://sinalaura.github.io/go-timer**. On your phone, add it to the home screen and it opens like an app. Once it's open, it needs no internet.
+<img src="images/playing.svg" alt="Two girls playing Go, the timer lying next to the board" width="640">
+
+**Open it: https://sinalaura.github.io/go-timer** and add it to your home screen. Works offline.
 
 ## How to use
 
-- Put the phone next to the board. The top half is turned around for the player across from you.
-- Tap White's half to start Black's clock. After each move, tap your own half and the other clock starts. A thick pink bar with a little heart on the edge of the screen flips to the player whose turn it is.
-- **Pause** and **Reset** are in the middle bar. During a game, tap the box in the middle: the clock pauses and shows the statistics: moves, time used, average per move, longest move, the whole game time and a small chart of the time per move (tap a bar to see that move), each player on their own half. They also show at the end, when someone runs out of time.
-- Between games, tap the box with the pencil in the middle to change the time: **Fischer**, **byo-yomi** or a **simple timer**, each with the times you like. A reset button brings each one back to a standard setting. The clock remembers your choice and your times for next time. You can also switch between English and German there (EN / DE) and turn the chime and voice on or off.
+- Tap White's half to start Black's clock. After your move, tap your own half.
+- During a game, tap the box in the middle to pause and see the statistics, with a chart of the time per move.
+- Between games, tap it to change the time setting.
 
-## What it does
+<p><img src="images/stats.png" alt="The statistics while paused" width="220">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/settings.png" alt="The time settings" width="220"></p>
 
-- Three time systems:
-  - **Fischer:** a main time, plus a few seconds added after every move. Standard: 45 min + 15 s.
-  - **Byo-yomi:** a main time, then periods of a few seconds each. Move within a period and it starts again. If a period runs out, the next one begins. When the last one runs out, you lose on time. Each half shows how many periods are left. Standard: 30 min + 5 × 30 s.
-  - **Simple timer:** just a main time, nothing added. Standard: 30 min.
-- Warnings: the digits turn pink under 1 minute. Under 10 seconds the whole half turns bright pink, with a soft chime (in byo-yomi in every period, plus a lower chime when a period is used up).
-- When someone runs out of time, each half shows a big **LOST** or **WON**, and a voice says who lost, in English or German.
-- On Android the phone vibrates softly on every tap, on pause and resume, and when time runs out.
-- The screen stays on during a game.
-- In English or German: it starts in your phone's language and remembers your choice.
+## Time settings
+
+- **Fischer:** a main time, plus seconds after every move. Default: 45 min + 15 s.
+- **Byo-yomi:** a main time, then periods that start again after every move. Default: 30 min + 5 × 30 s.
+- **Simple timer:** just a main time.
+
+Under 10 seconds the half turns pink and a soft chime sounds. When time runs out, a voice says who lost. In English or German.
+
+<details>
+<summary>🤫 Easter egg (spoiler)</summary>
+
+<br>
+
+During a game, tap the little heart on the running clock. Here are three of the colour themes. The others are yours to find, and one of them has new colours every game.
+
+<p><img src="images/go-girls.gif" alt="Go Girls* theme, with the colour themes open" width="200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/trans.gif" alt="Trans theme" width="200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/pride.gif" alt="Pride theme" width="200"></p>
+
+</details>
 
 ## How it's built
 
-One `index.html` file: HTML, CSS and JavaScript, with no framework, no build step and no server. The icon files and `manifest.webmanifest` only give the app its name and icon on the home screen. Built by Sina with [Claude](https://claude.com/claude-code) in one afternoon: about 3 hours from first plan to a working app, on 9 Oct 2026. It was her first app.
+One `index.html` file, with no framework, no build step and no server. Built by Sina with [Claude](https://claude.com/claude-code) as a one-day project in October 2026. Her first app.
 
 ## Licence
 
-[MIT](LICENSE): free to use, change and share, as long as the copyright notice stays in. The embedded Nunito font is under the SIL Open Font License.
+[MIT](LICENSE). The embedded Nunito font is under the SIL Open Font License.
