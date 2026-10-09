@@ -80,6 +80,9 @@
     line-height: 1;
   }
   .hint { padding: 0 16px; font-size: clamp(14px, 2.3vh, 20px); text-align: center; opacity: .75; min-height: 1.3em; }
+  /* Byo-yomi: the periods still to come, or how many are left */
+  .periods { font-size: clamp(15px, 2.5vh, 22px); font-weight: 700; }
+  .periods:empty, .over .periods { display: none; }
 
   .waiting .time { opacity: .35; }
   /* One thick bar on the outer edge of the screen; it flips to whoever's turn it is.
@@ -117,10 +120,11 @@
   #bar {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     padding: 10px 16px;
     color: var(--bar-fg);
   }
+  #bar button { padding: 0 14px; }
   button {
     min-height: 48px;
     padding: 0 20px;
@@ -139,11 +143,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 4px 12px;
+    gap: 6px;
+    padding: 4px 10px;
     background: rgb(255 255 255 / .6);
     border: 2px solid #e08ab0;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.25;
   }
   #info .edit { flex: none; width: 18px; height: 18px; color: var(--out); }
@@ -157,6 +161,8 @@
   dialog {
     margin: auto;
     width: min(360px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
     padding: 24px;
     border: 0;
     border-radius: 20px;
@@ -214,6 +220,7 @@
 <section class="half" id="white">
   <div class="name"><span class="stone"></span><span data-t="white">White</span></div>
   <div class="time"></div>
+  <div class="periods"></div>
   <div class="hint"></div>
 </section>
 
@@ -229,6 +236,7 @@
 <section class="half" id="black">
   <div class="name"><span class="stone"></span><span data-t="black">Black</span></div>
   <div class="time"></div>
+  <div class="periods"></div>
   <div class="hint"></div>
 </section>
 
@@ -247,15 +255,28 @@
       <input id="modeOwn" type="radio" name="mode">
       <span><b data-t="ownTime">Your own time</b><small data-t="ownDesc">Choose the times yourself</small></span>
     </label>
+    <label class="option">
+      <input id="modeByo" type="radio" name="mode">
+      <span><b data-t="byoTime">Byo-yomi</b><small data-t="byoDesc">Main time, then periods</small></span>
+    </label>
     <div id="ownFields" class="own">
       <label data-t="mainTime">Main time</label>
       <div class="fields">
         <input id="mainMin" type="number" inputmode="numeric" min="0" max="600"> min
         <input id="mainSec" type="number" inputmode="numeric" min="0" max="59"> s
       </div>
-      <label data-t="added">Added after each move</label>
-      <div class="fields">
-        <input id="incSec" type="number" inputmode="numeric" min="0" max="600"> s
+      <div id="incRow">
+        <label data-t="added">Added after each move</label>
+        <div class="fields">
+          <input id="incSec" type="number" inputmode="numeric" min="0" max="600"> s
+        </div>
+      </div>
+      <div id="byoRow">
+        <label data-t="periodsLabel">Periods</label>
+        <div class="fields">
+          <input id="periods" type="number" inputmode="numeric" min="1" max="30"> ×
+          <input id="periodSec" type="number" inputmode="numeric" min="1" max="600"> s
+        </div>
       </div>
     </div>
     <label class="check"><input id="sound" type="checkbox"> <span data-t="sound">Chime and voice</span></label>
@@ -267,14 +288,21 @@
 </dialog>
 
 <script>
-  // Starts on Fischer time, 45 min + 15 s; players can also set their own.
-  const FISCHER = { main: 45 * 60 * 1000, inc: 15 * 1000 };
-  const isFischer = s => s.main === FISCHER.main && s.inc === FISCHER.inc;
+  // Starts on Fischer time, 45 min + 15 s. Players can also set their own Fischer time,
+  // or byo-yomi: a main time, then periods that start again after every move.
+  const FISCHER = { system: 'fischer', main: 45 * 60 * 1000, inc: 15 * 1000 };
+  const BYO = { system: 'byo', main: 30 * 60 * 1000, periods: 5, period: 30 * 1000 }; // suggested in the form
+  const isByo = s => s.system === 'byo';
+  const isFischer = s => !isByo(s) && s.main === FISCHER.main && s.inc === FISCHER.inc;
   let settings = { ...FISCHER };
   // The last chosen time is remembered on this device.
   try {
     const saved = JSON.parse(localStorage.getItem('time'));
-    if (saved && saved.main > 0 && saved.inc >= 0) settings = { main: saved.main, inc: saved.inc };
+    if (saved && isByo(saved) && saved.main >= 0 && saved.periods >= 1 && saved.period >= 1000) {
+      settings = { system: 'byo', main: saved.main, periods: saved.periods, period: saved.period };
+    } else if (saved && saved.main > 0 && saved.inc >= 0) {
+      settings = { system: 'fischer', main: saved.main, inc: saved.inc };
+    }
   } catch (e) { /* nothing saved yet, or storage blocked */ }
   const LOW = 60 * 1000;      // pink digits from here
   const CRITICAL = 10 * 1000; // bright pink half and a chime from here
@@ -287,9 +315,12 @@
       lost: 'LOST', won: 'WON', resetAsk: 'Reset both clocks?',
       lostSay: (l, w) => `${l} lost on time. ${w} wins!`,
       timeSetting: 'Time setting',
-      fischerTime: 'Fischer time', fischerDesc: '45 min, plus 15 s after every move',
-      ownTime: 'Your own time', ownDesc: 'Choose the times yourself',
-      mainTime: 'Main time', added: 'Added after each move', sound: 'Chime and voice',
+      fischerTime: 'Fischer time', fischerDesc: '45 min, plus 15 s after every move',
+      ownTime: 'Your own time', ownDesc: 'Main time, plus seconds after every move',
+      byoTime: 'Byo-yomi', byoDesc: 'Main time, then periods that start again after every move',
+      mainTime: 'Main time', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Chime and voice',
+      byoInfo: (n, s) => `+ ${n} × ${s} s`,
+      byoLeft: n => (n === 1 ? 'Last period!' : `Byo-yomi · ${n} left`),
       cancel: 'Cancel', set: 'Set',
     },
     de: {
@@ -298,9 +329,12 @@
       lost: 'VERLOREN', won: 'GEWONNEN', resetAsk: 'Beide Uhren zurücksetzen?',
       lostSay: (l, w) => `${l} hat die Zeit überschritten. ${w} gewinnt!`,
       timeSetting: 'Bedenkzeit',
-      fischerTime: 'Fischer-Zeit', fischerDesc: '45 min, plus 15 s nach jedem Zug',
-      ownTime: 'Eigene Zeit', ownDesc: 'Zeiten selbst wählen',
-      mainTime: 'Grundzeit', added: 'Dazu nach jedem Zug', sound: 'Klang und Stimme',
+      fischerTime: 'Fischer-Zeit', fischerDesc: '45 min, plus 15 s nach jedem Zug',
+      ownTime: 'Eigene Zeit', ownDesc: 'Grundzeit, plus Sekunden nach jedem Zug',
+      byoTime: 'Byo-yomi', byoDesc: 'Grundzeit, dann Perioden, die nach jedem Zug neu beginnen',
+      mainTime: 'Grundzeit', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Klang und Stimme',
+      byoInfo: (n, s) => `+ ${n} × ${s} s`,
+      byoLeft: n => (n === 1 ? 'Letzte Periode!' : `Byo-yomi · noch ${n}`),
       cancel: 'Abbrechen', set: 'OK',
     },
   };
@@ -312,12 +346,14 @@
   const other = p => (p === 'black' ? 'white' : 'black');
 
   // state: 'ready' | 'running' | 'paused' | 'over'
-  let state, active, loser, left, warned, moved, turnStart, wakeLock;
+  // left: main time per player; periods: byo-yomi periods per player;
+  // turnUsed + turnStart: time used so far in the current turn (pausing keeps turnUsed).
+  let state, active, loser, left, periods, warned, moved, turnUsed, turnStart, seen, wakeLock;
 
   const ui = {};
   for (const p of ['black', 'white']) {
     const root = document.getElementById(p);
-    ui[p] = { root, time: root.querySelector('.time'), hint: root.querySelector('.hint') };
+    ui[p] = { root, time: root.querySelector('.time'), periods: root.querySelector('.periods'), hint: root.querySelector('.hint') };
     root.addEventListener('pointerdown', () => tap(p));
   }
   const pauseBtn = document.getElementById('pause');
@@ -331,28 +367,35 @@
     state = 'ready';
     active = loser = null;
     left = { black: settings.main, white: settings.main };
+    periods = { black: settings.periods || 0, white: settings.periods || 0 };
     warned = { black: false, white: false };
     moved = { black: false, white: false };
     releaseWake();
     render();
   }
 
-  // Remaining time, measured from the real clock rather than counted ticks.
-  function timeLeft(p) {
-    if (state === 'running' && active === p) return left[p] - (performance.now() - turnStart);
-    return left[p];
+  // A player's clock right now, measured from the real clock rather than counted ticks.
+  // time: the main time left, or in byo-yomi the time left in the current period.
+  function clock(p) {
+    const inTurn = active === p && (state === 'running' || state === 'paused');
+    const used = inTurn ? turnUsed + (state === 'running' ? performance.now() - turnStart : 0) : 0;
+    if (!isByo(settings) || left[p] - used > 0) return { time: left[p] - used, periods: periods[p], byo: false };
+    const over = used - left[p], gone = Math.floor(over / settings.period);
+    return { time: settings.period - over % settings.period, periods: periods[p] - gone, byo: true };
   }
+  const outOfTime = c => (isByo(settings) ? c.byo && c.periods <= 0 : c.time <= 0);
 
   // Tapping your own half ends your move and starts the other clock.
   function tap(p) {
     unlockSound();
     if (state === 'ready') return start(other(p));
     if (state !== 'running' || active !== p) return;
-    const t = timeLeft(p);
-    if (t <= 0) return flag(p);
-    left[p] = t + settings.inc;
+    const c = clock(p);
+    if (outOfTime(c)) return flag(p);
+    if (!isByo(settings)) left[p] = c.time + settings.inc;
+    else if (!c.byo) left[p] = c.time;
+    else { left[p] = 0; periods[p] = c.periods; } // the period starts again on the next turn
     moved[p] = true;
-    warned[p] = left[p] < CRITICAL; // chime again next time it drops under 10 s
     start(other(p));
   }
 
@@ -364,8 +407,10 @@
 
   function start(p) {
     active = p;
+    turnUsed = 0;
     turnStart = performance.now();
     state = 'running';
+    seen = clock(p);
     keepAwake();
     render();
   }
@@ -373,7 +418,7 @@
   function togglePause() {
     unlockSound();
     if (state === 'running') {
-      left[active] = timeLeft(active);
+      turnUsed += performance.now() - turnStart;
       state = 'paused';
     } else if (state === 'paused') {
       turnStart = performance.now();
@@ -385,6 +430,7 @@
 
   function flag(p) {
     left[p] = 0;
+    periods[p] = 0;
     loser = p;
     state = 'over';
     if (navigator.vibrate) navigator.vibrate([400, 150, 400]);
@@ -458,17 +504,23 @@
   function fillForm(s) {
     field('mainMin').value = Math.floor(s.main / 60000);
     field('mainSec').value = s.main % 60000 / 1000;
-    field('incSec').value = s.inc / 1000;
+    field('incSec').value = (s.inc ?? FISCHER.inc) / 1000;
+    field('periods').value = s.periods ?? BYO.periods;
+    field('periodSec').value = (s.period ?? BYO.period) / 1000;
   }
-  // The number fields only show when "Your own time" is picked.
-  const showOwn = () => { field('ownFields').hidden = !field('modeOwn').checked; };
-  field('modeFischer').addEventListener('change', showOwn);
-  field('modeOwn').addEventListener('change', showOwn);
+  // The number fields only show for "Your own time" and "Byo-yomi", each with its own extra row.
+  const showFields = () => {
+    const own = field('modeOwn').checked, byo = field('modeByo').checked;
+    field('ownFields').hidden = !own && !byo;
+    field('incRow').hidden = !own;
+    field('byoRow').hidden = !byo;
+  };
+  for (const id of ['modeFischer', 'modeOwn', 'modeByo']) field(id).addEventListener('change', showFields);
 
   info.addEventListener('click', () => {
     fillForm(settings);
-    field(isFischer(settings) ? 'modeFischer' : 'modeOwn').checked = true;
-    showOwn();
+    field(isByo(settings) ? 'modeByo' : isFischer(settings) ? 'modeFischer' : 'modeOwn').checked = true;
+    showFields();
     field('sound').checked = soundOn;
     dialog.returnValue = '';
     dialog.showModal();
@@ -477,13 +529,16 @@
     if (dialog.returnValue !== 'set') return;
     soundOn = field('sound').checked;
     unlockSound();
+    const num = id => Math.max(0, Math.floor(Number(field(id).value) || 0));
+    const main = (num('mainMin') * 60 + num('mainSec')) * 1000;
     if (field('modeFischer').checked) {
       settings = { ...FISCHER };
+    } else if (field('modeByo').checked) {
+      if (num('periods') < 1 || num('periodSec') < 1) return;
+      settings = { system: 'byo', main, periods: num('periods'), period: num('periodSec') * 1000 };
     } else {
-      const num = id => Math.max(0, Math.floor(Number(field(id).value) || 0));
-      const main = (num('mainMin') * 60 + num('mainSec')) * 1000;
       if (main <= 0) return;
-      settings = { main, inc: num('incSec') * 1000 };
+      settings = { system: 'fischer', main, inc: num('incSec') * 1000 };
     }
     try { localStorage.setItem('time', JSON.stringify(settings)); } catch (e) { /* storage blocked */ }
     newGame();
@@ -499,10 +554,12 @@
   }
   for (const b of document.querySelectorAll('[data-lang]')) b.addEventListener('click', () => setLang(b.dataset.lang));
 
+  // e.g. "45 min + 15 s" or "30 min + 5 × 30 s"; numbers and units never get split across lines.
   function describe(s) {
     const m = Math.floor(s.main / 60000), sec = s.main % 60000 / 1000;
-    const main = [m && `${m} min`, sec && `${sec} s`].filter(Boolean).join(' ');
-    return `${main} + ${s.inc / 1000} s`;
+    const main = [m && `${m} min`, sec && `${sec} s`].filter(Boolean).join(' ');
+    const extra = isByo(s) ? `${s.periods} × ${s.period / 1000} s` : `${s.inc / 1000} s`;
+    return main ? `${main} + ${extra}` : extra; // byo-yomi without main time: just "3 × 30 s"
   }
 
   // Keep the screen on while a game is in progress.
@@ -539,33 +596,48 @@
     return active === p && !moved[p] ? t('yourMove') : ''; // only until each player has moved once
   }
 
+  // Byo-yomi, under the time: the periods still to come, or how many are left.
+  function periodsFor(c) {
+    if (!isByo(settings)) return '';
+    return c.byo ? t('byoLeft')(c.periods) : t('byoInfo')(c.periods, settings.period / 1000);
+  }
+
   function render() {
     const inGame = state === 'running' || state === 'paused';
     document.body.classList.toggle('over', state === 'over');
     for (const p of ['black', 'white']) {
-      const t = timeLeft(p), cl = ui[p].root.classList;
-      setText(ui[p].time, fmt(t));
+      const c = clock(p), ms = state === 'over' && loser === p ? 0 : c.time, cl = ui[p].root.classList;
+      setText(ui[p].time, fmt(ms));
+      setText(ui[p].periods, periodsFor(c));
       setText(ui[p].hint, hintFor(p));
       cl.toggle('running', state === 'running' && active === p);
       cl.toggle('waiting', inGame && active !== p);
-      cl.toggle('low', t < LOW && t >= CRITICAL);
-      cl.toggle('critical', inGame && t < CRITICAL);
+      cl.toggle('low', ms < LOW && ms >= CRITICAL);
+      cl.toggle('critical', inGame && ms < CRITICAL);
       cl.toggle('flagged', state === 'over' && loser === p);
     }
     pauseBtn.disabled = !inGame;
     setText(pauseBtn, state === 'paused' ? t('resume') : t('pause'));
     info.disabled = inGame;
     setText(setting, describe(settings));
-    // "Fischer" only for Fischer time; your own time just shows the times.
-    setText(system, isFischer(settings) ? 'Fischer' : '');
+    // "Fischer" only for Fischer time, "Byo-yomi" for byo-yomi; your own time just shows the times.
+    setText(system, isByo(settings) ? 'Byo-yomi' : isFischer(settings) ? 'Fischer' : '');
   }
 
   function loop() {
     if (state === 'running') {
-      const t = timeLeft(active);
-      if (t <= 0) flag(active);
+      const c = clock(active);
+      if (outOfTime(c)) flag(active);
       else {
-        if (t < CRITICAL && !warned[active]) warn(active);
+        // A soft chime under 10 s (again in every byo-yomi period)...
+        if (c.time >= CRITICAL) warned[active] = false;
+        else if (!warned[active]) warn(active);
+        // ...and a lower one when byo-yomi starts or a period is used up.
+        if (c.byo !== seen.byo || c.periods !== seen.periods) {
+          chime([1046.5, 784]);
+          if (navigator.vibrate) navigator.vibrate(300);
+        }
+        seen = c;
         render();
       }
     }
