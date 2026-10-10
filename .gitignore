@@ -1,0 +1,15 @@
+# Signing keys and passwords for the Play Store app: never upload these.
+*.keystore
+*.jks
+*.pem
+*.p12
+*.pfx
+*.key
+signing*.txt
+signing*.json
+*password*
+*passwort*
+
+# Files Windows and editors make by themselves
+Thumbs.db
+desktop.ini
