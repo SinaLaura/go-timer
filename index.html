@@ -85,13 +85,9 @@
   /* Each half glows in the flag stripe next to it. */
   :root[data-theme=wlw] #white { --glow-bg: #d52d00; }
   :root[data-theme=wlw] #black { --glow-bg: #a30262; }
-  /* wlw: no edge at all: the bar flows on into both halves at full colour and fades out gently (no step where it starts or ends). */
+  /* wlw: no edge at all: the bar flows on into both halves at full colour and fades out quickly. */
   :root[data-theme=wlw] { --glow: 1; }
-  :root[data-theme=wlw] .half::before {
-    height: 12px; /* short, so the outer stripes look no wider than the others */
-    -webkit-mask: linear-gradient(#000, rgb(0 0 0 / .84) 25%, rgb(0 0 0 / .5) 50%, rgb(0 0 0 / .16) 75%, transparent);
-    mask: linear-gradient(#000, rgb(0 0 0 / .84) 25%, rgb(0 0 0 / .5) 50%, rgb(0 0 0 / .16) 75%, transparent);
-  }
+  :root[data-theme=wlw] .half::before { height: 12px; } /* short, so the outer stripes look no wider than the others */
   * { box-sizing: border-box; margin: 0; }
   html, body { height: 100%; }
   body {
@@ -142,8 +138,9 @@
     height: 28px;
     background: var(--glow-bg, var(--stripes)); /* a striped flag glows in its outer stripe */
     opacity: var(--glow);
-    -webkit-mask: linear-gradient(#000 2px, transparent);
-    mask: linear-gradient(#000 2px, transparent);
+    /* eased, so there is no visible line where the fade starts or ends */
+    -webkit-mask: linear-gradient(#000, rgb(0 0 0 / .84) 25%, rgb(0 0 0 / .5) 50%, rgb(0 0 0 / .16) 75%, transparent);
+    mask: linear-gradient(#000, rgb(0 0 0 / .84) 25%, rgb(0 0 0 / .5) 50%, rgb(0 0 0 / .16) 75%, transparent);
     pointer-events: none;
   }
   #white::before { top: -1px; scale: -1 1; } /* mirrored back, so the colours line up with the bar; 1px into the bar, so no light seam shows */
