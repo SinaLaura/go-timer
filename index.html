@@ -194,7 +194,7 @@
     bottom: -2px; /* 2px past the screen edge, so no light seam shows between it and the phone's status bar */
     left: 0;
     right: 0;
-    height: calc(54px + var(--cutout));
+    height: calc(44px + var(--cutout));
     pointer-events: none;
   }
   /* Its inner edge is wavy: a wave on top, solid below. */
@@ -216,11 +216,11 @@
     width: 64px;
     height: 44px;
     min-height: 0;
-    padding: 0;
+    padding: 0 0 3px; /* the heart sits near the screen edge; the button stays big enough to tap */
     border-radius: 0;
     background: none;
     translate: -50% 0;
-    place-items: center;
+    place-items: end center;
     -webkit-tap-highlight-color: transparent;
   }
   .running .heart-btn, body.ready .heart-btn { display: grid; }
@@ -492,7 +492,7 @@
 <dialog id="settings">
   <form method="dialog">
     <div class="top">
-      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 11.10. 16:07</small></div>
+      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 11.10. 16:12</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
