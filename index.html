@@ -126,6 +126,10 @@
   #black { background-color: var(--black-bg); color: var(--black-fg); }
   #white { --run-bg: var(--run-white); }
   #black { --run-bg: var(--run-black); }
+  /* Room for a camera in the screen (full screen) or the phone's bars at the screen edge of each half:
+     the turn bar grows by it, and the heart and the colours keep clear of it. */
+  #white { --cutout: env(safe-area-inset-top, 0px); }
+  #black { --cutout: env(safe-area-inset-bottom, 0px); }
   .half { isolation: isolate; transition: background-color .4s, color .4s; }
   /* Soft fade from the middle bar into each half (its top edge, also for the turned-around one). */
   .half::before {
@@ -187,7 +191,7 @@
     bottom: -2px; /* 2px past the screen edge, so no light seam shows between it and the phone's status bar */
     left: 0;
     right: 0;
-    height: 46px;
+    height: calc(46px + var(--cutout));
     pointer-events: none;
   }
   /* Its inner edge is wavy: a wave on top, solid below. */
@@ -203,7 +207,7 @@
   .heart-btn {
     display: none;
     position: absolute;
-    bottom: 0;
+    bottom: var(--cutout);
     left: 50%;
     z-index: 1;
     width: 64px;
@@ -232,7 +236,7 @@
   /* The colours, just above the heart, facing the player who tapped it. */
   #themes {
     position: absolute;
-    bottom: 52px;
+    bottom: calc(52px + var(--cutout));
     left: 50%;
     z-index: 2;
     display: flex;
