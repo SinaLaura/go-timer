@@ -273,7 +273,6 @@
   /* The player's average move time, as a pink dashed line across the bars. */
   .chart .avg { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--run); pointer-events: none; }
   .flagged .chart .avg { border-color: #ffc2dc; } /* on the bright pink half */
-  .chart .axis { display: flex; justify-content: space-between; font-size: .75em; opacity: .6; font-variant-numeric: tabular-nums; }
   .chart .readout { min-height: 1.3em; font-size: .9em; font-weight: 700; } /* one line: the title, or the tapped move */
   /* A tap on the statistics shows only the chart, big. */
   .stats.chart-only { grid-template-columns: 1fr; width: min(86vw, 420px); }
@@ -1040,10 +1039,8 @@
     // The more bars, the thinner the gaps between them; a few bars stay narrow and centred.
     const gap = n > 100 ? .5 : n > 60 ? 1 : n > 30 ? 2 : 3;
     const style = `width: min(100%, ${Math.max(n * 18, 80)}px); gap: ${gap}px`;
-    const axis = n > 1 ? `<span>${moveNo(p, 0)}</span><span>${moveNo(p, times.length - 1)}</span>` : `<span>${moveNo(p, 0)}</span>`;
     return `<div class="chart">`
       + `<div class="bars${b ? ' has-sel' : ''}" style="${style}" aria-hidden="true">${rects}${line}</div>`
-      + `<div class="axis" style="width: min(100%, ${Math.max(n * 18, 80)}px)" aria-hidden="true">${axis}</div>`
       + (b ? `<b class="readout">${readout}</b>` : `<small class="readout">${t('chartTitle')}</small>`) + '</div>';
   }
   function pickBar(p, e) {
