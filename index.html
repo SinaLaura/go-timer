@@ -264,7 +264,7 @@
   /* Clear of the bar: a narrower fade and some room; if it is too tall, the rest goes to the screen edge. */
   .with-stats .half { gap: 1vh; padding-top: 16px; justify-content: safe center; }
   .with-stats .hint:empty { display: none; }
-  .paused .hint { animation: breathe 3s ease-in-out infinite; } /* "Paused" softly fades in and out */
+  .paused .hint { text-transform: uppercase; letter-spacing: .08em; animation: breathe 3s ease-in-out infinite; } /* "PAUSED" softly fades in and out */
   @keyframes breathe { 50% { opacity: .4; } }
   .with-stats .stats { display: grid; animation: fade-in .6s ease-out; }
   @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } }
