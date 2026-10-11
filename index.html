@@ -153,10 +153,11 @@
   }
   .stone { width: 1em; height: 1em; border-radius: 50%; }
   /* Once both players have moved, the name and stone go: the clock alone is enough.
-     In the statistics the name comes back, without the stone. */
-  .quiet .name { display: none; }
-  .with-stats .name { display: flex; }
-  .with-stats .stone { display: none; }
+     The same on the pause screen, where PAUSED says it. */
+  .quiet .name, .paused.with-stats .name { display: none; }
+  /* But when time runs short the half turns pink, so the name comes back to say whose it is. */
+  .half.critical .name { display: flex; }
+  .paused.with-stats .half:not(.waiting) .name { display: none; } /* PAUSED is there */
   /* Flat stones with a little shine, a soft shade and a faint pink edge. */
   #black .stone { background: radial-gradient(circle at 32% 30%, #fffb 0 .12em, transparent .14em) #2b2328; box-shadow: inset -.1em -.12em 0 #0007, 0 0 0 1px #f07bb066; }
   #white .stone { background: radial-gradient(circle at 32% 30%, #fff 0 .12em, transparent .14em) #f5e9ed; box-shadow: inset -.1em -.12em 0 #e9cfda, 0 0 0 1px #f07bb066; }
@@ -265,6 +266,8 @@
   .with-stats .half { gap: 1vh; padding-top: 16px; justify-content: safe center; }
   .with-stats .hint:empty { display: none; }
   .paused .hint { text-transform: uppercase; letter-spacing: .08em; animation: breathe 3s ease-in-out infinite; } /* "PAUSED" softly fades in and out */
+  /* With the statistics, "PAUSED" sits where the name was, on the side whose clock was running. */
+  .paused.with-stats .half:not(.waiting) .hint { order: -1; font-size: clamp(16px, 3vh, 26px); font-weight: 800; opacity: 1; }
   @keyframes breathe { 50% { opacity: .4; } }
   .with-stats .stats { display: grid; animation: fade-in .6s ease-out; }
   @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } }
