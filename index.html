@@ -76,15 +76,16 @@
   :root[data-theme=pride] #bar .icon { box-shadow: 0 1px 5px rgb(40 10 25 / .25); } /* white buttons on white and rainbow */
   :root[data-theme=trans] { --flag: var(--flag-trans); --glow: 0; /* no glow, the stripes end sharp */ --run-white: #f5a9b8; --run-black: #5bcefa; --edge-white: #f5a9b8; }
   :root[data-theme=wlw] {
-    /* The flag spread over the screen: its dark orange on White's edge (top), its purple on Black's. */
-    --flag: var(--flag-wlw);
-    --run-white: #d52d00;
-    --run-black: #a30262;
-    --edge-white: #d52d00;
+    /* The flag spread over the screen, upside down: its purple on White's edge (top), its dark orange on Black's.
+       (The colour picker keeps it the right way up.) */
+    --flag: linear-gradient(#a30262 18%, #d362a4 22% 38%, #fff 42% 58%, #ff9a56 62% 78%, #d52d00 82%);
+    --run-white: #a30262;
+    --run-black: #d52d00;
+    --edge-white: #a30262;
   }
   /* Each half glows in the flag stripe next to it. */
-  :root[data-theme=wlw] #white { --glow-bg: #d52d00; }
-  :root[data-theme=wlw] #black { --glow-bg: #a30262; }
+  :root[data-theme=wlw] #white { --glow-bg: #a30262; }
+  :root[data-theme=wlw] #black { --glow-bg: #d52d00; }
   * { box-sizing: border-box; margin: 0; }
   html, body { height: 100%; }
   body {
