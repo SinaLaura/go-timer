@@ -267,7 +267,7 @@
   .chart { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: .6em; touch-action: none; }
   /* The bars: plain boxes in a row, so they stay crisp and keep round tops however many there are. */
   .chart .bars { position: relative; display: flex; align-items: flex-end; height: 34px; border-bottom: 1px solid color-mix(in srgb, currentColor 35%, transparent); }
-  .chart .bars i { flex: 1 1 0; min-width: 0; min-height: 2px; background: currentColor; border-radius: 4px 4px 0 0; transition: opacity .15s; }
+  .chart .bars i { flex: none; width: var(--w); min-height: 2px; background: currentColor; border-radius: 4px 4px 0 0; transition: opacity .15s; }
   .chart .has-sel i { opacity: .35; }
   .chart .has-sel i.sel { opacity: 1; }
   /* The player's average move time, as a pink dashed line across the bars. */
@@ -875,6 +875,7 @@
     if (need > room) dialog.style.setProperty('--fit', Math.max(.7, 1 - (need - room) / shrinks));
   }
   (vv || window).addEventListener('resize', fitSettings);
+  addEventListener('resize', () => charts && render()); // the chart's bars fit the new width
 
   // The form shows the picked system's values; while switching between systems,
   // each keeps what was typed (draft). Set uses the picked one.
@@ -1036,9 +1037,13 @@
     const line = `<div class="avg" style="bottom:${pct(avg)}"></div>`;
     const readout = !b ? '' : b.from === b.to ? t('moveAt')(moveNo(p, b.from), dur(b.ms))
       : t('movesAt')(moveNo(p, b.from), moveNo(p, b.to), dur(b.ms));
-    // The more bars, the thinner the gaps between them; a few bars stay narrow and centred.
-    const gap = n > 100 ? .5 : n > 60 ? 1 : n > 30 ? 2 : 3;
-    const style = `width: min(100%, ${Math.max(n * 18, 80)}px); gap: ${gap}px`;
+    // Bars and gaps are whole screen pixels, so every bar is exactly as thick as the others.
+    // The more bars, the thinner the gaps; a few bars stay at most 18px apart and centred.
+    const px = window.devicePixelRatio || 1, room = Math.floor(Math.min(innerWidth * .86, 420) * px);
+    let gap = Math.round((n > 100 ? .5 : n > 60 ? 1 : n > 30 ? 2 : 3) * px) || 1;
+    let w = Math.min(Math.floor((room - (n - 1) * gap) / n), Math.round(18 * px) - gap);
+    if (w < 1) { gap = 0; w = Math.max(1, Math.floor(room / n)); } // hundreds of bars on a tiny screen
+    const style = `width: ${(n * w + (n - 1) * gap) / px}px; gap: ${gap / px}px; --w: ${w / px}px`;
     return `<div class="chart">`
       + `<div class="bars${b ? ' has-sel' : ''}" style="${style}" aria-hidden="true">${rects}${line}</div>`
       + (b ? `<b class="readout">${readout}</b>` : `<small class="readout">${t('chartTitle')}</small>`) + '</div>';
