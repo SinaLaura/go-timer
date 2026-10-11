@@ -10,18 +10,24 @@ A Go clock for your phone, lying next to the board.
 
 **Open it: https://sinalaura.github.io/go-timer**
 
-## Use it as an app
+## Two ways to use it
 
-Add it to your phone's home screen and it opens like an app: full screen, with its own icon. Once it's open, it needs no internet.
+**1. In the browser:** open the link above on your phone. Nothing to install. When a game starts, it goes full screen (on Android).
 
-- **Android (Chrome):** tap the menu **⋮** at the top right, then **Add to home screen** (or **Install app**), then **Install**.
+**2. As an app:** add it to your phone's home screen. Then it has its own icon, always opens full screen, and works without internet once it's been opened.
+
+- **Android:** open the browser's menu **⋮** (in Chrome at the top right, in Brave at the bottom right), then tap **Install app**, **Add to home screen** or **Install and create shortcut**, whichever your browser offers.
 - **iPhone (Safari):** tap the share button, then **Add to Home Screen**.
+
+<p><img src="images/install-1.jpg" alt="Step 1: the menu button at the bottom right in Brave" width="200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/install-2.jpg" alt="Step 2: Install and create shortcut" width="200"></p>
+
+Both are the same timer, and changes reach both by themselves.
 
 ## How to use
 
-- Tap White's half to start Black's clock. After your move, tap your own half.
-- During a game, tap the box in the middle to pause and see the statistics. Tap a half to see a chart of the time per move.
-- Between games, tap it to change the time setting.
+- Tap White's half or the play button **▶** in the middle to start Black's clock. After your move, tap your own half.
+- During a game, tap the pause button or the box in the middle to pause and see the statistics. Tap a half to see a chart of the time per move. **▶** continues the game.
+- Between games, tap the box in the middle to change the time setting.
 
 <p><img src="images/stats.png" alt="The statistics while paused" width="200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/chart.png" alt="A tap shows the time per move as a chart" width="200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/settings.png" alt="The time settings" width="200"></p>
 
@@ -46,7 +52,7 @@ During a game, tap the little heart on the running clock. Here are three of the 
 
 ## How it's built
 
-One `index.html` file, with no framework, no build step and no server. Built by Sina with [Claude](https://claude.com/claude-code) as a one-day project in October 2026. Her first app.
+One `index.html` file, with no framework, no build step and no server. Built by Sina with [Claude](https://claude.com/claude-code) in October 2026: the first version in one day, then polished, about 15 hours over three days in all. Her first app.
 
 ## Licence
 
