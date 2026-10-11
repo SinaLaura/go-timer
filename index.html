@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#fbf2f1">
 <meta name="color-scheme" content="only light">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<!-- iPhone app: the page reaches under the status bar, so it shows the top half's colour instead of white -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Go Girls*">
 <link rel="manifest" href="manifest.webmanifest">
@@ -133,6 +135,7 @@
   /* Not every phone tells where its camera is, so in full screen the top keeps a little room free for it. */
   :root:fullscreen #white { --cutout: max(env(safe-area-inset-top, 0px), 6px); }
   @media (display-mode: fullscreen) { #white { --cutout: max(env(safe-area-inset-top, 0px), 6px); } }
+  .half { padding-bottom: var(--cutout); } /* the clock and statistics keep clear of it too */
   .half { isolation: isolate; transition: background-color .4s, color .4s; }
   /* Soft fade from the middle bar into each half (its top edge, also for the turned-around one). */
   .half::before {
@@ -492,7 +495,7 @@
 <dialog id="settings">
   <form method="dialog">
     <div class="top">
-      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 11.10. 16:41</small></div>
+      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 11.10. 17:39</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -725,12 +728,13 @@
 
   // Full screen while playing: no phone bars around the clock. Browsers allow it only once a tap is
   // finished (the halves react as the finger touches), so it is asked for when the finger lifts.
-  // The app on the home screen is full screen anyway; iPhones ignore it.
+  // Also in the app on the home screen: only then do some phones let the page reach under the camera.
+  // iPhones ignore it.
   let wantFullScreen = false;
   function goFullScreen() {
     wantFullScreen = false;
     const el = document.documentElement;
-    if (document.fullscreenElement || !el.requestFullscreen || matchMedia('(display-mode: fullscreen)').matches) return;
+    if (document.fullscreenElement || !el.requestFullscreen) return;
     el.requestFullscreen({ navigationUI: 'hide' }).catch(() => { /* not allowed here */ });
   }
   document.addEventListener('pointerup', () => wantFullScreen && goFullScreen());
