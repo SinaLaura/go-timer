@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#1c1418">
+<meta name="theme-color" content="#fbf2f1">
 <meta name="color-scheme" content="only light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -37,33 +37,33 @@
     --glow: 1;
     --run-white: var(--run);
     --run-black: var(--run);
-    /* The phone's status bar above the screen takes this colour while Black's turn bar is up there. */
-    --edge-black: var(--run);
+    /* The phone's status bar above the screen takes this colour while White's turn bar is up there. */
+    --edge-white: var(--run);
     --flag-pride: linear-gradient(to right, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787);
     /* Trans: the actual flag, in stripes from top to bottom (with soft edges) */
     --flag-trans: linear-gradient(#5bcefa 18%, #f5a9b8 22% 38%, #fff 42% 58%, #f5a9b8 62% 78%, #5bcefa 82%);
     --flag-wlw: linear-gradient(#d52d00 18%, #ff9a56 22% 38%, #fff 42% 58%, #d362a4 62% 78%, #a30262 82%); /* the actual flag, like trans */
   }
   :root[data-theme] { --stripes: var(--flag); --glow: .55; }
-  /* Black's half is turned around, so its gradients run "to left" to look the same on the screen. */
+  /* White's half is turned around, so its gradients run "to left" to look the same on the screen. */
   :root[data-theme=pride] {
     --flag: var(--flag-pride);
     --glow: 0; /* the waves are the border */
-    --run-black: linear-gradient(to left, #e40303, #ff8c00, #ffed00);
-    --edge-black: #ff8c00; /* one colour only up there: the middle of the bar */
-    --run-white: linear-gradient(to right, #008026, #004dff, #750787);
+    --run-white: linear-gradient(to left, #e40303, #ff8c00, #ffed00);
+    --edge-white: #ff8c00; /* one colour only up there: the middle of the bar */
+    --run-black: linear-gradient(to right, #008026, #004dff, #750787);
   }
   /* Pride: the middle bar is a rainbow ribbon that waves: every wave up is a rainbow,
      every wave down one upside down. Around it, each half's own colour. */
   :root[data-theme=pride] #bar {
-    --top: var(--black-bg);
-    --bottom: var(--white-bg);
+    --top: var(--white-bg);
+    --bottom: var(--black-bg);
     position: relative;
     z-index: 1;
     background: linear-gradient(var(--top) 50%, var(--bottom) 0);
   }
-  :root[data-theme=pride]:has(#black:is(.critical, .flagged)) #bar { --top: var(--out); }
-  :root[data-theme=pride]:has(#white:is(.critical, .flagged)) #bar { --bottom: var(--out); }
+  :root[data-theme=pride]:has(#white:is(.critical, .flagged)) #bar { --top: var(--out); }
+  :root[data-theme=pride]:has(#black:is(.critical, .flagged)) #bar { --bottom: var(--out); }
   :root[data-theme=pride] #bar::before {
     content: "";
     position: absolute;
@@ -76,26 +76,26 @@
     pointer-events: none;
   }
   :root[data-theme=pride] #bar .icon { box-shadow: 0 1px 5px rgb(40 10 25 / .25); } /* white buttons on white and rainbow */
-  :root[data-theme=trans] { --flag: var(--flag-trans); --glow-bg: #5bcefa; --run-white: #f5a9b8; --run-black: #5bcefa; --edge-black: #5bcefa; }
+  :root[data-theme=trans] { --flag: var(--flag-trans); --glow-bg: #5bcefa; --run-white: #f5a9b8; --run-black: #5bcefa; --edge-white: #f5a9b8; }
   :root[data-theme=wlw] {
-    /* The flag spread over the screen: its dark orange side on Black's edge (top),
-       its dark pink side on White's (outermost on the screen edge). The top 5px of a bar is its wavy edge. */
+    /* The flag spread over the screen: its dark orange side on White's edge (top),
+       its dark pink side on Black's (outermost on the screen edge). The top 5px of a bar is its wavy edge. */
     --flag: var(--flag-wlw);
-    --run-white: linear-gradient(#d362a4 23.5px, #a30262 25.5px);
-    --run-black: linear-gradient(#ff9a56 23.5px, #d52d00 25.5px);
-    --edge-black: #d52d00;
+    --run-white: linear-gradient(#ff9a56 23.5px, #d52d00 25.5px);
+    --run-black: linear-gradient(#d362a4 23.5px, #a30262 25.5px);
+    --edge-white: #d52d00;
   }
   /* Each half glows in the flag stripe next to it. */
-  :root[data-theme=wlw] #white { --glow-bg: #a30262; }
-  :root[data-theme=wlw] #black { --glow-bg: #d52d00; }
+  :root[data-theme=wlw] #white { --glow-bg: #d52d00; }
+  :root[data-theme=wlw] #black { --glow-bg: #a30262; }
   * { box-sizing: border-box; margin: 0; }
   html, body { height: 100%; }
   body {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto minmax(0, .94fr); /* white a touch smaller: bright areas look bigger than dark ones */
+    grid-template-rows: minmax(0, .94fr) auto minmax(0, 1fr); /* white a touch smaller: bright areas look bigger than dark ones */
     height: 100dvh;
-    /* Shows only through hairline gaps at the edges of Black's turned-around half, so it has her colour. */
-    background: var(--black-bg);
+    /* Shows only through hairline gaps at the edges of White's turned-around half, so it has her colour. */
+    background: var(--white-bg);
     font-family: Nunito, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     user-select: none;
     -webkit-user-select: none;
@@ -104,11 +104,11 @@
     overflow: hidden;
     transition: grid-template-rows .5s ease;
   }
-  body:has(#black:is(.critical, .flagged)) { background: var(--out); }
+  body:has(#white:is(.critical, .flagged)) { background: var(--out); }
   /* The half whose turn it is grows a little, pushing the bar towards the other player. */
-  body.turn-black { grid-template-rows: minmax(0, 1.9fr) auto minmax(0, .94fr); }
-  body.turn-white { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1.5fr); }
-  body.with-stats { grid-template-rows: minmax(0, 1fr) auto minmax(0, .96fr); } /* white a touch smaller, as in play */
+  body.turn-white { grid-template-rows: minmax(0, 1.5fr) auto minmax(0, 1fr); }
+  body.turn-black { grid-template-rows: minmax(0, .94fr) auto minmax(0, 1.9fr); }
+  body.with-stats { grid-template-rows: minmax(0, .96fr) auto minmax(0, 1fr); } /* white a touch smaller, as in play */
   body.over { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr); } /* the end screen needs all the room */
 
   .half {
@@ -122,8 +122,8 @@
     -webkit-tap-highlight-color: transparent;
   }
   /* The top half faces the player across the board. */
-  #black { background-color: var(--black-bg); color: var(--black-fg); transform: rotate(180deg); }
-  #white { background-color: var(--white-bg); color: var(--white-fg); }
+  #white { background-color: var(--white-bg); color: var(--white-fg); transform: rotate(180deg); }
+  #black { background-color: var(--black-bg); color: var(--black-fg); }
   #white { --run-bg: var(--run-white); }
   #black { --run-bg: var(--run-black); }
   .half { isolation: isolate; transition: background-color .4s, color .4s; }
@@ -142,7 +142,7 @@
     mask: linear-gradient(#000 2px, transparent);
     pointer-events: none;
   }
-  #black::before { top: -1px; scale: -1 1; } /* mirrored back, so the colours line up with the bar; 1px into the bar, so no light seam shows */
+  #white::before { top: -1px; scale: -1 1; } /* mirrored back, so the colours line up with the bar; 1px into the bar, so no light seam shows */
   .with-stats .half::before { height: 12px; }
 
   .name {
@@ -175,7 +175,7 @@
 
   .waiting .time, .waiting .name, .waiting .periods { opacity: .25; }
   /* One thick bar on the outer edge of the screen; it flips to whoever's turn it is.
-     (bottom is the screen edge for both halves, because Black's half is turned around) */
+     (bottom is the screen edge for both halves, because White's half is turned around) */
   .running::after {
     content: "";
     position: absolute;
@@ -422,8 +422,8 @@
 <body>
 
 
-<section class="half" id="black">
-  <div class="name"><span class="stone"></span><span data-t="black">Black</span></div>
+<section class="half" id="white">
+  <div class="name"><span class="stone"></span><span data-t="white">White</span></div>
   <div class="time"></div>
   <div class="periods"></div>
   <div class="hint"></div>
@@ -444,8 +444,8 @@
   </button>
 </nav>
 
-<section class="half" id="white">
-  <div class="name"><span class="stone"></span><span data-t="white">White</span></div>
+<section class="half" id="black">
+  <div class="name"><span class="stone"></span><span data-t="black">Black</span></div>
   <div class="time"></div>
   <div class="periods"></div>
   <div class="hint"></div>
@@ -639,12 +639,12 @@
   document.addEventListener('pointerdown', e => {
     if (!picker.contains(e.target) && !e.target.closest('.heart-btn')) picker.hidden = true;
   }, true);
-  // The phone's status bar has the colour of the screen's top edge: Black's turn bar while her
-  // clock runs, otherwise her half (dark, or pink when her time is short).
+  // The phone's status bar has the colour of the screen's top edge: White's turn bar while her
+  // clock runs, otherwise her half (light, or pink when her time is short).
   const themeColour = document.querySelector('meta[name=theme-color]');
   function paintStatusBar() {
-    const top = document.getElementById('black').classList.contains('running')
-      ? getComputedStyle(document.documentElement).getPropertyValue('--edge-black').trim()
+    const top = document.getElementById('white').classList.contains('running')
+      ? getComputedStyle(document.documentElement).getPropertyValue('--edge-white').trim()
       : getComputedStyle(document.body).backgroundColor;
     if (themeColour.content !== top) themeColour.content = top;
   }
@@ -1068,7 +1068,7 @@
     if (!el) return;
     const r = el.getBoundingClientRect(), n = barsFor(p).length;
     let f = (e.clientX - r.left) / r.width;
-    if (p === 'black') f = 1 - f; // Black's half is turned around
+    if (p === 'white') f = 1 - f; // White's half is turned around
     const i = Math.floor(f * n);
     if (i < 0 || i >= n || i === chosen[p]) return;
     chosen[p] = i;
