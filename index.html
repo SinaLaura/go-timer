@@ -1014,9 +1014,9 @@
 
   // Time per move: one bar per move, from the first move (left) to the last (right),
   // on the same scale for both players. Tapping or sliding along the bars shows a move's time.
-  // One bar per move up to 150 moves each (a 300-move game); only in longer games do
+  // One bar per move up to 200 moves each; only in longer games do
   // neighbouring moves share a bar (their average), so it never gets too crowded.
-  const MAX_BARS = 150;
+  const MAX_BARS = 200;
   const moveNo = (p, i) => (p === 'black' ? 2 * i + 1 : 2 * i + 2); // Black moves first
   function barsFor(p) {
     const k = Math.ceil(Math.max(stats.black.times.length, stats.white.times.length) / MAX_BARS) || 1;
