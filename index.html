@@ -49,9 +49,7 @@
   :root[data-theme=pride] {
     --flag: var(--flag-pride);
     --glow: 0; /* the waves are the border */
-    --run-white: linear-gradient(to left, #e40303, #ff8c00, #ffed00);
-    --edge-white: #ff8c00; /* one colour only up there: the middle of the bar */
-    --run-black: linear-gradient(to right, #008026, #004dff, #750787);
+    --edge-white: initial; /* no turn bars, the hearts are enough: the status bar keeps White's colour */
   }
   /* Pride: the middle bar is a rainbow ribbon that waves: every wave up is a rainbow,
      every wave down one upside down. Around it, each half's own colour. */
@@ -78,11 +76,10 @@
   :root[data-theme=pride] #bar .icon { box-shadow: 0 1px 5px rgb(40 10 25 / .25); } /* white buttons on white and rainbow */
   :root[data-theme=trans] { --flag: var(--flag-trans); --glow-bg: #5bcefa; --run-white: #f5a9b8; --run-black: #5bcefa; --edge-white: #f5a9b8; }
   :root[data-theme=wlw] {
-    /* The flag spread over the screen: its dark orange side on White's edge (top),
-       its dark pink side on Black's (outermost on the screen edge). The top 5px of a bar is its wavy edge. */
+    /* The flag spread over the screen: its dark orange on White's edge (top), its purple on Black's. */
     --flag: var(--flag-wlw);
-    --run-white: linear-gradient(#ff9a56 23.5px, #d52d00 25.5px);
-    --run-black: linear-gradient(#d362a4 23.5px, #a30262 25.5px);
+    --run-white: #d52d00;
+    --run-black: #a30262;
     --edge-white: #d52d00;
   }
   /* Each half glows in the flag stripe next to it. */
@@ -218,6 +215,9 @@
   #black .heart-btn svg { fill: #000; }
   #white .heart-btn svg { fill: #fff; }
   :root[data-theme] #white .heart-btn svg { stroke: #1c1418; stroke-width: 1.3; } /* stays visible on a white stripe */
+  /* Pride: no bars, only the hearts, with the rainbow shimmering through them. */
+  :root[data-theme=pride] .running::after { content: none; }
+  :root[data-theme=pride] body :is(#black, #white) .heart-btn svg { fill: url(#pride-heart); stroke: none; }
   @keyframes pulse { 50% { opacity: .45; } }
   @media (prefers-reduced-motion: reduce) { .heart-btn svg, .stats, #themes { animation: none !important; } body, .time { transition: none; } }
 
@@ -420,6 +420,15 @@
 </style>
 </head>
 <body>
+<!-- The rainbow for the Pride hearts; it slowly moves through them, so the colours keep changing. -->
+<svg id="pride-defs" width="0" height="0" style="position: absolute" aria-hidden="true">
+  <linearGradient id="pride-heart" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="24" y2="24" spreadMethod="repeat">
+    <stop offset="0" stop-color="#e40303"/><stop offset=".17" stop-color="#ff8c00"/><stop offset=".33" stop-color="#ffed00"/>
+    <stop offset=".5" stop-color="#008026"/><stop offset=".67" stop-color="#004dff"/><stop offset=".83" stop-color="#750787"/>
+    <stop offset="1" stop-color="#e40303"/>
+    <animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="24 24" dur="12s" repeatCount="indefinite"/>
+  </linearGradient>
+</svg>
 
 
 <section class="half" id="white">
@@ -643,8 +652,9 @@
   // clock runs, otherwise her half (light, or pink when her time is short).
   const themeColour = document.querySelector('meta[name=theme-color]');
   function paintStatusBar() {
-    const top = document.getElementById('white').classList.contains('running')
-      ? getComputedStyle(document.documentElement).getPropertyValue('--edge-white').trim()
+    const edge = getComputedStyle(document.documentElement).getPropertyValue('--edge-white').trim();
+    const top = edge && document.getElementById('white').classList.contains('running')
+      ? edge
       : getComputedStyle(document.body).backgroundColor;
     if (themeColour.content !== top) themeColour.content = top;
   }
@@ -656,6 +666,7 @@
     paintStatusBar();
   }
   try { setTheme(localStorage.getItem('theme')); } catch (e) { setTheme('pink'); }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.getElementById('pride-defs').pauseAnimations();
 
   const pauseBtn = document.getElementById('pause');
   const resetBtn = document.getElementById('reset');
