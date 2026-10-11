@@ -37,6 +37,8 @@
     --glow: 1;
     --run-white: var(--run);
     --run-black: var(--run);
+    /* The phone's status bar above the screen takes this colour while Black's turn bar is up there. */
+    --edge-black: var(--run);
     --flag-pride: linear-gradient(to right, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787);
     /* Trans: the actual flag, in stripes from top to bottom (with soft edges) */
     --flag-trans: linear-gradient(#5bcefa 18%, #f5a9b8 22% 38%, #fff 42% 58%, #f5a9b8 62% 78%, #5bcefa 82%);
@@ -48,6 +50,7 @@
     --flag: var(--flag-pride);
     --glow: 0; /* the waves are the border */
     --run-black: linear-gradient(to left, #e40303, #ff8c00, #ffed00);
+    --edge-black: #ff8c00; /* one colour only up there: the middle of the bar */
     --run-white: linear-gradient(to right, #008026, #004dff, #750787);
   }
   /* Pride: the middle bar is a rainbow ribbon that waves: every wave up is a rainbow,
@@ -73,13 +76,14 @@
     pointer-events: none;
   }
   :root[data-theme=pride] #bar .icon { box-shadow: 0 1px 5px rgb(40 10 25 / .25); } /* white buttons on white and rainbow */
-  :root[data-theme=trans] { --flag: var(--flag-trans); --glow-bg: #5bcefa; --run-white: #f5a9b8; --run-black: #5bcefa; }
+  :root[data-theme=trans] { --flag: var(--flag-trans); --glow-bg: #5bcefa; --run-white: #f5a9b8; --run-black: #5bcefa; --edge-black: #5bcefa; }
   :root[data-theme=wlw] {
     /* The flag spread over the screen: its dark orange side on Black's edge (top),
        its dark pink side on White's (outermost on the screen edge). The top 5px of a bar is its wavy edge. */
     --flag: var(--flag-wlw);
     --run-white: linear-gradient(#d362a4 23.5px, #a30262 25.5px);
     --run-black: linear-gradient(#ff9a56 23.5px, #d52d00 25.5px);
+    --edge-black: #d52d00;
   }
   /* Each half glows in the flag stripe next to it. */
   :root[data-theme=wlw] #white { --glow-bg: #a30262; }
@@ -635,11 +639,21 @@
   document.addEventListener('pointerdown', e => {
     if (!picker.contains(e.target) && !e.target.closest('.heart-btn')) picker.hidden = true;
   }, true);
+  // The phone's status bar has the colour of the screen's top edge: Black's turn bar while her
+  // clock runs, otherwise her half (dark, or pink when her time is short).
+  const themeColour = document.querySelector('meta[name=theme-color]');
+  function paintStatusBar() {
+    const top = document.getElementById('black').classList.contains('running')
+      ? getComputedStyle(document.documentElement).getPropertyValue('--edge-black').trim()
+      : getComputedStyle(document.body).backgroundColor;
+    if (themeColour.content !== top) themeColour.content = top;
+  }
   function setTheme(name) {
     if (!['pride', 'trans', 'wlw'].includes(name)) name = 'pink';
     if (name === 'pink') delete document.documentElement.dataset.theme;
     else document.documentElement.dataset.theme = name;
     for (const b of picker.querySelectorAll('[data-pick]')) b.classList.toggle('on', b.dataset.pick === name);
+    paintStatusBar();
   }
   try { setTheme(localStorage.getItem('theme')); } catch (e) { setTheme('pink'); }
 
@@ -1113,6 +1127,7 @@
     info.classList.toggle('plain', inGame); // during a game it shows the statistics instead
     setText(setting, describe(settings));
     setText(system, t(systemKey()));
+    paintStatusBar();
   }
   function systemKey() { return settings.system === 'simple' ? 'simpleShort' : settings.system + 'Time'; } // Fischer, Byo-yomi or Timer
 
