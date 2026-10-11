@@ -492,7 +492,7 @@
 <dialog id="settings">
   <form method="dialog">
     <div class="top">
-      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 11.10. 16:01</small></div>
+      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 11.10. 16:07</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -633,9 +633,9 @@
   // state: 'ready' | 'running' | 'paused' | 'over'
   // left: main time per player; periods: byo-yomi periods per player;
   // turnUsed + turnStart: time used so far in the current turn (pausing keeps turnUsed).
-  // stats: time used per player, and the time of each move; showStats: shown while paused;
+  // stats: time used per player, and the time of each move (shown while paused and at the end);
   // chosen: the bar tapped in each player's chart; charts: the chart shown instead of the numbers.
-  let state, active, loser, left, periods, warned, moved, turnUsed, turnStart, seen, wakeLock, stats, showStats, chosen, charts;
+  let state, active, loser, left, periods, warned, moved, turnUsed, turnStart, seen, wakeLock, stats, chosen, charts;
 
   const ui = {};
   for (const p of ['black', 'white']) {
@@ -705,7 +705,6 @@
     warned = { black: false, white: false };
     moved = { black: false, white: false };
     stats = { black: { used: 0, times: [] }, white: { used: 0, times: [] } };
-    showStats = false;
     chosen = { black: null, white: null };
     charts = false;
     releaseWake();
@@ -779,12 +778,10 @@
     if (state === 'running') {
       turnUsed += performance.now() - turnStart;
       state = 'paused';
-      showStats = true;
       buzz(100);
     } else if (state === 'paused') {
       turnStart = performance.now();
       state = 'running';
-      showStats = false;
       buzz(100);
       keepAwake();
       goFullScreen(); // again, in case it was left while paused
@@ -977,12 +974,9 @@
   field('again').addEventListener('click', () => fillForm(draft[picked] = { ...DEFAULTS[picked] }));
 
   info.addEventListener('click', () => {
-    // During a game, the middle box pauses and shows or hides the statistics instead.
-    if (state === 'running' || state === 'paused') {
-      showStats = state === 'running' || !showStats;
-      if (state === 'running') togglePause();
-      return render();
-    }
+    // During a game, the middle box pauses instead (the statistics then show); while paused it does nothing.
+    if (state === 'running') return togglePause();
+    if (state === 'paused') return;
     draft = structuredClone(saved);
     picked = null;
     radios.find(r => r.value === settings.system).checked = true;
@@ -1124,7 +1118,7 @@
   }
   function hintFor(p) {
     if (state === 'ready') return ''; // the play button starts the game
-    if (state === 'paused') return !showStats || active === p ? t('paused') : ''; // with the statistics, only on the side whose clock was running
+    if (state === 'paused') return active === p ? t('paused') : ''; // only on the side whose clock was running
     if (state === 'over') return p === loser ? t('lost') : t('won');
     return active === p && !moved[p] ? t('yourMove') : ''; // only until each player has moved once
   }
@@ -1137,7 +1131,7 @@
 
   function render() {
     const inGame = state === 'running' || state === 'paused';
-    const withStats = state === 'over' || (state === 'paused' && showStats);
+    const withStats = state === 'over' || state === 'paused';
     if (withStats && !document.body.classList.contains('with-stats')) {
       chosen = { black: null, white: null }; // no move picked yet,
       charts = false;                        // and the numbers first
