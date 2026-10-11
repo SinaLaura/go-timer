@@ -265,17 +265,20 @@
   .stats .total { margin-top: .35em; }
   .stats .mode { margin-bottom: .35em; }
   .chart { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: .6em; touch-action: none; }
-  .chart svg { display: block; height: 34px; fill: currentColor; }
-  .chart .has-sel rect { opacity: .35; }
+  /* The bars: plain boxes in a row, so they stay crisp and keep round tops however many there are. */
+  .chart .bars { position: relative; display: flex; align-items: flex-end; height: 34px; border-bottom: 1px solid color-mix(in srgb, currentColor 35%, transparent); }
+  .chart .bars i { flex: 1 1 0; min-width: 0; min-height: 2px; background: currentColor; border-radius: 4px 4px 0 0; transition: opacity .15s; }
+  .chart .has-sel i { opacity: .35; }
+  .chart .has-sel i.sel { opacity: 1; }
   /* The player's average move time, as a pink dashed line across the bars. */
-  .chart .avg { stroke: var(--run); stroke-width: 2; stroke-dasharray: 5 4; }
-  .flagged .chart .avg { stroke: #ffc2dc; } /* on the bright pink half */
-  .chart .has-sel rect.sel { opacity: 1; }
+  .chart .avg { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--run); pointer-events: none; }
+  .flagged .chart .avg { border-color: #ffc2dc; } /* on the bright pink half */
+  .chart .axis { display: flex; justify-content: space-between; font-size: .75em; opacity: .6; font-variant-numeric: tabular-nums; }
   .chart .readout { min-height: 1.3em; font-size: .9em; font-weight: 700; } /* one line: the title, or the tapped move */
   /* A tap on the statistics shows only the chart, big. */
   .stats.chart-only { grid-template-columns: 1fr; width: min(86vw, 420px); }
   .chart-only .chart { margin-top: 0; gap: 6px; }
-  .chart-only .chart svg { height: min(26vh, 170px); }
+  .chart-only .chart .bars { height: min(26vh, 170px); }
   .chart small { font-size: .85em; opacity: .7; }
   .chart small.readout { font-weight: 600; }
   .low .time { color: var(--low); }
@@ -1004,15 +1007,16 @@
   // in the chart, a tap on the bars picks a move instead.
   function flipStats(e) {
     if (!stats.black.times.length && !stats.white.times.length) return; // no moves yet: no chart to show
-    if (charts && e.target.closest('.chart svg')) return;
+    if (charts && e.target.closest('.chart .bars')) return;
     charts = !charts;
     render();
   }
 
   // Time per move: one bar per move, from the first move (left) to the last (right),
   // on the same scale for both players. Tapping or sliding along the bars shows a move's time.
-  // Never more than 100 bars: in longer games, neighbouring moves share a bar (their average).
-  const MAX_BARS = 100;
+  // One bar per move up to 150 moves each (a 300-move game); only in longer games do
+  // neighbouring moves share a bar (their average), so it never gets too crowded.
+  const MAX_BARS = 150;
   const moveNo = (p, i) => (p === 'black' ? 2 * i + 1 : 2 * i + 2); // Black moves first
   function barsFor(p) {
     const k = Math.ceil(Math.max(stats.black.times.length, stats.white.times.length) / MAX_BARS) || 1;
@@ -1027,24 +1031,25 @@
     const bars = barsFor(p), n = bars.length, sel = chosen[p], b = bars[sel];
     if (!n) return '';
     const max = Math.max(1, ...barsFor('black').map(x => x.ms), ...barsFor('white').map(x => x.ms));
-    const rects = bars.map((x, i) => {
-      const h = Math.max(1, x.ms / max * 40);
-      return `<rect x="${i + .15}" y="${40 - h}" width=".7" height="${h}"${i === sel ? ' class="sel"' : ''}/>`;
-    }).join('');
-    const times = stats[p].times, avg = times.reduce((a, b) => a + b, 0) / times.length, y = 40 - Math.max(1, avg / max * 40);
-    const line = `<line class="avg" x1="0" x2="${n}" y1="${y}" y2="${y}" vector-effect="non-scaling-stroke"/>`;
+    const pct = ms => (ms / max * 100).toFixed(2) + '%';
+    const rects = bars.map((x, i) => `<i style="height:${pct(x.ms)}"${i === sel ? ' class="sel"' : ''}></i>`).join('');
+    const times = stats[p].times, avg = times.reduce((a, b) => a + b, 0) / times.length;
+    const line = `<div class="avg" style="bottom:${pct(avg)}"></div>`;
     const readout = !b ? '' : b.from === b.to ? t('moveAt')(moveNo(p, b.from), dur(b.ms))
       : t('movesAt')(moveNo(p, b.from), moveNo(p, b.to), dur(b.ms));
-    const width = `width: min(100%, ${Math.max(n * 18, 80)}px)`;
+    // The more bars, the thinner the gaps between them; a few bars stay narrow and centred.
+    const gap = n > 100 ? .5 : n > 60 ? 1 : n > 30 ? 2 : 3;
+    const style = `width: min(100%, ${Math.max(n * 18, 80)}px); gap: ${gap}px`;
+    const axis = n > 1 ? `<span>${moveNo(p, 0)}</span><span>${moveNo(p, times.length - 1)}</span>` : `<span>${moveNo(p, 0)}</span>`;
     return `<div class="chart">`
-      + `<svg class="${b ? 'has-sel' : ''}" style="${width}" viewBox="0 0 ${n} 40"`
-      + ` preserveAspectRatio="none" aria-hidden="true">${rects}${line}</svg>`
+      + `<div class="bars${b ? ' has-sel' : ''}" style="${style}" aria-hidden="true">${rects}${line}</div>`
+      + `<div class="axis" style="width: min(100%, ${Math.max(n * 18, 80)}px)" aria-hidden="true">${axis}</div>`
       + (b ? `<b class="readout">${readout}</b>` : `<small class="readout">${t('chartTitle')}</small>`) + '</div>';
   }
   function pickBar(p, e) {
-    const svg = ui[p].stats.querySelector('svg');
-    if (!svg) return;
-    const r = svg.getBoundingClientRect(), n = barsFor(p).length;
+    const el = ui[p].stats.querySelector('.bars');
+    if (!el) return;
+    const r = el.getBoundingClientRect(), n = barsFor(p).length;
     let f = (e.clientX - r.left) / r.width;
     if (p === 'black') f = 1 - f; // Black's half is turned around
     const i = Math.floor(f * n);
