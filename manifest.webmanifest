@@ -4,7 +4,7 @@
   "description": "A game clock for Go. A Go Girls* App by Sina.",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#1c1418",
   "theme_color": "#fbf2f1",

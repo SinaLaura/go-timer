@@ -716,10 +716,22 @@
   }
   const outOfTime = c => (isByo(settings) ? c.byo && c.periods <= 0 : c.time <= 0);
 
+  // Full screen while playing: no phone bars around the clock. Browsers allow it only once a tap is
+  // finished (the halves react as the finger touches), so it is asked for when the finger lifts.
+  // The app on the home screen is full screen anyway; iPhones ignore it.
+  let wantFullScreen = false;
+  function goFullScreen() {
+    wantFullScreen = false;
+    const el = document.documentElement;
+    if (document.fullscreenElement || !el.requestFullscreen || matchMedia('(display-mode: fullscreen)').matches) return;
+    el.requestFullscreen({ navigationUI: 'hide' }).catch(() => { /* not allowed here */ });
+  }
+  document.addEventListener('pointerup', () => wantFullScreen && goFullScreen());
+
   // Tapping your own half ends your move and starts the other clock.
   function tap(p) {
     unlockSound();
-    if (state === 'ready') { click(p); return start(other(p)); }
+    if (state === 'ready') { wantFullScreen = true; click(p); return start(other(p)); }
     if (state !== 'running' || active !== p) return;
     const c = clock(p);
     if (outOfTime(c)) return flag(p);
@@ -755,7 +767,7 @@
 
   function togglePause() {
     unlockSound();
-    if (state === 'ready') return tap('white'); // the play button before the game: same as White's tap, Black's clock starts
+    if (state === 'ready') { tap('white'); return goFullScreen(); } // the play button before the game: same as White's tap, Black's clock starts
     if (state === 'running') {
       turnUsed += performance.now() - turnStart;
       state = 'paused';
@@ -767,6 +779,7 @@
       showStats = false;
       buzz(100);
       keepAwake();
+      goFullScreen(); // again, in case it was left while paused
     }
     render();
   }
