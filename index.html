@@ -40,8 +40,8 @@
     /* The phone's status bar above the screen takes this colour while White's turn bar is up there. */
     --edge-white: var(--run);
     --flag-pride: linear-gradient(to right, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787);
-    /* Trans: the actual flag, in stripes from top to bottom (with soft edges) */
-    --flag-trans: linear-gradient(#5bcefa 18%, #f5a9b8 22% 38%, #fff 42% 58%, #f5a9b8 62% 78%, #5bcefa 82%);
+    /* Trans: the actual flag, in sharp stripes from top to bottom */
+    --flag-trans: linear-gradient(#5bcefa 20%, #f5a9b8 0 40%, #fff 0 60%, #f5a9b8 0 80%, #5bcefa 0);
     --flag-wlw: linear-gradient(#d52d00 18%, #ff9a56 22% 38%, #fff 42% 58%, #d362a4 62% 78%, #a30262 82%); /* the actual flag, like trans */
   }
   :root[data-theme] { --stripes: var(--flag); --glow: .55; }
@@ -74,7 +74,7 @@
     pointer-events: none;
   }
   :root[data-theme=pride] #bar .icon { box-shadow: 0 1px 5px rgb(40 10 25 / .25); } /* white buttons on white and rainbow */
-  :root[data-theme=trans] { --flag: var(--flag-trans); --glow-bg: #5bcefa; --run-white: #f5a9b8; --run-black: #5bcefa; --edge-white: #f5a9b8; }
+  :root[data-theme=trans] { --flag: var(--flag-trans); --glow: 0; /* no glow, the stripes end sharp */ --run-white: #f5a9b8; --run-black: #5bcefa; --edge-white: #f5a9b8; }
   :root[data-theme=wlw] {
     /* The flag spread over the screen: its dark orange on White's edge (top), its purple on Black's. */
     --flag: var(--flag-wlw);
@@ -152,8 +152,11 @@
     text-transform: uppercase;
   }
   .stone { width: 1em; height: 1em; border-radius: 50%; }
-  /* Once both players have moved, the stone alone says whose half it is. */
-  .quiet .name [data-t] { display: none; }
+  /* Once both players have moved, the name and stone go: the clock alone is enough.
+     In the statistics the name comes back, without the stone. */
+  .quiet .name { display: none; }
+  .with-stats .name { display: flex; }
+  .with-stats .stone { display: none; }
   /* Flat stones with a little shine, a soft shade and a faint pink edge. */
   #black .stone { background: radial-gradient(circle at 32% 30%, #fffb 0 .12em, transparent .14em) #2b2328; box-shadow: inset -.1em -.12em 0 #0007, 0 0 0 1px #f07bb066; }
   #white .stone { background: radial-gradient(circle at 32% 30%, #fff 0 .12em, transparent .14em) #f5e9ed; box-shadow: inset -.1em -.12em 0 #e9cfda, 0 0 0 1px #f07bb066; }
@@ -219,7 +222,7 @@
   :root[data-theme=pride] .running::after { content: none; }
   :root[data-theme=pride] body :is(#black, #white) .heart-btn svg { fill: url(#pride-heart); stroke: none; }
   @keyframes pulse { 50% { opacity: .45; } }
-  @media (prefers-reduced-motion: reduce) { .heart-btn svg, .stats, #themes { animation: none !important; } body, .time { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .heart-btn svg, .stats, #themes, .paused .hint { animation: none !important; } body, .time { transition: none; } }
 
   /* The colours, just above the heart, facing the player who tapped it. */
   #themes {
@@ -261,6 +264,8 @@
   /* Clear of the bar: a narrower fade and some room; if it is too tall, the rest goes to the screen edge. */
   .with-stats .half { gap: 1vh; padding-top: 16px; justify-content: safe center; }
   .with-stats .hint:empty { display: none; }
+  .paused .hint { animation: breathe 3s ease-in-out infinite; } /* "Paused" softly fades in and out */
+  @keyframes breathe { 50% { opacity: .4; } }
   .with-stats .stats { display: grid; animation: fade-in .6s ease-out; }
   @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } }
   .with-stats:not(.over) .time { font-size: min(14vw, 7.5vh); }
@@ -1091,7 +1096,7 @@
   }
   function hintFor(p) {
     if (state === 'ready') return ''; // the play button starts the game
-    if (state === 'paused') return showStats ? '' : t('paused'); // room for the statistics
+    if (state === 'paused') return !showStats || active === p ? t('paused') : ''; // with the statistics, only on the side whose clock was running
     if (state === 'over') return p === loser ? t('lost') : t('won');
     return active === p && !moved[p] ? t('yourMove') : ''; // only until each player has moved once
   }
@@ -1111,6 +1116,7 @@
     }
     document.body.classList.toggle('ready', state === 'ready');
     document.body.classList.toggle('over', state === 'over');
+    document.body.classList.toggle('paused', state === 'paused');
     document.body.classList.toggle('with-stats', withStats);
     // Both halves the same size while the statistics show, so they fit.
     for (const p of ['black', 'white']) document.body.classList.toggle('turn-' + p, inGame && active === p && !withStats);
