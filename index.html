@@ -227,6 +227,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   .running .heart-btn, body.ready .heart-btn { display: grid; }
+  #black .heart-btn { padding-bottom: 5px; } /* a little higher at the bottom edge */
   /* Before the game there are no bars behind the hearts, so both are pink. */
   :root body.ready #black .heart-btn svg, :root body.ready #white .heart-btn svg { fill: var(--run); stroke: none; }
   .heart-btn svg { width: 27px; height: 27px; animation: pulse 2.4s ease-in-out infinite; }
@@ -495,7 +496,7 @@
 <dialog id="settings">
   <form method="dialog">
     <div class="top">
-      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 11.10. 17:39</small></div>
+      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 11.10. 18:00</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
