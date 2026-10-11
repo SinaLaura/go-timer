@@ -130,9 +130,9 @@
      the turn bar grows by it, and the heart and the colours keep clear of it. */
   #white { --cutout: env(safe-area-inset-top, 0px); }
   #black { --cutout: env(safe-area-inset-bottom, 0px); }
-  /* Not every phone tells where its camera is, so in full screen the top keeps at least 32px free for it. */
-  :root:fullscreen #white { --cutout: max(env(safe-area-inset-top, 0px), 32px); }
-  @media (display-mode: fullscreen) { #white { --cutout: max(env(safe-area-inset-top, 0px), 32px); } }
+  /* Not every phone tells where its camera is, so in full screen the top keeps a little room free for it. */
+  :root:fullscreen #white { --cutout: max(env(safe-area-inset-top, 0px), 14px); }
+  @media (display-mode: fullscreen) { #white { --cutout: max(env(safe-area-inset-top, 0px), 14px); } }
   .half { isolation: isolate; transition: background-color .4s, color .4s; }
   /* Soft fade from the middle bar into each half (its top edge, also for the turned-around one). */
   .half::before {
