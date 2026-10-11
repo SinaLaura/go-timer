@@ -553,7 +553,7 @@
   const TEXT = {
     en: {
       black: 'Black', white: 'White', pause: 'Pause', resume: 'Resume', reset: 'Reset', begin: "Start Black's clock",
-      startHint: "Tap here to start Black's clock", yourMove: 'Tap after your move', paused: 'Paused',
+      yourMove: 'Tap after your move', paused: 'Paused',
       lost: 'LOST', won: 'WON', resetAsk: 'Reset timer?', resetInfo: 'The game starts again from the beginning.',
       moves: 'Moves', timeUsed: 'Time used', perMove: 'Avg. move', longest: 'Longest move',
       chartTitle: 'Time per move', moveAt: (n, d) => `move ${n} · ${d}`,
@@ -574,7 +574,7 @@
     },
     de: {
       black: 'Schwarz', white: 'Weiß', pause: 'Pause', resume: 'Weiter', reset: 'Neustart', begin: 'Uhr von Schwarz starten',
-      startHint: 'Hier tippen – Schwarz beginnt', yourMove: 'Nach deinem Zug tippen', paused: 'Pausiert',
+      yourMove: 'Nach deinem Zug tippen', paused: 'Pausiert',
       lost: 'VERLOREN', won: 'GEWONNEN', resetAsk: 'Timer zurücksetzen?', resetInfo: 'Das Spiel beginnt dann von vorne.',
       moves: 'Züge', timeUsed: 'Verbrauchte Zeit', perMove: 'Ø Zug', longest: 'Längster Zug',
       chartTitle: 'Zeit pro Zug', moveAt: (n, d) => `Zug ${n} · ${d}`,
@@ -1079,7 +1079,7 @@
     if (el.textContent !== text) el.textContent = text;
   }
   function hintFor(p) {
-    if (state === 'ready') return p === 'white' ? t('startHint') : '';
+    if (state === 'ready') return ''; // the play button starts the game
     if (state === 'paused') return showStats ? '' : t('paused'); // room for the statistics
     if (state === 'over') return p === loser ? t('lost') : t('won');
     return active === p && !moved[p] ? t('yourMove') : ''; // only until each player has moved once
