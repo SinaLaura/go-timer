@@ -552,7 +552,7 @@
   // English and German texts; the EN | DE switch sits in the settings dialog.
   const TEXT = {
     en: {
-      black: 'Black', white: 'White', pause: 'Pause', resume: 'Resume', reset: 'Reset',
+      black: 'Black', white: 'White', pause: 'Pause', resume: 'Resume', reset: 'Reset', begin: "Start Black's clock",
       startHint: "Tap here to start Black's clock", yourMove: 'Tap after your move', paused: 'Paused',
       lost: 'LOST', won: 'WON', resetAsk: 'Reset timer?', resetInfo: 'The game starts again from the beginning.',
       moves: 'Moves', timeUsed: 'Time used', perMove: 'Avg. move', longest: 'Longest move',
@@ -573,7 +573,7 @@
       cancel: 'Cancel', set: 'Set', colours: 'Colours',
     },
     de: {
-      black: 'Schwarz', white: 'Weiß', pause: 'Pause', resume: 'Weiter', reset: 'Neustart',
+      black: 'Schwarz', white: 'Weiß', pause: 'Pause', resume: 'Weiter', reset: 'Neustart', begin: 'Uhr von Schwarz starten',
       startHint: 'Hier tippen – Schwarz beginnt', yourMove: 'Nach deinem Zug tippen', paused: 'Pausiert',
       lost: 'VERLOREN', won: 'GEWONNEN', resetAsk: 'Timer zurücksetzen?', resetInfo: 'Das Spiel beginnt dann von vorne.',
       moves: 'Züge', timeUsed: 'Verbrauchte Zeit', perMove: 'Ø Zug', longest: 'Längster Zug',
@@ -732,6 +732,7 @@
 
   function togglePause() {
     unlockSound();
+    if (state === 'ready') return tap('white'); // the play button before the game: same as White's tap, Black's clock starts
     if (state === 'running') {
       turnUsed += performance.now() - turnStart;
       state = 'paused';
@@ -1118,9 +1119,9 @@
       cl.toggle('critical', inGame && ms < CRITICAL);
       cl.toggle('flagged', state === 'over' && loser === p);
     }
-    pauseBtn.disabled = !inGame;
-    pauseBtn.classList.toggle('paused', state === 'paused');
-    pauseBtn.ariaLabel = pauseBtn.title = state === 'paused' ? t('resume') : t('pause');
+    pauseBtn.disabled = !inGame && state !== 'ready';
+    pauseBtn.classList.toggle('paused', state === 'paused' || state === 'ready'); // shows the play icon
+    pauseBtn.ariaLabel = pauseBtn.title = state === 'ready' ? t('begin') : state === 'paused' ? t('resume') : t('pause');
     resetBtn.ariaLabel = resetBtn.title = t('reset');
     for (const h of hearts) h.ariaLabel = h.title = t('colours');
     if (state !== 'running' && state !== 'ready') picker.hidden = true; // only while the hearts show
