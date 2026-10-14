@@ -79,9 +79,9 @@ Eine Go Girls* App von Sina. 🖤
 ## Answers for the Play Console forms
 
 - **Privacy policy:** https://sinalaura.github.io/go-timer/privacy.html
-- **App or game:** Game
-- **Category:** Board, where the other Go apps are
-- **Tags:** pick Board games, Strategy and Tools if they're offered
+- **App or game:** App. It's a tool (a clock), not a game.
+- **Category:** Tools
+- **Tags:** pick Tools, and Board games or Strategy if they're offered
 - **Ads:** No
 - **Data safety:** No data collected, no data shared
 - **Content rating questionnaire:** answer No to everything. It ends up rated for everyone.
