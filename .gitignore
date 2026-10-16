@@ -13,3 +13,6 @@ signing*.json
 # Files Windows and editors make by themselves
 Thumbs.db
 desktop.ini
+
+# Private notes (tester emails etc.): stay on this computer
+*.private.md
