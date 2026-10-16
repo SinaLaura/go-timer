@@ -53,9 +53,9 @@ Eine Spieluhr für Go, die auf deinem Handy neben dem Brett liegt.
 Tippe nach deinem Zug auf deine Hälfte des Bildschirms, und die Uhr deines Gegenübers läuft. Große Zahlen, gut lesbar über das ganze Brett, und der Bildschirm bleibt an, solange die Uhr läuft.
 
 BEDENKZEIT
-• Fischer: eine Grundzeit, plus Sekunden nach jedem Zug (Standard 45 min + 15 s)
-• Byo-yomi: eine Grundzeit, dann Perioden, die nach jedem Zug neu beginnen (Standard 30 min + 5 × 30 s)
-• Einfacher Timer: nur eine Grundzeit
+• Fischer: eine Grundbedenkzeit, plus Sekunden nach jedem Zug (Standard 45 min + 15 s)
+• Byo-yomi: eine Grundbedenkzeit, dann Perioden, die nach jedem Zug neu beginnen (Standard 30 min + 5 × 30 s)
+• Einfacher Timer: nur eine Grundbedenkzeit
 
 WÄHREND DER PARTIE
 • Unter 10 Sekunden wird deine Hälfte pink und ein leiser Ton erklingt
