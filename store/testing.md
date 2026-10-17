@@ -37,4 +37,5 @@ Both tests use the same email list, *Go Girls\* Timer - Go Clock Testers*.
 
 - 16 Oct 2026: store listing done, closed test sent to Google for review, approved the
   same day.
-- 17 Oct 2026: closed test switched to the Google Group (sent to Google for review).
+- 17 Oct 2026: closed test switched to the Google Group, approved the same day.
+- The group page says "not authorized" to anyone signed in with an account that is not a member. That is harmless: testers only need to be members and open the closed test link with that same account.
