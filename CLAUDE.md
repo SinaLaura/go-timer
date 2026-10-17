@@ -64,4 +64,5 @@ After that, every change Claude pushes goes live by itself.
 - Small steps: one feature at a time, test it in the browser, then commit with a short
   message.
 - If the choice is between more features or finished by 17 Oct, finish first.
-- Personal notes, tasks and ideas do not belong here; they live in Sina's `Life` folder.
+- Ideas and issues for the app go in `ideas.md`. Personal notes and tasks that are not
+  about the app live in Sina's `Life` folder.
