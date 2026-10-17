@@ -19,9 +19,11 @@ Both tests use the same email list, *Go Girls\* Timer - Go Clock Testers*.
 
 ## Workflow
 
-1. **Add a tester:** their Google account email (the one in the Play Store on their
-   Android phone) goes on the email list in the Play Console. Also add it to
-   `testers.private.md`.
+1. **Add a tester:** the closed test uses the Google Group
+   `go-timer-testers@googlegroups.com` (since 17 Oct). Testers join the group with the
+   Google account that's in the Play Store on their Android phone, or you add them under
+   *Mitglieder hinzufügen* at https://groups.google.com/g/go-timer-testers/members. The
+   internal test still uses the email list in the Play Console.
 2. **Before the closed test is approved:** send them the internal test link. They open
    it, accept, and install the app.
 3. **Once Google approves** (an email from Google Play): send everyone the closed test
@@ -33,4 +35,6 @@ Both tests use the same email list, *Go Girls\* Timer - Go Clock Testers*.
 
 ## Status
 
-- 16 Oct 2026: store listing done, closed test sent to Google for review.
+- 16 Oct 2026: store listing done, closed test sent to Google for review, approved the
+  same day.
+- 17 Oct 2026: closed test switched to the Google Group (sent to Google for review).
