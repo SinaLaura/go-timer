@@ -2,6 +2,23 @@
 
 Things to change in the app later. Newest first.
 
+## 2026-10-18 · Feedback from a friend
+
+- **Colours only while the clock runs.** The heart that opens the colours shows only
+  while a clock runs or before the game. Changing them that way is awkward. It should
+  at least work while paused.
+- **Error message in the settings doesn't match the colours.** When a number is out of
+  range, the browser shows its own built-in bubble (from `min`/`max` on the number
+  fields), not one in the app's colours.
+- **Not all text is translated.** Probably that same bubble: the browser writes it in the
+  phone's language, not the one picked with EN | DE.
+- **German text:** drop the comma before "ohne" ("Nur Grundbedenkzeit, ohne
+  Zusatzzeit").
+- **German text:** "Klänge und Stimme" sounds odd. Suggestion: "Ton und Stimme".
+- **Idea:** set minutes and seconds with a scroll wheel instead of typing them. Then
+  wrong values can't be entered, and the checking and the error message are no longer
+  needed.
+
 ## 2026-10-17 · Full-screen notice in the Play Store app
 
 After installing the app from the Play Store, a notice says it is running in full-screen
