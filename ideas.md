@@ -2,6 +2,21 @@
 
 Things to change in the app later. Newest first.
 
+## 2026-10-18 · Old logo on the loading screen (parked)
+
+When the app opens, the loading screen still shows the old G logo. The app's own screen
+has no logo, and all icons in this repo are already the new Go Girls* stone (since
+12 Oct), so the old one is a copy saved on the phone. Parked for now: wait and see
+whether it changes by itself.
+
+- **Home-screen web app:** Android updates the saved logo by itself, but that can take
+  days. Faster: remove it from the home screen and add it again.
+- **Play Store app:** the loading screen is built into the app package, so it only
+  changes with a new app version (higher version number, same signing key, uploaded in
+  the Play Console).
+- **Maybe also:** the app's saved offline copy (`sw.js`) may still hold the old icon
+  files. Possible fix: let it throw away its saved copy once and load everything fresh.
+
 ## 2026-10-18 · Feedback from a friend
 
 Done on 18 Oct:
