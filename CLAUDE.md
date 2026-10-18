@@ -58,6 +58,8 @@ After that, every change Claude pushes goes live by itself.
 
 ## Working together
 
+- **Always pull first.** Before starting any work, on any device, run `git pull` so the
+  latest changes from other devices are in. On a separate branch, also bring in `main`.
 - **Sina** (she/her) builds this, with Claude doing most of the
   typing. Keep explanations short. Show the result: open `index.html` in the browser
   after each change.
