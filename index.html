@@ -226,10 +226,10 @@
     place-items: end center;
     -webkit-tap-highlight-color: transparent;
   }
-  .running .heart-btn, body.ready .heart-btn { display: grid; }
+  .running .heart-btn, body:is(.ready, .paused) .heart-btn { display: grid; }
   #black .heart-btn { padding-bottom: 5px; } /* a little higher at the bottom edge */
-  /* Before the game there are no bars behind the hearts, so both are pink. */
-  :root body.ready #black .heart-btn svg, :root body.ready #white .heart-btn svg { fill: var(--run); stroke: none; }
+  /* Before the game and while paused there are no bars behind the hearts, so both are pink. */
+  :root body:is(.ready, .paused) :is(#black, #white) .heart-btn svg { fill: var(--run); stroke: none; }
   .heart-btn svg { width: 27px; height: 27px; animation: pulse 2.4s ease-in-out infinite; }
   #black .heart-btn svg { fill: #000; }
   #white .heart-btn svg { fill: #fff; }
@@ -404,6 +404,7 @@
     text-align: center;
   }
   dialog input.wrong { border-color: var(--out); background: #ffe3ef; }
+  dialog .error { margin: 0 4px 10px; font-size: 14px; font-weight: 700; color: var(--out); }
   dialog .check { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-size: 16px; }
   dialog .check input, dialog .option input { flex: none; width: 24px; height: 24px; padding: 0; accent-color: var(--out); }
   dialog .option {
@@ -494,9 +495,9 @@
 </div>
 
 <dialog id="settings">
-  <form method="dialog">
+  <form method="dialog" novalidate>
     <div class="top">
-      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 12.10. 22:27</small></div>
+      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 18.10. 16:22</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -536,6 +537,7 @@
         <span id="againText"></span>
       </button>
     </div>
+    <p id="formError" class="error" role="alert" hidden></p>
     <label class="check"><input id="sound" type="checkbox"> <span data-t="sound">Sounds and voice</span></label>
     <div class="actions">
       <!-- Set comes first: the phone's Done key presses the first button in the form. -->
@@ -605,6 +607,8 @@
       // spelt for the voice, so it says "bee-oh-yoh-mee"
       byoSay: (n, start) => (start ? 'Bee-oh-yoh-mee. ' : '') + (n === 1 ? 'Last period!' : start ? `${n} periods.` : `${n} periods left.`),
       cancel: 'Cancel', set: 'Set', colours: 'Colours',
+      outOfRange: (min, max) => `Please enter a number from ${min} to ${max}.`,
+      noTime: 'The time cannot be 0.',
     },
     de: {
       black: 'Schwarz', white: 'Weiß', pause: 'Pause', resume: 'Weiter', reset: 'Neustart', begin: 'Uhr von Schwarz starten',
@@ -619,14 +623,16 @@
       timeSetting: 'Bedenkzeit',
       fischerTime: 'Fischer', fischerDesc: 'Grundbedenkzeit, plus Sekunden nach jedem Zug',
       byoTime: 'Byo-yomi', byoDesc: 'Grundbedenkzeit, dann Perioden, die nach jedem Zug neu beginnen',
-      simpleTime: 'Einfacher Timer', simpleDesc: 'Nur Grundbedenkzeit, ohne Zusatzzeit', simpleShort: 'Timer',
+      simpleTime: 'Einfacher Timer', simpleDesc: 'Nur Grundbedenkzeit ohne Zusatzzeit', simpleShort: 'Timer',
       resetTo: s => `Zurück auf ${s}`,
-      mainTime: 'Grundbedenkzeit', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Klänge und Stimme',
+      mainTime: 'Grundbedenkzeit', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Ton und Stimme',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Letzte Periode!' : `Byo-yomi · noch ${n}`),
       // für die Stimme geschrieben, damit sie "Bio-jo-mi" sagt
       byoSay: (n, start) => (start ? 'Bio-jomi. ' : '') + (n === 1 ? 'Letzte Periode!' : start ? `${n} Perioden.` : `Noch ${n} Perioden.`),
       cancel: 'Abbrechen', set: 'OK', colours: 'Farben',
+      outOfRange: (min, max) => `Bitte eine Zahl von ${min} bis ${max} eingeben.`,
+      noTime: 'Die Zeit darf nicht 0 sein.',
     },
   };
   let lang = 'en';
@@ -906,14 +912,28 @@
     else form.requestSubmit(setBtn);
   });
 
-  // Set only closes with a time that works; otherwise the time fields turn pink.
+  // Set only closes with a time that works; otherwise the wrong fields turn pink and a short
+  // message says why. Our own message, not the browser's: that one ignores the app's language.
   const form = dialog.querySelector('form'), setBtn = form.querySelector('[value=set]');
+  const formError = field('formError');
   form.addEventListener('submit', e => {
-    if (e.submitter !== setBtn || valid(readForm())) return;
+    if (e.submitter !== setBtn) return;
+    const outside = numbers().filter(i => !i.checkValidity() || (i.value === '' && +i.min > 0)); // outside min / max, or empty where 0 is not allowed
+    const noTime = !valid(readForm());
+    if (!outside.length && !noTime) return;
     e.preventDefault();
-    for (const id of ['mainMin', 'mainSec', 'incSec']) field(id).classList.add('wrong');
+    const wrong = outside.length ? outside : ['mainMin', 'mainSec', 'incSec'].map(field);
+    for (const i of wrong) i.classList.add('wrong');
+    formError.textContent = outside.length
+      ? t('outOfRange')(outside[0].min, outside[0].max)
+      : t('noTime');
+    formError.hidden = false;
+    fitSettings();
   });
-  const unmark = () => { for (const i of dialog.querySelectorAll('.wrong')) i.classList.remove('wrong'); };
+  const unmark = () => {
+    for (const i of dialog.querySelectorAll('.wrong')) i.classList.remove('wrong');
+    formError.hidden = true;
+  };
   dialog.addEventListener('input', unmark);
 
   // While the phone's keyboard is open, the dialogs fit into the part of the screen above it.
@@ -1171,7 +1191,7 @@
     pauseBtn.ariaLabel = pauseBtn.title = state === 'ready' ? t('begin') : state === 'paused' ? t('resume') : t('pause');
     resetBtn.ariaLabel = resetBtn.title = t('reset');
     for (const h of hearts) h.ariaLabel = h.title = t('colours');
-    if (state !== 'running' && state !== 'ready') picker.hidden = true; // only while the hearts show
+    if (state === 'over') picker.hidden = true; // only while the hearts show
     info.classList.toggle('plain', inGame); // during a game it shows the statistics instead
     setText(setting, describe(settings));
     setText(system, t(systemKey()));

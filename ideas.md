@@ -2,6 +2,20 @@
 
 Things to change in the app later. Newest first.
 
+## 2026-10-18 · Feedback from a friend
+
+Done on 18 Oct:
+- ~~Colours only while the clock runs.~~ The hearts now also show while paused.
+- ~~Error message doesn't match the colours, and isn't translated.~~ It was the browser's
+  own bubble. Now the app shows its own message under the fields, in the app's colours
+  and language.
+- ~~German: comma before "ohne".~~ Removed.
+- ~~German: "Klänge und Stimme".~~ Now "Ton und Stimme".
+
+Decided against:
+- Scroll wheel for minutes and seconds instead of typing them: too much for what it
+  gives. Typing stays.
+
 ## 2026-10-17 · Full-screen notice in the Play Store app
 
 After installing the app from the Play Store, a notice says it is running in full-screen
