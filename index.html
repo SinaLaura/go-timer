@@ -593,6 +593,7 @@
       movesAt: (a, b, d) => `moves ${a}–${b} · avg. ${d}`,
       periodsLeft: 'Periods left', wholeGame: 'Whole game',
       lostSay: (l, w) => `${l} lost on time. ${w} wins!`,
+      timeUp: 'Time is up',
       timeSetting: 'Time setting',
       fischerTime: 'Fischer', fischerDesc: 'Main time, plus seconds after every move',
       byoTime: 'Byo-yomi', byoDesc: 'Main time, then periods that start again after every move',
@@ -614,6 +615,7 @@
       movesAt: (a, b, d) => `Züge ${a}–${b} · Ø ${d}`,
       periodsLeft: 'Perioden übrig', wholeGame: 'Ganzes Spiel',
       lostSay: (l, w) => `${l} hat die Zeit überschritten. ${w} gewinnt!`,
+      timeUp: 'Zeit abgelaufen',
       timeSetting: 'Bedenkzeit',
       fischerTime: 'Fischer', fischerDesc: 'Grundbedenkzeit, plus Sekunden nach jedem Zug',
       byoTime: 'Byo-yomi', byoDesc: 'Grundbedenkzeit, dann Perioden, die nach jedem Zug neu beginnen',
@@ -743,7 +745,7 @@
   // Tapping your own half ends your move and starts the other clock.
   function tap(p) {
     unlockSound();
-    if (state === 'ready') { wantFullScreen = true; click(p); return start(other(p)); }
+    if (state === 'ready') { wantFullScreen = true; askToNotify(); click(p); return start(other(p)); }
     if (state !== 'running' || active !== p) return;
     const c = clock(p);
     if (outOfTime(c)) return flag(p);
@@ -803,6 +805,7 @@
     chime([1760, 1318.5, 1046.5]);
     setTimeout(() => say(t('lostSay')(t(p), t(other(p)))), 600);
     if (!soundOn) buzz(400); // without sound: one soft vibration, so it is noticed
+    if (document.hidden) notify(t('timeUp'), t('lostSay')(t(p), t(other(p))));
     releaseWake();
     render();
   }
@@ -1176,7 +1179,48 @@
   }
   function systemKey() { return settings.system === 'simple' ? 'simpleShort' : settings.system + 'Time'; } // Fischer, Byo-yomi or Timer
 
+  // Phone notifications, so time running out is noticed while the app is in the background.
+  // Asked for once, on the first tap of a game (browsers only ask after a tap).
+  function askToNotify() {
+    if (!('Notification' in window) || Notification.permission !== 'default') return;
+    try { Notification.requestPermission().catch(() => {}); } catch (e) { /* old browser */ }
+  }
+  function notify(title, body) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const opts = {
+      body, tag: 'go-timer', renotify: true, requireInteraction: true, silent: !soundOn,
+      vibrate: [400, 200, 400, 200, 400], icon: 'icon-192.png', badge: 'icon-48.png',
+    };
+    const plain = () => { try { new Notification(title, opts); } catch (e) { /* not allowed here */ } };
+    // Android only shows notifications through the service worker (sw.js).
+    if (!('serviceWorker' in navigator)) return plain();
+    navigator.serviceWorker.getRegistration()
+      .then(r => (r ? r.showNotification(title, opts) : plain()))
+      .catch(plain);
+  }
+
   function loop() {
+    step();
+    requestAnimationFrame(loop);
+  }
+
+  // The screen loop above stops while the app is in the background. Then a small worker
+  // (its timers keep running there) wakes the clock 4 times a second, so the end of the time
+  // is still noticed: chime, vibration and a notification. Without workers, a plain timer does it.
+  const tickSource = `let id; onmessage = e => { clearInterval(id); if (e.data) id = setInterval(() => postMessage(0), 250); };`;
+  let ticker;
+  try {
+    ticker = new Worker(URL.createObjectURL(new Blob([tickSource], { type: 'text/javascript' })));
+    ticker.onmessage = step;
+  } catch (e) {
+    let id;
+    ticker = { postMessage: on => { clearInterval(id); if (on) id = setInterval(step, 250); } };
+  }
+  const tickInBackground = () => ticker.postMessage(document.hidden);
+  document.addEventListener('visibilitychange', tickInBackground);
+  tickInBackground();
+
+  function step() {
     if (state === 'running') {
       const c = clock(active);
       if (outOfTime(c)) flag(active);
@@ -1195,7 +1239,6 @@
         render();
       }
     }
-    requestAnimationFrame(loop);
   }
 
   newGame();
