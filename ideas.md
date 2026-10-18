@@ -2,17 +2,20 @@
 
 Things to change in the app later. Newest first.
 
-## 2026-10-18 · Old logo on the Play Store app's loading screen
+## 2026-10-18 · Old logo on the loading screen (parked)
 
-When the Play Store app opens, its loading screen still shows the old G logo. All icons
-in this repo are already the new Go Girls* stone (since 12 Oct), so a website change
-can't fix it: the loading screen is built into the app package when it is made.
+When the app opens, the loading screen still shows the old G logo. The app's own screen
+has no logo, and all icons in this repo are already the new Go Girls* stone (since
+12 Oct), so the old one is a copy saved on the phone. Parked for now: wait and see
+whether it changes by itself.
 
-Fix: build a new app package from https://sinalaura.github.io/go-timer (the same tool as
-the first time, e.g. PWABuilder), with a **higher version number** and the **same signing
-key** as before, then upload it to the closed test in the Play Console. Testers get it as
-an update. Phones that installed an older version may need to open the app once more
-after the update.
+- **Home-screen web app:** Android updates the saved logo by itself, but that can take
+  days. Faster: remove it from the home screen and add it again.
+- **Play Store app:** the loading screen is built into the app package, so it only
+  changes with a new app version (higher version number, same signing key, uploaded in
+  the Play Console).
+- **Maybe also:** the app's saved offline copy (`sw.js`) may still hold the old icon
+  files. Possible fix: let it throw away its saved copy once and load everything fresh.
 
 ## 2026-10-18 · Feedback from a friend
 
