@@ -60,6 +60,9 @@ After that, every change Claude pushes goes live by itself.
 
 - **Always pull first.** Before starting any work, on any device, run `git pull` so the
   latest changes from other devices are in. On a separate branch, also bring in `main`.
+- **Push straight to `main`, everywhere.** Also in the Claude app in the cloud: commit and
+  push directly to `main`, no separate branch and no pull request. Sina works alone, so
+  each change should simply go live. (She gave this permission on 18 Oct 2026.)
 - **Sina** (she/her) builds this, with Claude doing most of the
   typing. Keep explanations short. Show the result: open `index.html` in the browser
   after each change.
