@@ -29,10 +29,3 @@ self.addEventListener('fetch', e => {
     return fresh;
   }));
 });
-
-// Tapping the "time is up" notification brings the clock back to the front.
-self.addEventListener('notificationclick', e => {
-  e.notification.close();
-  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true })
-    .then(list => (list.length ? list[0].focus() : self.clients.openWindow('./'))));
-});

@@ -33,6 +33,10 @@ Decided against:
 
 ## 2026-10-17 · Full-screen notice in the Play Store app
 
+**Done on 19 Oct:** the Play Store app no longer asks for full screen (it is recognised
+by the `android-app://` referrer it opens the page with). Still to check on a real phone:
+whether a thin strip around the camera now stays in the bar colour.
+
 After installing the app from the Play Store, a notice says it is running in full-screen
 mode. Other apps don't show this. Is it needed?
 
