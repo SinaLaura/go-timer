@@ -2,6 +2,16 @@
 
 Things to change in the app later. Newest first.
 
+## 2026-10-19 · Hearts on the pause screen
+
+Sina is not quite happy with the hearts showing while paused (since 19 Oct, so the
+colours can be changed in a pause), especially on the bar chart of the statistics:
+there they get in the way. To pick up again later. Possible ways:
+
+- hide the hearts while the chart shows, keep them with the numbers;
+- show them only for a moment after the pause starts;
+- change colours somewhere else while paused (e.g. in the settings), with no hearts.
+
 ## 2026-10-19 · Pause when you leave the app
 
 **Done on 19 Oct:** leaving the app during a game (home button, another app, a call)
