@@ -228,8 +228,10 @@
   }
   .running .heart-btn, body:is(.ready, .paused) .heart-btn { display: grid; }
   #black .heart-btn { padding-bottom: 5px; } /* a little higher at the bottom edge */
-  /* Before the game and while paused there are no bars behind the hearts, so both are pink. */
-  :root body:is(.ready, .paused) :is(#black, #white) .heart-btn svg { fill: var(--run); stroke: none; }
+  /* Before the game and while paused there are no bars behind the hearts, so each heart takes its
+     player's bar colour from the theme (both pink in the Go Girls* colours). Paused, they rest. */
+  :root body:is(.ready, .paused) :is(#black, #white) .heart-btn svg { fill: var(--run-bg); stroke: none; }
+  body.paused .heart-btn svg { animation: none; }
   .heart-btn svg { width: 27px; height: 27px; animation: pulse 2.4s ease-in-out infinite; }
   #black .heart-btn svg { fill: #000; }
   #white .heart-btn svg { fill: #fff; }
@@ -497,7 +499,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 19.10. 13:46</small></div>
+      <div class="group">A Go Girls* App by <a href="https://github.com/SinaLaura/go-timer" target="_blank" rel="noopener">Sina</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 19.10. 14:01</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -791,13 +793,23 @@
     render();
   }
 
+  function pause() {
+    turnUsed += performance.now() - turnStart;
+    state = 'paused';
+    render();
+  }
+  // Leaving the app during a game (home button, another app, a call) pauses the clock.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && state === 'running') pause();
+  });
+
   function togglePause() {
     unlockSound();
     if (state === 'ready') { tap('white'); return goFullScreen(); } // the play button before the game: same as White's tap, Black's clock starts
     if (state === 'running') {
-      turnUsed += performance.now() - turnStart;
-      state = 'paused';
+      pause();
       buzz(100);
+      return;
     } else if (state === 'paused') {
       turnStart = performance.now();
       state = 'running';
@@ -1205,27 +1217,6 @@
   function systemKey() { return settings.system === 'simple' ? 'simpleShort' : settings.system + 'Time'; } // Fischer, Byo-yomi or Timer
 
   function loop() {
-    step();
-    requestAnimationFrame(loop);
-  }
-
-  // The screen loop above stops while the app is in the background. Then a small worker
-  // (its timers keep running there) wakes the clock 4 times a second, so the end of the time
-  // is still noticed: chime and vibration. Without workers, a plain timer does it.
-  const tickSource = `let id; onmessage = e => { clearInterval(id); if (e.data) id = setInterval(() => postMessage(0), 250); };`;
-  let ticker;
-  try {
-    ticker = new Worker(URL.createObjectURL(new Blob([tickSource], { type: 'text/javascript' })));
-    ticker.onmessage = step;
-  } catch (e) {
-    let id;
-    ticker = { postMessage: on => { clearInterval(id); if (on) id = setInterval(step, 250); } };
-  }
-  const tickInBackground = () => ticker.postMessage(document.hidden);
-  document.addEventListener('visibilitychange', tickInBackground);
-  tickInBackground();
-
-  function step() {
     if (state === 'running') {
       const c = clock(active);
       if (outOfTime(c)) flag(active);
@@ -1244,6 +1235,7 @@
         render();
       }
     }
+    requestAnimationFrame(loop);
   }
 
   newGame();
