@@ -2,6 +2,16 @@
 
 Things to change in the app later. Newest first.
 
+## 2026-10-19 · Pause when you leave the app
+
+When you leave the app during a game (home button, another app, a call), the clock
+should pause by itself, instead of running on in the background.
+
+To decide: then the background check from 18 Oct (chime and vibration when time runs
+out while the app is hidden) is no longer needed and can go. Maybe only pause when the
+app is left for longer than a few seconds, so a quick look at another app doesn't stop
+the game.
+
 ## 2026-10-18 · Old logo on the loading screen
 
 **Done on 19 Oct:** the old logo is gone; it changed by itself.
