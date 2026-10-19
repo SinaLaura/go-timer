@@ -2,7 +2,9 @@
 
 Things to change in the app later. Newest first.
 
-## 2026-10-18 · Old logo on the loading screen (parked)
+## 2026-10-18 · Old logo on the loading screen
+
+**Done on 19 Oct:** the old logo is gone; it changed by itself.
 
 When the app opens, the loading screen still shows the old G logo. The app's own screen
 has no logo, and all icons in this repo are already the new Go Girls* stone (since
