@@ -2,6 +2,15 @@
 
 Things to change in the app later. Newest first.
 
+## 2026-10-22 · Expected game length in the settings
+
+Draft: `draft-advanced.html`. A box under the time fields shows how long a game will
+probably take, e.g. "1:30–2:45 h". Tapping the board size switches 19×19 → 13×13 → 9×9.
+
+The guess: 19×19 takes 200–260 moves, 13×13 95–120, 9×9 45–60 (about two thirds of the
+points). Short end: the fewest moves at about 25 s each, but at most two thirds of the
+clock. Long end: the most moves at about 60 s each, but at most the whole clock.
+
 ## 2026-10-22 · Slider for the playing time
 
 A user suggested a slider for setting the minutes of main time, instead of typing them.

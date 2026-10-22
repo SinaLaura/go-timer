@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game Length Draft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black-bg: #1c1418; --black-fg: #fbf2f1;
+    --white-bg: #fbf2f1; --white-fg: #1c1418;
+    --bar: #f8cfe0; --bar-fg: #6b1d44;
+    --low: #e8559a; --out: #d6006f;
+    --line: #f4b6d1; --card: #fff5f9;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: Nunito, system-ui, sans-serif; background: #efe4ea; color: var(--bar-fg); padding: 24px 16px 48px; }
+  header { max-width: 420px; margin: 0 auto 20px; }
+  header h1 { font-size: 24px; font-weight: 800; }
+  header p { margin-top: 6px; font-size: 15px; line-height: 1.45; }
+  button { font: inherit; border: 0; cursor: pointer; color: inherit; background: none; }
+
+  /* A phone, 360 × 760, with the clock dimmed behind the settings */
+  .phone { position: relative; margin: 0 auto; width: min(360px, calc(100vw - 32px)); height: 760px; border-radius: 34px; overflow: hidden;
+           box-shadow: 0 0 0 8px #2a1e24, 0 18px 40px rgb(60 20 40 / .3); display: flex; flex-direction: column; }
+  .half { flex: 1; display: grid; place-items: center; font-size: 64px; font-weight: 800; }
+  .half.white { background: var(--white-bg); color: var(--white-fg); transform: rotate(180deg); }
+  .half.black { background: var(--black-bg); color: var(--black-fg); }
+  .bar { height: 50px; background: var(--bar); }
+  .scrim { position: absolute; inset: 0; background: rgb(40 10 25 / .6); display: flex; align-items: center; justify-content: center; padding: 16px; }
+
+  /* The settings, as in the app */
+  .dialog { width: 100%; max-height: 100%; overflow-y: auto; background: var(--card); border-radius: 20px; padding: 16px; }
+  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+  .group { font-size: 13px; font-weight: 800; color: var(--low); }
+  .group small { display: block; font-size: 11px; font-weight: 600; opacity: .6; }
+  .lang { display: flex; padding: 2px; border: 1.5px solid var(--line); border-radius: 14px; }
+  .lang button { padding: 3px 9px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+  .lang .on { background: var(--out); color: #fff; }
+  h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .option { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; padding: 7px 14px; border: 2px solid var(--line); border-radius: 14px; background: #fff; line-height: 1.3; cursor: pointer; }
+  .option:has(input:checked) { border-color: var(--out); background: var(--bar); }
+  .option input { flex: none; width: 24px; height: 24px; accent-color: var(--out); }
+  .option b { display: block; font-size: 16px; font-weight: 800; }
+  .option small { display: block; font-size: 13px; }
+  .own { padding: 6px 4px 0; }
+  label.lbl { display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .fields { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 16px; }
+  .fields input { width: 76px; padding: 6px; border: 2px solid var(--line); border-radius: 12px; background: #fff; color: inherit; font: inherit; font-size: 18px; text-align: center; }
+  .again { display: flex; align-items: center; gap: 6px; margin: -4px 0 8px; padding: 4px 0; color: var(--out); font-size: 14px; font-weight: 700; }
+  .again svg { width: 16px; height: 16px; }
+  .check { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-size: 16px; }
+  .check input { width: 24px; height: 24px; accent-color: var(--out); }
+  .actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn { min-height: 48px; padding: 0 20px; border-radius: 24px; background: #fff; font-size: 17px; font-weight: 600; }
+  .btn.primary { background: var(--out); color: #fff; }
+
+  /* NEW: the expected game length */
+  /* A box like the time systems above */
+  .estimate { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 10px; padding: 7px 10px 7px 14px;
+              border: 2px solid var(--line); border-radius: 14px; background: #fff; line-height: 1.3; }
+  .estimate > span { font-size: 14px; font-weight: 600; }
+  .estimate b { display: block; font-size: 17px; font-weight: 800; }
+  /* The board size: only this cycles 19×19 → 13×13 → 9×9 */
+  .board { flex: none; padding: 3px 10px; border: 2px solid var(--line); border-radius: 12px; background: var(--card);
+           color: var(--bar-fg); font-size: 14px; font-weight: 800; }
+  .board:active { background: var(--bar); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Draft: Expected game length</h1>
+  <p>The normal settings, with one new line above "Sounds and voice". It updates as you change the time.
+     Tap <b>19×19</b> to switch to 13×13, then 9×9, then back. Shown in German; tap EN | DE to switch.</p>
+</header>
+
+<div class="phone">
+  <div class="half white">45:00</div>
+  <div class="bar"></div>
+  <div class="half black">45:00</div>
+  <div class="scrim"><div class="dialog">
+    <div class="top">
+      <div class="group">An Ankabuti Application ♥<small>Version 22.10.</small></div>
+      <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
+    </div>
+    <h2 data-t="timeSetting">Time setting</h2>
+    <label class="option"><input type="radio" name="mode" value="fischer" checked><span><b>Fischer</b><small data-t="fischerDesc">Main time, plus seconds after every move</small></span></label>
+    <label class="option"><input type="radio" name="mode" value="byo"><span><b>Byo-yomi</b><small data-t="byoDesc">Main time, then periods that start again after every move</small></span></label>
+    <label class="option"><input type="radio" name="mode" value="simple"><span><b data-t="simpleTime">Simple timer</b><small data-t="simpleDesc">Just a main time, nothing added</small></span></label>
+    <div class="own">
+      <label class="lbl" data-t="mainTime">Main time</label>
+      <div class="fields"><input id="mainMin" type="number" min="0"> min <input id="mainSec" type="number" min="0" max="59"> s</div>
+      <div id="incRow"><label class="lbl" data-t="added">Added after each move</label>
+        <div class="fields"><input id="inc" type="number" min="0"> s</div></div>
+      <div id="byoRow"><label class="lbl" data-t="periodsLabel">Periods</label>
+        <div class="fields"><input id="periods" type="number" min="1"> × <input id="period" type="number" min="1"> s</div></div>
+      <button type="button" class="again" id="again">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        <span id="againText"></span>
+      </button>
+    </div>
+
+    <div class="estimate">
+      <span><span data-t="expected">Expected game length</span><b id="len"></b></span>
+      <button type="button" class="board" id="board" aria-label="Board size, tap to change"><span id="size">19×19</span></button>
+    </div>
+
+    <label class="check"><input type="checkbox" checked> <span data-t="sound">Sounds and voice</span></label>
+    <div class="actions"><button class="btn" data-t="cancel">Cancel</button><button class="btn primary" data-t="set">Set</button></div>
+  </div></div>
+</div>
+
+<script>
+  const DEFAULTS = {
+    fischer: { main: 45 * 60, inc: 15 },
+    byo: { main: 30 * 60, periods: 5, period: 30 },
+    simple: { main: 30 * 60 },
+  };
+  // Usual number of moves in a whole game, both players together (about two thirds of the points).
+  const MOVES = { 19: [200, 260], 13: [95, 120], 9: [45, 60] };
+  // Seconds people think per move on average: short end, long end.
+  const PACE = [25, 60];
+  const SIZES = [19, 13, 9];
+  let size = 19, lang = 'de';
+  // The app's own texts, plus the new one (expected).
+  const T = {
+    en: { timeSetting: 'Time setting', fischerDesc: 'Main time, plus seconds after every move',
+          byoDesc: 'Main time, then periods that start again after every move', simpleTime: 'Simple timer',
+          simpleDesc: 'Just a main time, nothing added', mainTime: 'Main time', added: 'Added after each move',
+          periodsLabel: 'Periods', expected: 'Expected game length', sound: 'Sounds and voice', cancel: 'Cancel', set: 'Set',
+          resetTo: s => `Reset to ${s}` },
+    de: { timeSetting: 'Bedenkzeit', fischerDesc: 'Grundbedenkzeit, plus Sekunden nach jedem Zug',
+          byoDesc: 'Grundbedenkzeit, dann Perioden, die nach jedem Zug neu beginnen', simpleTime: 'Einfacher Timer',
+          simpleDesc: 'Nur Grundbedenkzeit ohne Zusatzzeit', mainTime: 'Grundbedenkzeit', added: 'Dazu nach jedem Zug',
+          periodsLabel: 'Perioden', expected: 'Voraussichtliche Spieldauer', sound: 'Ton und Stimme', cancel: 'Abbrechen', set: 'OK',
+          resetTo: s => `Zurück auf ${s}` },
+  };
+  const $ = id => document.getElementById(id);
+  const system = () => document.querySelector('[name=mode]:checked').value;
+
+  // Seconds one player can spend over `own` moves.
+  // Byo-yomi: about half the moves are played in byo-yomi, each using nearly a full period.
+  function avail(sys, s, own) {
+    if (sys === 'fischer') return s.main + own * s.inc;
+    if (sys === 'byo') return s.main + own / 2 * s.period;
+    return s.main;
+  }
+  // Short end: a short game at 25 s per move, but at most two thirds of the clock.
+  // Long end: a long game at 60 s per move, but at most the whole clock.
+  function estimate(sys, s) {
+    const [a, b] = MOVES[size];
+    const lo = Math.min(a * PACE[0], 2 * avail(sys, s, a / 2) * 2 / 3) / 60;
+    const hi = Math.min(b * PACE[1], 2 * avail(sys, s, b / 2)) / 60;
+    return [Math.max(5, Math.floor(lo / 5) * 5), Math.max(5, Math.ceil(hi / 5) * 5)];
+  }
+  const len = m => m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ' ' + String(m % 60).padStart(2, '0') : ''}`;
+  const describe = (sys, s) => sys === 'fischer' ? `${s.main / 60} min + ${s.inc} s`
+    : sys === 'byo' ? `${s.main / 60} min + ${s.periods} × ${s.period} s` : `${s.main / 60} min`;
+
+  function read() {
+    return { main: (+$('mainMin').value || 0) * 60 + (+$('mainSec').value || 0), inc: +$('inc').value || 0,
+             periods: +$('periods').value || 1, period: +$('period').value || 0 };
+  }
+  function fill(s) {
+    $('mainMin').value = Math.floor(s.main / 60); $('mainSec').value = s.main % 60;
+    if ('inc' in s) $('inc').value = s.inc;
+    if ('periods' in s) { $('periods').value = s.periods; $('period').value = s.period; }
+  }
+  function update() {
+    const sys = system();
+    $('incRow').hidden = sys !== 'fischer';
+    $('byoRow').hidden = sys !== 'byo';
+    document.documentElement.lang = lang;
+    for (const el of document.querySelectorAll('[data-t]')) el.textContent = T[lang][el.dataset.t];
+    for (const b of document.querySelectorAll('[data-lang]')) b.classList.toggle('on', b.dataset.lang === lang);
+    $('againText').textContent = T[lang].resetTo(describe(sys, DEFAULTS[sys]));
+    const [lo, hi] = estimate(sys, read()), [a, b] = MOVES[size];
+    $('size').textContent = `${size}×${size}`;
+    // Compact: "1:30–2:45 h", or "40–55 min" when it is all under an hour.
+    const hm = m => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+    $('len').textContent = hi <= 60 ? `${lo}–${hi} min` : `${hm(lo)}–${hm(hi)} h`;
+  }
+
+  for (const r of document.querySelectorAll('[name=mode]')) r.addEventListener('change', () => { fill(DEFAULTS[system()]); update(); });
+  document.addEventListener('input', e => e.target.matches('.fields input') && update());
+  $('again').addEventListener('click', () => { fill(DEFAULTS[system()]); update(); });
+  $('board').addEventListener('click', () => {
+    size = SIZES[(SIZES.indexOf(size) + 1) % SIZES.length];
+    update();
+  });
+  for (const b of document.querySelectorAll('[data-lang]')) b.addEventListener('click', () => { lang = b.dataset.lang; update(); });
+  fill({ ...DEFAULTS.byo, ...DEFAULTS.fischer });
+  update();
+</script>
+</body>
+</html>
