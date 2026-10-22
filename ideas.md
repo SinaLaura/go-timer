@@ -2,6 +2,13 @@
 
 Things to change in the app later. Newest first.
 
+## 2026-10-22 · Slider for the playing time
+
+A user suggested a slider for setting the minutes of main time, instead of typing them.
+Note: a scroll wheel for minutes and seconds was decided against on 18 Oct (too much for
+what it gives). A slider is simpler, so maybe worth a second look, e.g. as an addition
+next to the typing field.
+
 ## 2026-10-22 · Change the time settings during a game
 
 A user would like to be able to change the time settings in the middle of a game, for
