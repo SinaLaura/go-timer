@@ -23,11 +23,15 @@ next to the typing field.
 
 ## 2026-10-22 · Change the time settings during a game
 
-**Done on 22 Oct:** the reset button on the right is now a menu button (gear), and both
-round buttons are bigger (52 px, reaching a little over the bar, which stays the same height). During a game it pauses
-and opens "Adjust time": −1 min, −10 s, +10 s, +1 min for each player, and ±1 period in
-byo-yomi. Reset moved into that window. Before a game the gear opens the settings; after
-a game it asks to start again.
+**Done on 22 Oct:** one round button on the left (start, pause; after a game a new game),
+52 px, reaching a little over the bar, which stays the same height. In the pause, three
+buttons slide slowly from it to the middle, without text: resume (▶, pink), end the game
+(power symbol, in the centre; asks first) and adjust the time (stopwatch). "Adjust time"
+gives −1 min, −10 s, +10 s, +1 min for each player, and ±1 period in byo-yomi.
+
+Why: a first version used a gear on the right for both the settings (before a game) and
+time and reset (during a game). A user found the same symbol for different things
+confusing, and the reset option too hidden. Draft: `draft-buttons.html`.
 
 A user would like to be able to change the time settings in the middle of a game, for
 example to give a player more time or to fix a wrong setting, without starting over.

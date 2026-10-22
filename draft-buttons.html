@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buttons Draft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black-bg: #1c1418; --black-fg: #fbf2f1; --white-bg: #fbf2f1; --white-fg: #1c1418;
+    --bar: #f8cfe0; --bar-fg: #6b1d44; --run: #f07bb0; --low: #e8559a; --out: #d6006f;
+    --line: #f4b6d1; --card: #fff5f9;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: Nunito, system-ui, sans-serif; background: #efe4ea; color: var(--bar-fg); padding: 24px 16px 48px; }
+  button { font: inherit; border: 0; cursor: pointer; color: inherit; background: none; }
+  header { max-width: 760px; margin: 0 auto 18px; }
+  h1 { font-size: 24px; font-weight: 800; }
+  header p { margin-top: 6px; font-size: 15px; line-height: 1.45; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; align-items: flex-start; }
+
+  /* The phone */
+  .phone { position: relative; width: min(360px, calc(100vw - 32px)); height: 720px; border-radius: 34px; overflow: hidden;
+           box-shadow: 0 0 0 8px #2a1e24, 0 18px 40px rgb(60 20 40 / .3); display: flex; flex-direction: column; }
+  .half { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .half.white { background: var(--white-bg); color: var(--white-fg); transform: rotate(180deg); }
+  .half.black { background: var(--black-bg); color: var(--black-fg); }
+  .name { font-size: 16px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .time { font-size: 60px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tag { font-size: 14px; font-weight: 800; letter-spacing: .1em; opacity: .6; min-height: 1.2em; }
+  .phone.running .half.active { box-shadow: inset 0 0 0 0 transparent; }
+  .phone.running .half.waiting .time { opacity: .4; }
+
+  /* The bar: 44px high, buttons sit on it */
+  .bar { position: relative; z-index: 1; height: 44px; background: var(--bar); }
+  .round { position: absolute; top: -4px; width: 52px; height: 52px; border-radius: 50%; background: #fff; display: grid; place-items: center;
+           box-shadow: 0 1px 6px rgb(40 10 25 / .28); transition: left .35s ease, opacity .25s, transform .35s; }
+  .round svg { width: 26px; height: 26px; }
+  .pill { position: absolute; left: 50%; top: 3px; transform: translateX(-50%); height: 38px; width: calc(100% - 152px); border-radius: 19px;
+          background: rgb(255 255 255 / .6); border: 2px solid #e08ab0; display: grid; place-items: center; text-align: center; font-size: 14px; font-weight: 700; line-height: 1.1;
+          transition: opacity .2s; }
+  .pill small { display: block; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .hide { opacity: 0; pointer-events: none; }
+
+  /* The three buttons while paused: they glide from the pause button to the middle */
+  .trio { position: absolute; inset: 0; pointer-events: none; }
+  .trio .btn { position: absolute; top: -4px; width: 52px; height: 52px; padding: 0; border-radius: 50%; background: #fff; display: grid; place-items: center;
+               box-shadow: 0 1px 6px rgb(40 10 25 / .28); font-size: 15px; font-weight: 800; white-space: nowrap;
+               left: 16px; opacity: 0; transform: scale(.6); transition: left .9s cubic-bezier(.25,1.15,.4,1), opacity .5s, transform .9s; }
+  .trio .btn svg { width: 26px; height: 26px; }
+  .trio .btn.go { background: var(--out); color: #fff; }
+  .phone.paused .trio { pointer-events: auto; }
+  .phone.paused .trio .btn { opacity: 1; transform: none; }
+
+  /* Dialogs inside the phone */
+  .scrim { position: absolute; inset: 0; z-index: 5; background: rgb(40 10 25 / .6); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .scrim[hidden] { display: none; }
+  .dialog { width: 100%; background: var(--card); border-radius: 20px; padding: 16px; }
+  .dialog h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .dialog p.sub { font-size: 14px; margin-bottom: 10px; }
+  .option { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; padding: 7px 14px; border: 2px solid var(--line); border-radius: 14px; background: #fff; }
+  .option.on { border-color: var(--out); background: var(--bar); }
+  .dot { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); background: #fff; }
+  .option.on .dot { border: 6px solid var(--out); }
+  .option b { font-size: 16px; font-weight: 800; }
+  .lbl { font-size: 14px; font-weight: 600; margin: 8px 0 4px; }
+  .fields { display: flex; align-items: center; gap: 8px; font-size: 16px; margin-bottom: 6px; }
+  .fields span.in { width: 70px; padding: 6px; border: 2px solid var(--line); border-radius: 12px; background: #fff; font-size: 18px; text-align: center; }
+  .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+  .actions button { min-height: 46px; padding: 0 18px; border-radius: 23px; background: #fff; font-size: 16px; font-weight: 700; }
+  .actions .primary { background: var(--out); color: #fff; }
+  .adj { padding: 9px 12px; border: 2px solid var(--line); border-radius: 14px; background: #fff; margin-bottom: 8px; }
+  .adj-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 800; }
+  .adj-top b { font-size: 24px; }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .steps span { display: grid; place-items: center; min-height: 36px; border-radius: 12px; background: var(--bar); font-size: 14px; font-weight: 800; }
+
+  /* The symbol overview */
+  .legend { width: min(360px, calc(100vw - 32px)); }
+  .legend h2 { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+  .legend ul { list-style: none; padding: 0; display: grid; gap: 10px; }
+  .legend li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: #fff; font-size: 14px; line-height: 1.35; }
+  .legend li b { display: block; font-size: 15px; }
+  .legend .ico { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--card); box-shadow: 0 1px 4px rgb(40 10 25 / .2); }
+  .legend .ico.go { background: var(--out); color: #fff; }
+  .legend .ico svg { width: 24px; height: 24px; }
+  .state { margin-top: 14px; font-size: 13px; font-weight: 700; text-align: center; opacity: .8; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Entwurf: Pause und Menü</h1>
+  <p>Während des Spiels gibt es nur noch den Pause-Knopf links. In der Pause gleiten drei Knöpfe von links zur Mitte:
+     <b>Weiter</b>, <b>Spiel beenden</b> (in der Mitte), <b>Zeit korrigieren</b>. Tippe im Handy auf ▶, dann auf ❚❚ und probiere die drei aus.</p>
+</header>
+
+<div class="wrap">
+  <div>
+    <div class="phone" id="phone">
+      <div class="half white"><div class="tag" id="tagW"></div><div class="name">Weiß</div><div class="time" id="tW">45:00</div></div>
+      <div class="bar">
+        <button class="round" id="main" style="left:16px" aria-label="Start"></button>
+        <div class="pill" id="pill"><span><small>Fischer</small>45 min + 15 s</span></div>
+        <div class="trio">
+          <button class="btn go i-play" data-act="resume" aria-label="Weiter"></button>
+          <button class="btn i-end" data-act="end" aria-label="Spiel beenden"></button>
+          <button class="btn i-adjust" data-act="adjust" aria-label="Zeit korrigieren"></button>
+        </div>
+      </div>
+      <div class="half black"><div class="tag" id="tagB"></div><div class="name">Schwarz</div><div class="time" id="tB">45:00</div></div>
+
+      <div class="scrim" id="dAdjust" hidden><div class="dialog">
+        <h2>Zeit korrigieren</h2>
+        <div class="adj"><div class="adj-top"><span>● Schwarz</span><b>44:12</b></div><div class="steps"><span>−1 min</span><span>−10 s</span><span>+10 s</span><span>+1 min</span></div></div>
+        <div class="adj"><div class="adj-top"><span>○ Weiß</span><b>43:58</b></div><div class="steps"><span>−1 min</span><span>−10 s</span><span>+10 s</span><span>+1 min</span></div></div>
+        <div class="actions"><button class="primary" data-close>Fertig</button></div>
+      </div></div>
+
+      <div class="scrim" id="dEnd" hidden><div class="dialog">
+        <h2>Spiel beenden?</h2>
+        <p class="sub">Die Uhren gehen zurück auf den Anfang. Danach kannst du die Bedenkzeit ändern.</p>
+        <div class="actions"><button data-close>Abbrechen</button><button class="primary" data-end>Beenden</button></div>
+      </div></div>
+
+      <div class="scrim" id="dSet" hidden><div class="dialog">
+        <h2>Bedenkzeit</h2>
+        <div class="option on"><span class="dot"></span><b>Fischer</b></div>
+        <div class="option"><span class="dot"></span><b>Byo-yomi</b></div>
+        <div class="option"><span class="dot"></span><b>Einfacher Timer</b></div>
+        <div class="lbl">Grundbedenkzeit (pro Person)</div>
+        <div class="fields"><span class="in">45</span> min <span class="in">0</span> s</div>
+        <div class="actions"><button data-close>Abbrechen</button><button class="primary" data-close>OK</button></div>
+      </div></div>
+    </div>
+    <p class="state" id="state"></p>
+  </div>
+
+  <div class="legend">
+    <h2>Die Symbole</h2>
+    <ul>
+      <li><span class="ico i-play"></span><span><b>Start / Weiter</b>Dreieck, wie bei jedem Abspielknopf. In der Pause pink hervorgehoben, weil es der häufigste Weg ist.</span></li>
+      <li><span class="ico i-pause"></span><span><b>Pause</b>Zwei Striche. Während des Spiels der einzige Knopf.</span></li>
+      <li><span class="ico i-adjust"></span><span><b>Zeit korrigieren</b>Eine schlichte Stoppuhr.</span></li>
+      <li><span class="ico i-end"></span><span><b>Spiel beenden</b>Ausschalter. Fragt kurz nach, dann zurück zum Anfang.</span></li>
+    </ul>
+    <p class="state" style="text-align:left">Vor dem Spiel: links ▶, in der Mitte die Bedenkzeit (antippen = Einstellungen), rechts nichts.<br>
+      Nach dem Spiel: links ▶, startet gleich ein neues Spiel.</p>
+  </div>
+</div>
+
+<script>
+  const ICON = {
+    play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.2v13.6c0 .8.9 1.3 1.6.8l10-6.8c.6-.4.6-1.2 0-1.6l-10-6.8C8.9 3.9 8 4.4 8 5.2z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1.5"/><rect x="14" y="4.5" width="4" height="15" rx="1.5"/></svg>',
+    // a plain stopwatch: face, button on top, one hand
+    adjust: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="8"/><path d="M10 2.5h4M12 2.5v3"/><path d="M12 13.5V9.5"/></svg>',
+    // power off: a line through an open circle
+    end: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3.5v8"/><path d="M6.6 7a7.5 7.5 0 1 0 10.8 0"/></svg>',
+  };
+  for (const k in ICON) for (const el of document.querySelectorAll('.i-' + k)) el.innerHTML = ICON[k];
+
+  const $ = id => document.getElementById(id), phone = $('phone');
+  let state = 'ready', times = { B: 45 * 60, W: 45 * 60 }, timer;
+  const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+  // Where the three buttons end up: next to each other, the middle one (power) in the centre of the bar.
+  // They all start at the pause button on the left and slide right, slowly; the furthest one (the stopwatch) goes first.
+  function placeTrio() {
+    const btns = [...document.querySelectorAll('.trio .btn')], gap = 16, barW = phone.clientWidth;
+    const widths = btns.map(b => b.offsetWidth), total = widths.reduce((a, b) => a + b, 0) + gap * 2;
+    let x = (barW - total) / 2;
+    btns.forEach((b, i) => {
+      b.dataset.left = x; x += widths[i] + gap;
+      b.style.transitionDelay = `${(btns.length - 1 - i) * 120}ms`;
+      b.style.zIndex = i + 1; // the stopwatch slides over the others
+    });
+  }
+  function render() {
+    phone.className = 'phone ' + state;
+    const main = $('main');
+    main.innerHTML = ICON[state === 'running' ? 'pause' : 'play'];
+    main.classList.toggle('hide', state === 'paused');
+    $('pill').classList.toggle('hide', state === 'running' || state === 'paused');
+    for (const b of document.querySelectorAll('.trio .btn')) b.style.left = state === 'paused' ? b.dataset.left + 'px' : '16px';
+    $('tB').textContent = fmt(times.B); $('tW').textContent = fmt(times.W);
+    $('tagB').textContent = $('tagW').textContent = state === 'paused' ? 'PAUSIERT' : '';
+    $('state').textContent = { ready: 'Vor dem Spiel', running: 'Während des Spiels', paused: 'In der Pause', over: 'Nach dem Spiel' }[state];
+  }
+  function run(on) {
+    clearInterval(timer);
+    if (on) timer = setInterval(() => { times.B = Math.max(0, times.B - 1); $('tB').textContent = fmt(times.B); }, 1000);
+  }
+
+  $('main').addEventListener('click', () => {
+    if (state === 'over') { times = { B: 45 * 60, W: 45 * 60 }; state = 'running'; run(true); } // a new game right away
+    else if (state === 'ready') { state = 'running'; run(true); }
+    else if (state === 'running') { state = 'paused'; run(false); }
+    render();
+  });
+  document.querySelector('.trio').addEventListener('click', e => {
+    const b = e.target.closest('.btn'); if (!b) return;
+    if (b.dataset.act === 'resume') { state = 'running'; run(true); render(); }
+    if (b.dataset.act === 'adjust') $('dAdjust').hidden = false;
+    if (b.dataset.act === 'end') $('dEnd').hidden = false;
+  });
+  for (const c of document.querySelectorAll('[data-close]')) c.addEventListener('click', () => c.closest('.scrim').hidden = true);
+  document.querySelector('[data-end]').addEventListener('click', () => {
+    $('dEnd').hidden = true; state = 'ready'; times = { B: 45 * 60, W: 45 * 60 }; run(false); render();
+  });
+  $('pill').addEventListener('click', () => state === 'ready' && ($('dSet').hidden = false));
+
+  placeTrio();
+  render();
+  addEventListener('resize', () => { placeTrio(); render(); });
+</script>
+</body>
+</html>
