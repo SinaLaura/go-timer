@@ -2,6 +2,18 @@
 
 Things to change in the app later. Newest first.
 
+## 2026-10-22 · Hard to leave the app
+
+A user found the app hard to leave. Most likely because of full screen: with no status
+bar or navigation bar showing, it is not clear how to get out. To look into:
+
+- **Play Store / home-screen app:** starts in full screen through the manifest
+  (`manifest.webmanifest`, `"display": "fullscreen"`). Android's bars only show after a
+  swipe from the edge. Possible fix: `"standalone"` instead, which keeps the phone's bars.
+- **Browser:** the page asks for full screen again on each tap during a game
+  (`index.html`, `goFullScreen()`), so leaving full screen doesn't last.
+- Maybe add a clear way out in the menu, or a short hint on how to leave.
+
 ## 2026-10-19 · Hearts on the pause screen
 
 Sina is not quite happy with the hearts showing while paused (since 19 Oct, so the
