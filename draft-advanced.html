@@ -60,7 +60,9 @@
   /* A box like the time systems above */
   .estimate { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 10px; padding: 7px 10px 7px 14px;
               border: 2px solid var(--line); border-radius: 14px; background: #fff; line-height: 1.3; }
-  .estimate > span { font-size: 14px; font-weight: 600; }
+  .estimate { flex-wrap: wrap; }
+  .est-main { flex: 1; padding: 0; text-align: left; font-size: 14px; font-weight: 600; line-height: 1.3; }
+  .why { flex-basis: 100%; font-size: 13px; line-height: 1.35; opacity: .8; }
   .estimate b { display: block; font-size: 17px; font-weight: 800; }
   /* The board size: only this cycles 19×19 → 13×13 → 9×9 */
   .board { flex: none; padding: 3px 10px; border: 2px solid var(--line); border-radius: 12px; background: var(--card);
@@ -72,7 +74,8 @@
 <header>
   <h1>Draft: Expected game length</h1>
   <p>The normal settings, with one new line above "Sounds and voice". It updates as you change the time.
-     Tap <b>19×19</b> to switch to 13×13, then 9×9, then back. Shown in German; tap EN | DE to switch.</p>
+     Tap <b>19×19</b> to switch to 13×13, then 9×9, then back. Shown in German; tap EN | DE to switch.
+     Tap the expected length to see how it is guessed.</p>
 </header>
 
 <div class="phone">
@@ -89,7 +92,7 @@
     <label class="option"><input type="radio" name="mode" value="byo"><span><b>Byo-yomi</b><small data-t="byoDesc">Main time, then periods that start again after every move</small></span></label>
     <label class="option"><input type="radio" name="mode" value="simple"><span><b data-t="simpleTime">Simple timer</b><small data-t="simpleDesc">Just a main time, nothing added</small></span></label>
     <div class="own">
-      <label class="lbl" data-t="mainTime">Main time</label>
+      <label class="lbl" data-t="mainTime">Main time (per player)</label>
       <div class="fields"><input id="mainMin" type="number" min="0"> min <input id="mainSec" type="number" min="0" max="59"> s</div>
       <div id="incRow"><label class="lbl" data-t="added">Added after each move</label>
         <div class="fields"><input id="inc" type="number" min="0"> s</div></div>
@@ -102,8 +105,9 @@
     </div>
 
     <div class="estimate">
-      <span><span data-t="expected">Expected game length</span><b id="len"></b></span>
+      <button type="button" class="est-main" id="why" aria-expanded="false"><span data-t="expected">Expected game length</span><b id="len"></b></button>
       <button type="button" class="board" id="board" aria-label="Board size, tap to change"><span id="size">19×19</span></button>
+      <p class="why" id="whyText" hidden></p>
     </div>
 
     <label class="check"><input type="checkbox" checked> <span data-t="sound">Sounds and voice</span></label>
@@ -127,14 +131,16 @@
   const T = {
     en: { timeSetting: 'Time setting', fischerDesc: 'Main time, plus seconds after every move',
           byoDesc: 'Main time, then periods that start again after every move', simpleTime: 'Simple timer',
-          simpleDesc: 'Just a main time, nothing added', mainTime: 'Main time', added: 'Added after each move',
+          simpleDesc: 'Just a main time, nothing added', mainTime: 'Main time (per player)', added: 'Added after each move',
           periodsLabel: 'Periods', expected: 'Expected game length', sound: 'Sounds and voice', cancel: 'Cancel', set: 'Set',
-          resetTo: s => `Reset to ${s}` },
+          resetTo: s => `Reset to ${s}`,
+          why: (a, b) => `About ${a}–${b} moves, 25–60 s each. Never more than the clock allows.` },
     de: { timeSetting: 'Bedenkzeit', fischerDesc: 'Grundbedenkzeit, plus Sekunden nach jedem Zug',
           byoDesc: 'Grundbedenkzeit, dann Perioden, die nach jedem Zug neu beginnen', simpleTime: 'Einfacher Timer',
-          simpleDesc: 'Nur Grundbedenkzeit ohne Zusatzzeit', mainTime: 'Grundbedenkzeit', added: 'Dazu nach jedem Zug',
+          simpleDesc: 'Nur Grundbedenkzeit ohne Zusatzzeit', mainTime: 'Grundbedenkzeit (pro Person)', added: 'Dazu nach jedem Zug',
           periodsLabel: 'Perioden', expected: 'Voraussichtliche Spieldauer', sound: 'Ton und Stimme', cancel: 'Abbrechen', set: 'OK',
-          resetTo: s => `Zurück auf ${s}` },
+          resetTo: s => `Zurück auf ${s}`,
+          why: (a, b) => `Etwa ${a}–${b} Züge, je 25–60 s. Nie länger, als die Uhr erlaubt.` },
   };
   const $ = id => document.getElementById(id);
   const system = () => document.querySelector('[name=mode]:checked').value;
@@ -180,7 +186,14 @@
     // Compact: "1:30–2:45 h", or "40–55 min" when it is all under an hour.
     const hm = m => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
     $('len').textContent = hi <= 60 ? `${lo}–${hi} min` : `${hm(lo)}–${hm(hi)} h`;
+    $('whyText').textContent = T[lang].why(a, b);
   }
+  // A tap on the expected length shows how it is guessed; another tap hides it.
+  $('why').addEventListener('click', () => {
+    const open = $('whyText').hidden;
+    $('whyText').hidden = !open;
+    $('why').ariaExpanded = open;
+  });
 
   for (const r of document.querySelectorAll('[name=mode]')) r.addEventListener('change', () => { fill(DEFAULTS[system()]); update(); });
   document.addEventListener('input', e => e.target.matches('.fields input') && update());
