@@ -24,7 +24,7 @@ next to the typing field.
 ## 2026-10-22 · Change the time settings during a game
 
 **Done on 22 Oct:** the reset button on the right is now a menu button (gear), and both
-round buttons are bigger (44 px, the bar stays the same height). During a game it pauses
+round buttons are bigger (52 px, reaching a little over the bar, which stays the same height). During a game it pauses
 and opens "Adjust time": −1 min, −10 s, +10 s, +1 min for each player, and ±1 period in
 byo-yomi. Reset moved into that window. Before a game the gear opens the settings; after
 a game it asks to start again.
