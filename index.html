@@ -351,9 +351,9 @@
     border-radius: 50%;
     box-shadow: 0 1px 6px rgb(40 10 25 / .28);
     opacity: 0;
-    transition: left .9s cubic-bezier(.4, 0, .2, 1), opacity 0s .9s; /* resuming: slide home, then vanish under ▶ */
+    transition: left .9s cubic-bezier(.4, 0, .2, 1), opacity 0s .9s, filter .25s; /* resuming: slide home, then vanish under ▶ */
   }
-  #bar .trio #resume { color: var(--play, var(--out)); transition: left .9s cubic-bezier(.4, 0, .2, 1), opacity .35s .9s; } /* ▶ fades into the pause symbol */
+  #bar .trio #resume { color: var(--play, var(--out)); transition: left .9s cubic-bezier(.4, 0, .2, 1), opacity .35s .9s, filter .25s; } /* ▶ fades into the pause symbol */
   #bar .trio svg { width: 26px; height: 26px; }
   #bar .trio #resume path { stroke: var(--play-line, none); stroke-width: 3; stroke-linejoin: round; paint-order: stroke; } /* an outline in some themes */
   #pause { color: var(--play, var(--out)); } /* ▶ and ❚❚ keep the same colour as ▶ in the pause, in every theme */
@@ -362,9 +362,19 @@
   body.paused #bar .trio { pointer-events: auto; }
   body.paused #bar .trio button {
     opacity: 1;
-    transition: left .9s cubic-bezier(.25, 1.15, .4, 1) calc(.35s + var(--in)), opacity 0s .35s; /* pausing: out from under ▶ */
+    transition: left .9s cubic-bezier(.25, 1.15, .4, 1) calc(.35s + var(--in)), opacity 0s .35s, filter .25s; /* pausing: out from under ▶ */
   }
-  body.paused #bar .trio #resume { transition: left .9s cubic-bezier(.25, 1.15, .4, 1) calc(.35s + var(--in)), opacity .35s; } /* the pause symbol fades into ▶ */
+  body.paused #bar .trio #resume { transition: left .9s cubic-bezier(.25, 1.15, .4, 1) calc(.35s + var(--in)), opacity .35s, filter .25s; } /* the pause symbol fades into ▶ */
+  /* End asks in place: a first tap widens it into "End game?", a second tap ends the game, and a tap
+     anywhere else (it lands on a see-through shield behind the button) puts it back. Meanwhile ▶ and
+     the stopwatch fade out. The script sets the wide width (--wide) to fit the words. */
+  #bar .trio #end { display: flex; align-items: center; justify-content: center; border-radius: 26px; }
+  body.paused #bar .trio #end { transition: left .9s cubic-bezier(.25, 1.15, .4, 1) calc(.35s + var(--in)), opacity 0s .35s, width .35s ease, transform .35s ease; }
+  #bar .trio #end.wide { z-index: 5 !important; width: var(--wide); transform: translateX(calc((52px - var(--wide)) / 2)); }
+  #end .end-label { max-width: 0; overflow: hidden; white-space: nowrap; opacity: 0; font-size: 15px; font-weight: 800; transition: max-width .35s ease, margin .35s ease, opacity .15s; }
+  #end.wide .end-label { max-width: 220px; margin-left: 8px; opacity: 1; transition: max-width .35s ease, margin .35s ease, opacity .25s .1s; }
+  body.confirm-end #bar .trio :is(#resume, #adjustBtn) { filter: opacity(0); }
+  #endShield { position: fixed; inset: 0; z-index: 4; }
   @media (prefers-reduced-motion: reduce) { #bar .trio button, #pause { transition: none !important; } }
   button {
     min-height: 48px;
@@ -428,8 +438,7 @@
   .lang button.on { background: var(--out); color: #fff; }
   .lang button:focus-visible { outline: none; }
   dialog h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-  dialog.confirm { width: min(320px, calc(100vw - 32px)); }
-  dialog.confirm .actions { justify-content: center; }
+
   dialog .actions button:focus-visible { outline: none; } /* no ring on the button that gets focus on opening */
   dialog label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
   .fields { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 16px; }
@@ -527,7 +536,6 @@
   </linearGradient>
 </svg>
 
-
 <section class="half" id="white">
   <div class="name"><span class="stone"></span><span data-t="white">White</span></div>
   <div class="time"></div>
@@ -547,6 +555,8 @@
   </button>
   <!-- No button on the right; this keeps the time setting in the middle. -->
   <span class="icon spacer" aria-hidden="true"></span>
+  <!-- While "End game?" asks: catches a tap anywhere else, which cancels. -->
+  <div id="endShield" hidden></div>
   <!-- While paused: these three slide out from the pause button to the middle of the bar. -->
   <div class="trio">
     <button type="button" id="resume">
@@ -554,6 +564,7 @@
     </button>
     <button type="button" id="end">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 3.5v8"/><path d="M6.6 7a7.5 7.5 0 1 0 10.8 0"/></svg>
+      <span class="end-label" data-t="endAsk">End game?</span>
     </button>
     <button type="button" id="adjustBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13.5" r="8"/><path d="M10 2.5h4M12 2.5v3"/><path d="M12 13.5V9.5"/></svg>
@@ -580,7 +591,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 22.10. 23:42</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 22.10. 23:49</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -656,15 +667,6 @@
   </form>
 </dialog>
 
-<dialog id="confirmReset" class="confirm">
-  <form method="dialog">
-    <!-- No words needed: the power button and "End game" say it. -->
-    <div class="actions">
-      <button value="cancel" data-t="cancel">Cancel</button>
-      <button value="reset" class="primary" data-t="endGame">End game</button>
-    </div>
-  </form>
-</dialog>
 
 <script>
   // Three time systems: Fischer (seconds added after every move), byo-yomi (a main time,
@@ -710,7 +712,7 @@
       resetTo: s => `Reset to ${s}`,
       expected: 'Expected game length', boardSize: 'Board size',
       adjustTitle: 'Adjust time', done: 'Done', newGame: 'New game',
-      endGame: 'End game',
+      endGame: 'End game', endAsk: 'End game?',
       estWhy: (a, b) => `About ${a}–${b} moves, 25–60 s each. Never more than the clock allows.`,
       mainTime: 'Main time (per player)', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Sounds and voice',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
@@ -737,7 +739,7 @@
       resetTo: s => `Zurück auf ${s}`,
       expected: 'Voraussichtliche Spieldauer', boardSize: 'Brettgröße',
       adjustTitle: 'Zeit korrigieren', done: 'Fertig', newGame: 'Neues Spiel',
-      endGame: 'Spiel beenden',
+      endGame: 'Spiel beenden', endAsk: 'Spiel beenden?',
       estWhy: (a, b) => `Etwa ${a}–${b} Züge, je 25–60 s. Nie länger, als die Uhr erlaubt.`,
       mainTime: 'Grundbedenkzeit (pro Person)', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Ton und Stimme',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
@@ -1039,14 +1041,24 @@
   placeTrio();
   addEventListener('resize', placeTrio);
   document.getElementById('resume').addEventListener('click', togglePause);
-  const confirmEnd = document.getElementById('confirmReset');
-  document.getElementById('end').addEventListener('click', () => {
-    confirmEnd.returnValue = '';
-    confirmEnd.showModal();
+  // End the game: the first tap asks in place ("End game?"), the second ends it; a tap anywhere else cancels.
+  // (A second tap right after the first, under 0.4 s, is ignored, so a quick double tap never ends a game.)
+  const endBtn = document.getElementById('end'), endShield = document.getElementById('endShield');
+  let askedAt = 0;
+  function askEnd(on) {
+    if (on) endBtn.style.setProperty('--wide', 52 + 8 + endBtn.querySelector('.end-label').scrollWidth + 18 + 'px');
+    endBtn.classList.toggle('wide', on);
+    document.body.classList.toggle('confirm-end', on);
+    endShield.hidden = !on;
+    askedAt = on ? performance.now() : 0;
+  }
+  endBtn.addEventListener('click', () => {
+    if (!endBtn.classList.contains('wide')) return askEnd(true);
+    if (performance.now() - askedAt < 400) return;
+    askEnd(false);
+    newGame();
   });
-  confirmEnd.addEventListener('close', () => {
-    if (confirmEnd.returnValue === 'reset') newGame();
-  });
+  endShield.addEventListener('click', () => askEnd(false));
   const adjust = document.getElementById('adjust');
   document.getElementById('adjustBtn').addEventListener('click', () => {
     showAdjust();
@@ -1421,6 +1433,7 @@
     const labels = { resume: 'resume', end: 'endGame', adjustBtn: 'adjustTitle' };
     for (const id in labels) field(id).ariaLabel = field(id).title = t(labels[id]);
     for (const b of trio) b.style.left = state === 'paused' ? b.style.getPropertyValue('--to') : '';
+    if (state !== 'paused' && endBtn.classList.contains('wide')) askEnd(false); // the question goes when the pause does
     for (const h of hearts) h.ariaLabel = h.title = t('colours');
     if (state === 'over') picker.hidden = true; // only while the hearts show
     info.classList.toggle('plain', inGame); // during a game it shows the statistics instead
