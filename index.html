@@ -441,6 +441,24 @@
     font-weight: 700;
   }
   dialog .again svg { width: 16px; height: 16px; }
+  /* The expected game length: a box like the time systems; only the board size inside looks like a button. */
+  dialog .estimate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin-bottom: 10px;
+    padding: 7px 10px 7px 14px;
+    border: 2px solid #f4b6d1;
+    border-radius: 14px;
+    background: #fff;
+    line-height: 1.3;
+  }
+  dialog .est-main { flex: 1; min-height: 0; padding: 0; border-radius: 0; background: none; text-align: left; font-size: 14px; line-height: 1.3; }
+  dialog .est-main b { display: block; font-size: 17px; font-weight: 800; }
+  dialog .board { flex: none; min-height: 0; padding: 3px 10px; border: 2px solid #f4b6d1; border-radius: 12px; background: #fff5f9; font-size: 14px; font-weight: 800; }
+  dialog .board:active { background: var(--bar); }
+  dialog .est-why { flex-basis: 100%; font-size: 13px; line-height: 1.35; opacity: .8; }
   .actions { display: flex; gap: 10px; justify-content: flex-end; }
   .actions .primary { background: var(--out); color: #fff; }
   /* Cancel and Set stay at the bottom of the settings, even while scrolling. */
@@ -500,7 +518,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 22.10. 20:45</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 22.10. 20:47</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -539,6 +557,12 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
         <span id="againText"></span>
       </button>
+    </div>
+    <!-- How long a game will probably take; a tap on it explains the guess, a tap on the board size switches it. -->
+    <div class="estimate">
+      <button type="button" id="estMain" class="est-main" aria-expanded="false" aria-controls="estWhy"><span data-t="expected">Expected game length</span><b id="estLen"></b></button>
+      <button type="button" id="board" class="board"></button>
+      <p id="estWhy" class="est-why" hidden></p>
     </div>
     <p id="formError" class="error" role="alert" hidden></p>
     <label class="check"><input id="sound" type="checkbox"> <span data-t="sound">Sounds and voice</span></label>
@@ -603,6 +627,8 @@
       byoTime: 'Byo-yomi', byoDesc: 'Main time, then periods that start again after every move',
       simpleTime: 'Simple timer', simpleDesc: 'Just a main time, nothing added', simpleShort: 'Timer',
       resetTo: s => `Reset to ${s}`,
+      expected: 'Expected game length', boardSize: 'Board size',
+      estWhy: (a, b) => `About ${a}–${b} moves, 25–60 s each. Never more than the clock allows.`,
       mainTime: 'Main time (per player)', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Sounds and voice',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Last period!' : `Byo-yomi · ${n} left`),
@@ -626,6 +652,8 @@
       byoTime: 'Byo-yomi', byoDesc: 'Grundbedenkzeit, dann Perioden, die nach jedem Zug neu beginnen',
       simpleTime: 'Einfacher Timer', simpleDesc: 'Nur Grundbedenkzeit ohne Zusatzzeit', simpleShort: 'Timer',
       resetTo: s => `Zurück auf ${s}`,
+      expected: 'Voraussichtliche Spieldauer', boardSize: 'Brettgröße',
+      estWhy: (a, b) => `Etwa ${a}–${b} Züge, je 25–60 s. Nie länger, als die Uhr erlaubt.`,
       mainTime: 'Grundbedenkzeit (pro Person)', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Ton und Stimme',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Letzte Periode!' : `Byo-yomi · noch ${n}`),
@@ -998,6 +1026,7 @@
     const list = numbers();
     for (const i of list) i.enterKeyHint = i === list.at(-1) ? 'done' : 'next';
     setText(field('againText'), t('resetTo')(describe(DEFAULTS[s.system])));
+    showEstimate(s);
     fitSettings();
   }
   function readForm() {
@@ -1019,6 +1048,41 @@
   // Reset: back to the standard values of the picked system.
   field('again').addEventListener('click', () => fillForm(draft[picked] = { ...DEFAULTS[picked] }));
 
+  // Expected game length: a rough guess from the board size and the time setting.
+  const MOVES = { 19: [200, 260], 13: [95, 120], 9: [45, 60] }; // a whole game, both players: about two thirds of the points
+  const PACE = [25, 60]; // seconds people think per move on average: in a short game, in a long one
+  const BOARDS = [19, 13, 9];
+  let board = 19;
+  try { board = BOARDS.find(b => b === Number(localStorage.getItem('board'))) || 19; } catch (e) { /* storage blocked */ }
+  // Time one player can use over `own` moves; in byo-yomi, about half of them in byo-yomi, each nearly a full period.
+  const canUse = (s, own) => s.main + (s.system === 'fischer' ? own * s.inc : isByo(s) ? own / 2 * s.period : 0);
+  function gameLength(s) {
+    const [few, many] = MOVES[board];
+    const short = Math.min(few * PACE[0] * 1000, 2 * canUse(s, few / 2) * 2 / 3); // a short game, at most two thirds of the clock
+    const long = Math.min(many * PACE[1] * 1000, 2 * canUse(s, many / 2));        // a long game, at most the whole clock
+    return [Math.max(5, Math.floor(short / 300000) * 5), Math.max(5, Math.ceil(long / 300000) * 5)]; // minutes, in steps of 5
+  }
+  // e.g. "1:20–2:35 h", or "15–60 min" for games up to an hour.
+  function showEstimate(s = readForm()) {
+    const [lo, hi] = gameLength(s), hm = m => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+    setText(field('estLen'), hi <= 60 ? (lo === hi ? `${hi} min` : `${lo}–${hi} min`) : `${hm(lo)}–${hm(hi)} h`);
+    setText(field('board'), `${board}×${board}`);
+    field('board').ariaLabel = `${t('boardSize')}: ${board}×${board}`;
+    setText(field('estWhy'), t('estWhy')(...MOVES[board]));
+  }
+  dialog.addEventListener('input', () => picked && showEstimate());
+  field('board').addEventListener('click', () => {
+    board = BOARDS[(BOARDS.indexOf(board) + 1) % BOARDS.length];
+    try { localStorage.setItem('board', board); } catch (e) { /* storage blocked */ }
+    showEstimate();
+  });
+  field('estMain').addEventListener('click', () => {
+    const open = field('estWhy').hidden;
+    field('estWhy').hidden = !open;
+    field('estMain').ariaExpanded = open;
+    fitSettings();
+  });
+
   info.addEventListener('click', () => {
     // During a game, the middle box pauses instead (the statistics then show); while paused it does nothing.
     if (state === 'running') return togglePause();
@@ -1028,6 +1092,8 @@
     radios.find(r => r.value === settings.system).checked = true;
     pick(settings.system);
     field('sound').checked = soundOn;
+    field('estWhy').hidden = true; // the explanation starts closed
+    field('estMain').ariaExpanded = false;
     dialog.returnValue = '';
     dialog.showModal();
     fitSettings();
@@ -1050,7 +1116,10 @@
     document.documentElement.lang = l;
     for (const el of document.querySelectorAll('[data-t]')) el.textContent = t(el.dataset.t);
     for (const b of document.querySelectorAll('[data-lang]')) b.classList.toggle('on', b.dataset.lang === l);
-    if (picked) setText(field('againText'), t('resetTo')(describe(DEFAULTS[picked])));
+    if (picked) {
+      setText(field('againText'), t('resetTo')(describe(DEFAULTS[picked])));
+      showEstimate();
+    }
     fitSettings();
     render();
   }

@@ -4,6 +4,9 @@ Things to change in the app later. Newest first.
 
 ## 2026-10-22 · Expected game length in the settings
 
+**Done on 22 Oct:** built into the settings, in English and German. The board size is
+remembered on the device. A tap on the expected length shows a one-line explanation.
+
 Draft: `draft-advanced.html`. A box under the time fields shows how long a game will
 probably take, e.g. "1:30–2:45 h". Tapping the board size switches 19×19 → 13×13 → 9×9.
 
