@@ -329,11 +329,14 @@
   #pause .play, #pause.paused .bars { display: none; }
   #pause.paused .play { display: block; }
   #bar .spacer { visibility: hidden; }
-  #pause { transition: opacity .3s .95s; } /* on resume it comes back once the three buttons are home */
-  body.paused #pause { opacity: 0; pointer-events: none; transition-delay: 0s; } /* in the pause the three buttons take over */
-  /* While paused: Resume, End and Adjust time slide slowly from the pause button to the middle of the bar,
-     and on resume the same way back, like a film run backwards. The script sets where each one stops
-     (--to) and short delays: going out the furthest starts first (--in), coming back the nearest (--back). */
+  /* The pause button and the three pause buttons are one family of white circles that turn into each other.
+     Pausing: the pause symbol fades into ▶ in the same circle (Resume lies on top of the pause button),
+     then End and Adjust time come out from under it and slide slowly to the middle, the furthest first.
+     Resuming: all three slide back together; End and Adjust time are faster and disappear under ▶,
+     and when ▶ is home its symbol fades back into the pause symbol. No circle grows or shrinks.
+     The script sets where each one stops (--to) and the short delays going out (--in). */
+  #pause { transition: opacity 0s .9s; } /* resuming: back under ▶ the moment it arrives */
+  body.paused #pause { opacity: 0; pointer-events: none; transition: opacity 0s .35s; } /* pausing: gone once ▶ covers it */
   #bar .trio { position: absolute; inset: 0; pointer-events: none; }
   #bar .trio button {
     position: absolute;
@@ -347,20 +350,17 @@
     border-radius: 50%;
     box-shadow: 0 1px 6px rgb(40 10 25 / .28);
     opacity: 0;
-    transform: scale(.6);
-    /* coming back: slide home, then fade */
-    transition: left .9s cubic-bezier(.4, 0, .2, 1) var(--back), transform .9s ease var(--back), opacity .3s calc(var(--back) + .65s);
+    transition: left .9s cubic-bezier(.4, 0, .2, 1), opacity 0s .9s; /* resuming: slide home, then vanish under ▶ */
   }
+  #bar .trio #resume { color: var(--out); transition: left .9s cubic-bezier(.4, 0, .2, 1), opacity .35s .9s; } /* ▶ fades into the pause symbol */
   #bar .trio svg { width: 26px; height: 26px; }
-  #bar .trio .go { background: var(--out); color: #fff; }
   body.paused #bar .trio { pointer-events: auto; }
   body.paused #bar .trio button {
     opacity: 1;
-    transform: none;
-    /* going out: appear, then slide to the middle with a soft bounce */
-    transition: left .9s cubic-bezier(.25, 1.15, .4, 1) var(--in), opacity .5s var(--in), transform .9s var(--in);
+    transition: left .9s cubic-bezier(.25, 1.15, .4, 1) calc(.35s + var(--in)), opacity 0s .35s; /* pausing: out from under ▶ */
   }
-  @media (prefers-reduced-motion: reduce) { #bar .trio button, #pause { transition: none; } }
+  body.paused #bar .trio #resume { transition: left .9s cubic-bezier(.25, 1.15, .4, 1) calc(.35s + var(--in)), opacity .35s; } /* the pause symbol fades into ▶ */
+  @media (prefers-reduced-motion: reduce) { #bar .trio button, #pause { transition: none !important; } }
   button {
     min-height: 48px;
     padding: 0 20px;
@@ -544,7 +544,7 @@
   <span class="icon spacer" aria-hidden="true"></span>
   <!-- While paused: these three slide out from the pause button to the middle of the bar. -->
   <div class="trio">
-    <button type="button" id="resume" class="go">
+    <button type="button" id="resume">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.9 1.3 1.6.8l10-6.8c.6-.4.6-1.2 0-1.6l-10-6.8C8.9 3.9 8 4.4 8 5.2z"/></svg>
     </button>
     <button type="button" id="end">
@@ -575,7 +575,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 22.10. 22:16</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 22.10. 23:04</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -1025,8 +1025,7 @@
     trio.forEach((b, i) => {
       b.style.setProperty('--to', x0 + i * (w + gap) + 'px');
       b.style.setProperty('--in', (trio.length - 1 - i) * 120 + 'ms'); // going out: the furthest first
-      b.style.setProperty('--back', i * 120 + 'ms');                    // coming back: the nearest first
-      b.style.zIndex = i + 1;
+      b.style.zIndex = trio.length - i; // Resume on top, the others slide out from under it
     });
   }
   placeTrio();
@@ -1408,7 +1407,7 @@
       cl.toggle('critical', inGame && ms < CRITICAL);
       cl.toggle('flagged', state === 'over' && loser === p);
     }
-    pauseBtn.classList.toggle('paused', state !== 'running'); // shows the play icon
+    pauseBtn.classList.toggle('paused', state === 'ready' || state === 'over'); // shows the play icon (in the pause it hides under Resume, still showing pause, so it can fade into it)
     pauseBtn.ariaLabel = pauseBtn.title = state === 'ready' ? t('begin') : state === 'over' ? t('newGame') : t('pause');
     const labels = { resume: 'resume', end: 'endGame', adjustBtn: 'adjustTitle' };
     for (const id in labels) field(id).ariaLabel = field(id).title = t(labels[id]);

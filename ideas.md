@@ -25,7 +25,7 @@ next to the typing field.
 
 **Done on 22 Oct:** one round button on the left (start, pause; after a game a new game),
 52 px, reaching a little over the bar, which stays the same height. In the pause, three
-buttons slide slowly from it to the middle, without text: resume (▶, pink), end the game
+buttons slide slowly from it to the middle, without text: resume (▶, pink on white), end the game
 (power symbol, in the centre; asks first) and adjust the time (stopwatch). "Adjust time"
 gives −1 min, −10 s, +10 s, +1 min for each player, and ±1 period in byo-yomi.
 
