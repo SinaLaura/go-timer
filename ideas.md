@@ -23,6 +23,12 @@ next to the typing field.
 
 ## 2026-10-22 · Change the time settings during a game
 
+**Done on 22 Oct:** the reset button on the right is now a menu button (gear), and both
+round buttons are bigger (44 px, the bar stays the same height). During a game it pauses
+and opens "Adjust time": −1 min, −10 s, +10 s, +1 min for each player, and ±1 period in
+byo-yomi. Reset moved into that window. Before a game the gear opens the settings; after
+a game it asks to start again.
+
 A user would like to be able to change the time settings in the middle of a game, for
 example to give a player more time or to fix a wrong setting, without starting over.
 Open questions: should this only work while paused, and does a change apply to both
@@ -101,8 +107,8 @@ Decided against:
 ## 2026-10-17 · Full-screen notice in the Play Store app
 
 **Done on 19 Oct:** the Play Store app no longer asks for full screen (it is recognised
-by the `android-app://` referrer it opens the page with). Still to check on a real phone:
-whether a thin strip around the camera now stays in the bar colour.
+by the `android-app://` referrer it opens the page with). The thin strip around the
+camera has not been a problem so far (22 Oct).
 
 After installing the app from the Play Store, a notice says it is running in full-screen
 mode. Other apps don't show this. Is it needed?

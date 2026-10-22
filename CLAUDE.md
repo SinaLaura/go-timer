@@ -29,7 +29,6 @@ the practice game at tournament time.
 
 **Later, only once version 1 works**
 
-- Canadian byo-yomi (N stones in X minutes).
 - Custom time settings that are remembered.
 - A spoken count in the last seconds, the way tournament clocks do it.
 - Move counter per player.
