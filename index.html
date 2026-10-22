@@ -500,7 +500,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 22.10. 19:56</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 22.10. 20:45</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -517,7 +517,7 @@
       <span><b data-t="simpleTime">Simple timer</b><small data-t="simpleDesc">Just a main time, nothing added</small></span>
     </label>
     <div class="own">
-      <label data-t="mainTime">Main time</label>
+      <label data-t="mainTime">Main time (per player)</label>
       <div class="fields">
         <input id="mainMin" type="number" inputmode="numeric" min="0" max="600"> min
         <input id="mainSec" type="number" inputmode="numeric" min="0" max="59"> s
@@ -603,7 +603,7 @@
       byoTime: 'Byo-yomi', byoDesc: 'Main time, then periods that start again after every move',
       simpleTime: 'Simple timer', simpleDesc: 'Just a main time, nothing added', simpleShort: 'Timer',
       resetTo: s => `Reset to ${s}`,
-      mainTime: 'Main time', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Sounds and voice',
+      mainTime: 'Main time (per player)', added: 'Added after each move', periodsLabel: 'Periods', sound: 'Sounds and voice',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Last period!' : `Byo-yomi · ${n} left`),
       // spelt for the voice, so it says "bee-oh-yoh-mee"
@@ -626,7 +626,7 @@
       byoTime: 'Byo-yomi', byoDesc: 'Grundbedenkzeit, dann Perioden, die nach jedem Zug neu beginnen',
       simpleTime: 'Einfacher Timer', simpleDesc: 'Nur Grundbedenkzeit ohne Zusatzzeit', simpleShort: 'Timer',
       resetTo: s => `Zurück auf ${s}`,
-      mainTime: 'Grundbedenkzeit', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Ton und Stimme',
+      mainTime: 'Grundbedenkzeit (pro Person)', added: 'Dazu nach jedem Zug', periodsLabel: 'Perioden', sound: 'Ton und Stimme',
       byoInfo: (n, s) => `+ ${n} × ${s} s`,
       byoLeft: n => (n === 1 ? 'Letzte Periode!' : `Byo-yomi · noch ${n}`),
       // für die Stimme geschrieben, damit sie "Bio-jo-mi" sagt
