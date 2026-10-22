@@ -37,6 +37,9 @@ bar or navigation bar showing, it is not clear how to get out. To look into:
 
 ## 2026-10-19 · Hearts on the pause screen
 
+**Done on 22 Oct:** the hearts are hidden while a half shows the bar chart, and come back
+with the numbers.
+
 Sina is not quite happy with the hearts showing while paused (since 19 Oct, so the
 colours can be changed in a pause), especially on the bar chart of the statistics:
 there they get in the way. To pick up again later. Possible ways:
