@@ -2,6 +2,13 @@
 
 Things to change in the app later. Newest first.
 
+## 2026-10-22 · Change the time settings during a game
+
+A user would like to be able to change the time settings in the middle of a game, for
+example to give a player more time or to fix a wrong setting, without starting over.
+Open questions: should this only work while paused, and does a change apply to both
+players or to one of them?
+
 ## 2026-10-22 · Hard to leave the app
 
 A user found the app hard to leave. Most likely because of full screen: with no status
