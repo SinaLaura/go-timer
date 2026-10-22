@@ -20,6 +20,13 @@ bar or navigation bar showing, it is not clear how to get out. To look into:
 - **Browser:** the page asks for full screen again on each tap during a game
   (`index.html`, `goFullScreen()`), so leaving full screen doesn't last.
 - Maybe add a clear way out in the menu, or a short hint on how to leave.
+- **Another idea:** don't open in full screen, but switch to it when a game starts, and
+  leave it again on reset. Then the phone's bars are there on the start screen, where you
+  would want to leave. In the browser the app already goes full screen at the start;
+  only leaving it on reset is missing. For the installed app it would mean
+  `"standalone"` in the manifest plus the full-screen request at the start. But that
+  request brings back Chrome's "swipe to exit full screen" notice in the Play Store app
+  (see 17 Oct), so check how it looks there.
 
 ## 2026-10-19 · Hearts on the pause screen
 
