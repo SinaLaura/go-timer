@@ -325,7 +325,7 @@
   /* Pause / resume and the menu are big round buttons that sit on the bar and reach a little
      over its edges (the bar itself stays 44px high), with a soft shadow so they look laid on top. */
   #bar { position: relative; z-index: 1; }
-  #bar .icon { display: grid; place-items: center; flex: none; width: 52px; min-height: 52px; margin: -4px 0; padding: 0; box-shadow: 0 1px 6px rgb(40 10 25 / .28); }
+  #bar .icon { display: grid; place-items: center; flex: none; width: 52px; min-height: 52px; margin: -4px 0; padding: 0; border-radius: 50%; box-shadow: 0 1px 6px rgb(40 10 25 / .28); }
   #bar .icon svg { width: 26px; height: 26px; }
   #pause .play, #pause.paused .bars { display: none; }
   #pause.paused .play { display: block; }
@@ -591,7 +591,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 22.10. 23:49</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 23.10. 12:33</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
