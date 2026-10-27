@@ -26,10 +26,11 @@ Both are the same timer, and changes reach both by themselves.
 ## How to use
 
 - Tap White's half or the play button **▶** in the middle to start Black's clock. After your move, tap your own half.
-- During a game, tap the pause button or the box in the middle to pause and see the statistics. Tap a half to see a chart of the time per move. **▶** continues the game.
-- Between games, tap the box in the middle to change the time setting.
+- During a game, tap the pause button or the box in the middle to pause and see the statistics. Tap a half to see a chart of the time per move. When paused, three buttons slide out: **▶** continues the game, the power button ends it (it asks first), and the stopwatch lets you add or take away time for each player, or periods in byo-yomi.
+- Between games, tap the box in the middle to change the time setting. It also shows how long a game will probably take, for a 19×19, 13×13 or 9×9 board.
+- Leaving the app during a game pauses the clock.
 
-<p><img src="images/stats.png" alt="The statistics while paused" width="200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/chart.png" alt="A tap shows the time per move as a chart" width="200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/settings.png" alt="The time settings" width="200"></p>
+<p><img src="images/stats.png" alt="The statistics while paused, with resume, end game and adjust time in the middle" width="170">&nbsp;&nbsp;&nbsp;<img src="images/chart.png" alt="A tap shows the time per move as a chart" width="170">&nbsp;&nbsp;&nbsp;<img src="images/adjust.png" alt="Adjusting each player's time" width="170">&nbsp;&nbsp;&nbsp;<img src="images/settings.png" alt="The time settings, with the expected game length" width="170"></p>
 
 ## Time settings
 
