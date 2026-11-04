@@ -90,6 +90,52 @@
   /* wlw: no edge at all: the bar flows on into both halves at full colour and fades out quickly. */
   :root[data-theme=wlw] { --glow: 1; --play: #a30262; --tools: #ff9a56; /* ▶ in the pause: the flag's dark rose; End and Adjust time: its light orange */ }
   :root[data-theme=wlw] .half::before { height: 12px; } /* short, so the outer stripes look no wider than the others */
+  /* Yin/Yang: only black, white and grey. Each half keeps its colour all the way to the screen edge (no turn
+     strip), the bar between them is split the same way, and the heart becomes a yin-yang. */
+  :root {
+    --yinyang: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23fff' stroke='%23000' stroke-width='4'/><path d='M50 2A48 48 0 0 1 50 98A24 24 0 0 1 50 50A24 24 0 0 0 50 2Z' fill='%23000'/><circle cx='50' cy='26' r='7' fill='%23000'/><circle cx='50' cy='74' r='7' fill='%23fff'/></svg>");
+  }
+  :root[data-theme=yinyang] {
+    --black-bg: #0b0b0b;
+    --black-fg: #f4f4f4;
+    --white-bg: #f4f4f4;
+    --white-fg: #0b0b0b;
+    --bar: #e4e4e4;
+    --bar-fg: #0b0b0b;
+    --run: #0b0b0b;
+    --low: #0b0b0b;
+    --out: #0b0b0b;
+    --glow: 0;
+    --play: #0b0b0b;
+    --tools: #0b0b0b;
+    --edge-white: initial; /* the phone's status bar keeps White's colour */
+    --stripes: linear-gradient(var(--white-bg) 50%, var(--black-bg) 0);
+  }
+  :root[data-theme=yinyang] .running::after { content: none; } /* the dimmed clock of the waiting side and the yin-yang show whose turn it is */
+  :root[data-theme=yinyang] #bar { --top: var(--white-bg); --bottom: var(--black-bg); background: linear-gradient(var(--top) 50%, var(--bottom) 0); }
+  :root[data-theme=yinyang]:has(#white:is(.critical, .flagged)) #bar { --top: #0b0b0b; } /* the bar follows a half that swapped */
+  :root[data-theme=yinyang]:has(#black:is(.critical, .flagged)) #bar { --bottom: #f4f4f4; }
+  :root[data-theme=yinyang] #bar :is(.icon, .trio button) { box-shadow: 0 0 0 2px #0b0b0b, 0 0 0 4px #f4f4f4; }
+  :root[data-theme=yinyang] #info:not(.plain) { color: #0b0b0b; background: #f4f4f4; border: 2px solid #0b0b0b; } /* during a game it stays invisible */
+  :root[data-theme=yinyang] :is(#white .stone, #adjust [data-p=white] .stone) { background: #fff; box-shadow: inset -.1em -.12em 0 #d8d8d8, 0 0 0 1.5px #0b0b0b; }
+  :root[data-theme=yinyang] :is(#black .stone, #adjust [data-p=black] .stone) { background: radial-gradient(circle at 32% 30%, #fff9 0 .12em, transparent .14em) #1a1a1a; box-shadow: inset -.1em -.12em 0 #000, 0 0 0 1.5px #f4f4f4; }
+  /* Short on time: the half swaps colours with its opponent, the other side takes over. */
+  :root[data-theme=yinyang] :is(#white.critical, #white.flagged) { background-color: #0b0b0b !important; color: #f4f4f4 !important; }
+  :root[data-theme=yinyang] :is(#black.critical, #black.flagged) { background-color: #f4f4f4 !important; color: #0b0b0b !important; }
+  :root[data-theme=yinyang] body:has(#white:is(.critical, .flagged)) { background: #0b0b0b; }
+  :root[data-theme=yinyang] .low .time { color: inherit; text-decoration: underline dotted; text-decoration-thickness: .04em; text-underline-offset: .08em; }
+  :root[data-theme=yinyang] .heart-btn svg { display: none; }
+  :root[data-theme=yinyang] .heart-btn::before { content: ""; width: 21px; height: 21px; background: var(--yinyang) center / contain no-repeat; }
+  :root[data-theme=yinyang] .chart .avg { border-color: currentColor; }
+  /* The colours and the dialogs (settings, adjust time): grey instead of pink. */
+  :root[data-theme=yinyang] #themes { background: #f4f4f4; box-shadow: 0 6px 24px rgb(0 0 0 / .5); }
+  :root[data-theme=yinyang] dialog { background: #f4f4f4; }
+  :root[data-theme=yinyang] dialog::backdrop { background: rgb(0 0 0 / .6); }
+  :root[data-theme=yinyang] :is(.lang, dialog input, dialog .option, dialog .estimate, dialog .board, #adjust .adj) { border-color: #b4b4b4; }
+  :root[data-theme=yinyang] :is(dialog .option:has(input:checked), dialog input.wrong) { border-color: #0b0b0b; }
+  :root[data-theme=yinyang] dialog input.wrong { background: #e4e4e4; }
+  :root[data-theme=yinyang] dialog .board, :root[data-theme=yinyang] #settings .actions { background: #f4f4f4; }
+  [data-pick=yinyang] .swatch { background: var(--yinyang) center / contain no-repeat; box-shadow: none; } /* the logo itself */
   * { box-sizing: border-box; margin: 0; }
   html, body { height: 100%; }
   body {
@@ -586,12 +632,13 @@
   <button type="button" data-pick="wlw"><span class="swatch"></span>wlw</button>
   <button type="button" data-pick="trans"><span class="swatch"></span>Trans</button>
   <button type="button" data-pick="pride"><span class="swatch"></span>Pride</button>
+  <button type="button" data-pick="yinyang"><span class="swatch"></span>Yin/Yang</button>
 </div>
 
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 23.10. 12:33</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 10:40</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -807,7 +854,7 @@
     if (themeColour.content !== top) themeColour.content = top;
   }
   function setTheme(name) {
-    if (!['pride', 'trans', 'wlw'].includes(name)) name = 'pink';
+    if (!['pride', 'trans', 'wlw', 'yinyang'].includes(name)) name = 'pink';
     if (name === 'pink') delete document.documentElement.dataset.theme;
     else document.documentElement.dataset.theme = name;
     for (const b of picker.querySelectorAll('[data-pick]')) b.classList.toggle('on', b.dataset.pick === name);
