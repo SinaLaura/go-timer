@@ -663,7 +663,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 12:30</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 12:50</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -1132,10 +1132,18 @@
   });
   endShield.addEventListener('click', () => askEnd(false));
   const adjust = document.getElementById('adjust');
+  let beforeAdjust; // the times when the window opened: anything but Done puts them back
   document.getElementById('adjustBtn').addEventListener('click', () => {
+    beforeAdjust = { left: { ...left }, periods: { ...periods } };
     showAdjust();
     adjust.returnValue = '';
     adjust.showModal();
+  });
+  adjust.addEventListener('close', () => {
+    if (adjust.returnValue === 'done') return;
+    Object.assign(left, beforeAdjust.left);
+    Object.assign(periods, beforeAdjust.periods);
+    render();
   });
   function showAdjust() {
     for (const p of ['black', 'white']) {
@@ -1333,7 +1341,7 @@
     store();
     newGame();
   });
-  // A tap outside the window closes it, like Cancel (and for Adjust time like Done: what was tapped stays).
+  // A tap outside the window closes it, like Cancel: Adjust time puts the old times back, only Done keeps them.
   // A tap on the dialog's own padding also lands on the dialog, so the position tells it apart from the backdrop.
   for (const d of [adjust, dialog]) d.addEventListener('click', e => {
     if (e.target !== d) return;
