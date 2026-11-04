@@ -14,26 +14,46 @@ A Go clock for your phone, lying next to the board.
 
 It is the same timer everywhere, and changes reach all of them by themselves.
 
-<p><img src="images/stats.png" alt="The statistics while paused, with resume, end game and adjust time in the middle" width="170">&nbsp;&nbsp;&nbsp;<img src="images/chart.png" alt="A tap shows the time per move as a chart" width="170">&nbsp;&nbsp;&nbsp;<img src="images/adjust.png" alt="Adjusting each player's time" width="170">&nbsp;&nbsp;&nbsp;<img src="images/settings.png" alt="The time settings, with the expected game length" width="170"></p>
+## Features
 
-## Time settings
+<table>
+<tr>
+<td width="33%" valign="top"><b>Two big halves</b><br>Tap your half after your move, and your opponent's clock starts.<br><br><img src="images/f-halves.png" alt="The running clock: Black's half with the time and the hint to tap after your move, White's half dimmed above" width="220"></td>
+<td width="33%" valign="top"><b>Three time systems</b><br>Fischer (default 45 min + 15 s), byo-yomi (default 30 min + 5 × 30 s) or a simple timer.<br><br><img src="images/f-systems.png" alt="The time setting dialog with Fischer, byo-yomi and simple timer marked" width="220"></td>
+<td width="33%" valign="top"><b>Expected game length</b><br>See how long a game will probably take, for a 19×19, 13×13 or 9×9 board.<br><br><img src="images/f-expected.png" alt="The expected game length box in the time settings, marked" width="220"></td>
+</tr>
+<tr>
+<td valign="top"><b>Warning when time is short</b><br>Under 10 seconds the half turns pink, the time shows tenths, and a soft chime sounds.<br><br><img src="images/f-low.png" alt="Black's clock at 7.3 seconds on a pink half" width="260"></td>
+<td valign="top"><b>Who lost on time</b><br>The screen says it, and a voice does too, in English or German.<br><br><img src="images/f-lost.png" alt="Black lost on time" width="260"></td>
+<td valign="top"><b>Statistics</b><br>Pause to see the number of moves, the time used, the average and the longest move.<br><br><img src="images/f-stats.png" alt="The paused game with the statistics" width="260"></td>
+</tr>
+<tr>
+<td valign="top"><b>Pause menu</b><br>Resume, end the game (it asks first) or adjust the time.<br><br><img src="images/f-pause.png" alt="The three round buttons in the middle of the paused game, marked" width="260"></td>
+<td valign="top"><b>Time per move</b><br>Tap a half while paused to see a chart of how long every move took.<br><br><img src="images/f-chart.png" alt="The chart of the time per move" width="260"></td>
+<td valign="top"><b>Adjust the time</b><br>Add or take away time for each player, or periods in byo-yomi, if something went wrong.<br><br><img src="images/f-adjust.png" alt="The adjust time dialog" width="260"></td>
+</tr>
+<tr>
+<td valign="top"><b>English and German</b><br>Switch the language in the time settings.<br><br><img src="images/f-lang.png" alt="The time settings with the language switch marked" width="220"></td>
+<td colspan="2" valign="top"><b>Also</b><ul><li>The screen stays on while the clock runs.</li><li>Leaving the app during a game pauses the clock.</li><li>Works offline, once it has been opened.</li><li>No account, no ads, no tracking.</li></ul></td>
+</tr>
+</table>
 
-- **Fischer:** a main time, plus seconds after every move. Default: 45 min + 15 s.
-- **Byo-yomi:** a main time, then periods that start again after every move. Default: 30 min + 5 × 30 s.
-- **Simple timer:** just a main time.
+## Themes
 
-Under 10 seconds the half turns pink and a soft chime sounds. When time runs out, a voice says who lost. In English or German.
+Five colour themes, from pink to Yin/Yang. During a game, tap the little heart on the running clock to pick one. The choice is kept on your phone. The pictures show the time settings in each theme.
 
-<details>
-<summary>🤫 Easter egg (spoiler)</summary>
+<img src="images/t-picker.png" alt="The theme picker, opened with the heart on the running clock" width="200">
 
-<br>
+<table>
+<tr>
+<td align="center"><img src="images/t-pink.png" alt="Go Girls* theme" width="150"><br><b>Go Girls*</b></td>
+<td align="center"><img src="images/t-wlw.png" alt="wlw theme" width="150"><br><b>wlw</b></td>
+<td align="center"><img src="images/t-trans.png" alt="Trans theme" width="150"><br><b>Trans</b></td>
+<td align="center"><img src="images/t-pride.png" alt="Pride theme" width="150"><br><b>Pride</b></td>
+<td align="center"><img src="images/t-yinyang.png" alt="Yin/Yang theme" width="150"><br><b>Yin/Yang</b></td>
+</tr>
+</table>
 
-During a game, tap the little heart on the running clock. Here are three of the colour themes; the last one is yours to find.
-
-<p><img src="images/go-girls.gif" alt="Go Girls* theme, with the colour themes open" width="200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/trans.gif" alt="Trans theme" width="200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/pride.gif" alt="Pride theme" width="200"></p>
-
-</details>
 
 ## Found a bug or have an idea?
 
