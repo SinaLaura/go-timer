@@ -418,6 +418,10 @@
   body:is(.ready, .over) #pause { --shift: calc(var(--start-x) - 16px); color: var(--start-ic); transition: opacity 0s .9s, transform .9s cubic-bezier(.25, 1.15, .4, 1) .47s; }
   #bar #timeBtn { position: absolute; z-index: 1; top: -4px; left: 16px; margin: 0; color: var(--start-ic); opacity: 0; pointer-events: none; transform: none; transition: transform .9s cubic-bezier(.4, 0, .2, 1), opacity 0s .9s; }
   body:is(.ready, .over) #bar #timeBtn { opacity: 1; pointer-events: auto; transform: translateX(calc(var(--start-x) + 52px)); transition: transform .9s cubic-bezier(.25, 1.15, .4, 1) .35s, opacity 0s .35s; }
+  /* Ending a game from the pause: nothing slides (the three pause buttons would cross the two new ones); the pause buttons
+     are gone at once and ▶ and the time-setting button fade in where they stand. */
+  body.ending #bar .trio button { transition: none !important; }
+  body.ending :is(#pause, #bar #timeBtn) { transition: opacity .35s .1s, transform 0s !important; }
   body.paused #pause { opacity: 0; pointer-events: none; transition: opacity 0s .35s; } /* pausing: gone once ▶ covers it */
   #bar .trio { position: absolute; inset: 0; pointer-events: none; }
   #bar .trio button {
@@ -665,7 +669,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 12:00</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 12:02</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -1132,7 +1136,9 @@
     if (!endBtn.classList.contains('wide')) return askEnd(true);
     if (performance.now() - askedAt < 400) return;
     askEnd(false);
+    document.body.classList.add('ending'); // no sliding around: the pause buttons are gone at once, the two new ones fade in
     newGame();
+    setTimeout(() => document.body.classList.remove('ending'), 800);
   });
   endShield.addEventListener('click', () => askEnd(false));
   const adjust = document.getElementById('adjust');
