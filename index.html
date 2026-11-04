@@ -116,7 +116,6 @@
   :root[data-theme=yinyang]:has(#white:is(.critical, .flagged)) #bar { --top: #0b0b0b; } /* the bar follows a half that swapped */
   :root[data-theme=yinyang]:has(#black:is(.critical, .flagged)) #bar { --bottom: #f4f4f4; }
   :root[data-theme=yinyang] #bar :is(.icon, .trio button) { box-shadow: 0 0 0 2px #0b0b0b, 0 0 0 4px #f4f4f4; }
-  :root[data-theme=yinyang] #info:not(.plain) { color: #0b0b0b; background: #f4f4f4; border: 2px solid #0b0b0b; } /* during a game it stays invisible */
   :root[data-theme=yinyang] :is(#white .stone, #adjust [data-p=white] .stone) { background: #fff; box-shadow: inset -.1em -.12em 0 #d8d8d8, 0 0 0 1.5px #0b0b0b; }
   :root[data-theme=yinyang] :is(#black .stone, #adjust [data-p=black] .stone) { background: radial-gradient(circle at 32% 30%, #fff9 0 .12em, transparent .14em) #1a1a1a; box-shadow: inset -.1em -.12em 0 #000, 0 0 0 1.5px #f4f4f4; }
   /* Short on time: the half swaps colours with its opponent, the other side takes over. */
@@ -157,6 +156,13 @@
     --dlg-bd: #b58ac4; --dlg-ac: #750787; --dlg-tint: #ecdcf1; --dlg-tt: #3d1745; --dlg-rr: #750787; --dlg-tx: #3d1745; --dlg-gp: #750787;
   }
   :root[data-theme=yinyang] { --dlg-bg: #fff; --dlg-bar: #fff; --dlg-bd: #0b0b0b; --dlg-ac: #0b0b0b; --dlg-tint: #0b0b0b; --dlg-tt: #fff; --dlg-rr: #fff; --dlg-cb: #0b0b0b; --dlg-tx: #0b0b0b; --dlg-gp: #0b0b0b; --dlg-backdrop: rgb(0 0 0 / .6); }
+  /* The colour of the symbols on the two round buttons (▶ and the time setting) before and after a game:
+     one of the two colours from the pause, whichever looks better on white in the theme. */
+  :root { --start-ic: var(--out); }
+  :root[data-theme=wlw] { --start-ic: #ff9a56; }
+  :root[data-theme=trans] { --start-ic: #e0809a; }
+  :root[data-theme=pride] { --start-ic: #750787; }
+  :root[data-theme=yinyang] { --start-ic: #0b0b0b; }
   [data-pick=yinyang] .swatch { background: var(--yinyang) center / contain no-repeat; box-shadow: none; } /* the logo itself */
   * { box-sizing: border-box; margin: 0; }
   html, body { height: 100%; }
@@ -404,7 +410,13 @@
      Resuming: all three slide back together; End and Adjust time are faster and disappear under ▶,
      and when ▶ is home its symbol fades back into the pause symbol. No circle grows or shrinks.
      The script sets where each one stops (--to) and the short delays going out (--in). */
-  #pause { transition: opacity 0s .9s; } /* resuming: back under ▶ the moment it arrives */
+  #pause { transform: translateX(var(--shift, 0px)); transition: opacity 0s .9s, transform .5s cubic-bezier(.4, 0, .2, 1); } /* resuming: back under ▶ the moment it arrives */
+  /* Before and after a game ▶ stands in the middle, next to the time-setting button; during a game it is at the left.
+     The script sets --start-x: where the two stand (side by side, centred). */
+  #bar { --start-x: calc((100vw - 120px) / 2); } /* the script sets the exact value; this one keeps ▶ from sliding in when the page opens */
+  body:is(.ready, .over) #pause { --shift: calc(var(--start-x) - 16px); color: var(--start-ic); }
+  #bar #timeBtn { position: absolute; top: -4px; left: calc(var(--start-x, 0px) + 68px); margin: 0; color: var(--start-ic); opacity: 0; pointer-events: none; transition: opacity .3s; }
+  body:is(.ready, .over) #bar #timeBtn { opacity: 1; pointer-events: auto; }
   body.paused #pause { opacity: 0; pointer-events: none; transition: opacity 0s .35s; } /* pausing: gone once ▶ covers it */
   #bar .trio { position: absolute; inset: 0; pointer-events: none; }
   #bar .trio button {
@@ -456,23 +468,9 @@
     font-weight: 600;
   }
   button:disabled { opacity: .4; }
-  /* The time setting doubles as the button that changes it. */
-  #info {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 1px 10px;
-    background: rgb(255 255 255 / .6);
-    border: 2px solid #e08ab0;
-    font-size: 14px;
-    line-height: 1.15;
-  }
-  #info.plain { opacity: 1; background: transparent; border-color: transparent; }
-  #info.plain > span { visibility: hidden; } /* during a game the time setting is in the statistics */
-  #info small:empty { display: none; }
-  #info small { display: block; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
+  /* The empty middle of the bar: during a game a tap on it pauses; before and after a game the round buttons stand there. */
+  #info { flex: 1; min-height: 38px; padding: 0; border-radius: 0; background: transparent; }
+  body:is(.ready, .over) #info { pointer-events: none; }
 
   button:focus-visible, input:focus-visible { outline: 3px solid var(--low); outline-offset: 2px; }
 
@@ -623,10 +621,11 @@
     <svg class="bars" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.5"/><rect x="14" y="4.5" width="4" height="15" rx="1.5"/></svg>
     <svg class="play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.9 1.3 1.6.8l10-6.8c.6-.4.6-1.2 0-1.6l-10-6.8C8.9 3.9 8 4.4 8 5.2z"/></svg>
   </button>
-  <button id="info">
-    <span><small id="system"></small><span id="setting"></span></span>
+  <!-- The empty middle: during a game a tap on it pauses. Before and after a game ▶ and the time-setting button stand in the middle instead. -->
+  <button id="info" aria-hidden="true" tabindex="-1"></button>
+  <button id="timeBtn" class="icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="6" r="2"/><path d="M4 6h8M16 6h4"/><circle cx="8" cy="12" r="2"/><path d="M4 12h2M10 12h10"/><circle cx="17" cy="18" r="2"/><path d="M4 18h11M19 18h1"/></svg>
   </button>
-  <!-- No button on the right; this keeps the time setting in the middle. -->
   <span class="icon spacer" aria-hidden="true"></span>
   <!-- While "End game?" asks: catches a tap anywhere else, which cancels. -->
   <div id="endShield" hidden></div>
@@ -665,7 +664,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 11:30</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 11:54</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -897,8 +896,7 @@
 
   const pauseBtn = document.getElementById('pause');
   const info = document.getElementById('info');
-  const setting = document.getElementById('setting');
-  const system = document.getElementById('system');
+  const timeBtn = document.getElementById('timeBtn');
   document.addEventListener('contextmenu', e => e.preventDefault());
 
   function newGame() {
@@ -1107,7 +1105,8 @@
   // Where each one stops: side by side, the middle one (End) in the centre of the bar.
   // Short delays, so they move one after the other.
   function placeTrio() {
-    const gap = 16, w = 52, x0 = (document.getElementById('bar').clientWidth - 3 * w - 2 * gap) / 2;
+    const bar = document.getElementById('bar'), gap = 16, w = 52, x0 = (bar.clientWidth - 3 * w - 2 * gap) / 2;
+    bar.style.setProperty('--start-x', (bar.clientWidth - 2 * w - gap) / 2 + 'px'); // before and after a game: ▶ and the time setting, centred
     trio.forEach((b, i) => {
       b.style.setProperty('--to', x0 + i * (w + gap) + 'px');
       b.style.setProperty('--in', (trio.length - 1 - i) * 120 + 'ms'); // going out: the furthest first
@@ -1326,10 +1325,11 @@
     fitSettings();
   });
 
-  info.addEventListener('click', () => {
-    // During a game, the middle box pauses instead (the statistics then show); while paused it does nothing.
-    if (state === 'running') return togglePause();
-    if (state === 'paused') return;
+  // During a game, the empty middle of the bar pauses (the statistics then show); while paused it does nothing.
+  info.addEventListener('click', () => { if (state === 'running') togglePause(); });
+  timeBtn.addEventListener('click', openSettings);
+  function openSettings() {
+    if (state === 'running' || state === 'paused') return; // only between games
     draft = structuredClone(saved);
     picked = null;
     radios.find(r => r.value === settings.system).checked = true;
@@ -1340,7 +1340,7 @@
     dialog.returnValue = '';
     dialog.showModal();
     fitSettings();
-  });
+  }
   dialog.addEventListener('close', () => {
     if (dialog.returnValue !== 'set') return;
     soundOn = field('sound').checked;
@@ -1482,10 +1482,15 @@
     if (el.textContent !== text) el.textContent = text;
   }
   function hintFor(p) {
-    if (state === 'ready') return ''; // the play button starts the game
+    if (state === 'ready') return settingLine(); // the play button starts the game
     if (state === 'paused') return active === p ? t('paused') : ''; // only on the side whose clock was running
     if (state === 'over') return p === loser ? t('lost') : t('won');
     return active === p && !moved[p] ? t('yourMove') : ''; // only until each player has moved once
+  }
+
+  // Before the game, small under each clock: the whole setting, e.g. "Fischer 45 min + 15 s".
+  function settingLine() {
+    return `${t(systemKey())} ${describe(settings)}`;
   }
 
   // Byo-yomi, under the time: the periods still to come, or how many are left.
@@ -1534,9 +1539,7 @@
     if (state !== 'paused' && endBtn.classList.contains('wide')) askEnd(false); // the question goes when the pause does
     for (const h of hearts) h.ariaLabel = h.title = t('colours');
     if (state === 'over') picker.hidden = true; // only while the hearts show
-    info.classList.toggle('plain', inGame); // during a game it shows the statistics instead
-    setText(setting, describe(settings));
-    setText(system, t(systemKey()));
+    timeBtn.ariaLabel = timeBtn.title = t('timeSetting');
     paintStatusBar();
   }
   function systemKey() { return settings.system === 'simple' ? 'simpleShort' : settings.system + 'Time'; } // Fischer, Byo-yomi or Timer
