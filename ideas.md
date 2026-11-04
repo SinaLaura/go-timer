@@ -5,16 +5,23 @@ Things to change in the app later. Newest first.
 ## 2026-11-04 · Show the technical maximum next to the expected length
 
 Idea: the expected game length shows "from–to" as now, then a comma and the longest game
-the clock allows, e.g. "15–60 min, max. 1:55 h" (German: "max."). The maximum is a fact, not a guess:
+the clock allows, e.g. "1:30–2:15 h, max. 2:35 h" (German: "max."). **Only shown when it is
+longer than the "to" value**, so the same number never appears twice.
 
-- Fischer: 2 × main time + 15 s × number of moves. Mannheim: 2 × 45 min = 90 min, plus
-  about 100 moves × 15 s = 25 min, so about 1:55 h.
-- Byo-yomi: 2 × main time + 2 × periods × period length (a player who uses every period
-  to the end).
+How the maximum is worked out:
+
+- **Fischer:** 2 × main time + increment × expected number of moves (the upper guess for
+  the chosen board size: 9×9 60, 13×13 120, 19×19 260). Mannheim (2 × 45 min, 15 s):
+  9×9 1:45 h, 13×13 2:00 h, 19×19 2:35 h. Strictly, Fischer has no hard maximum (fast
+  moves win time back), so this is the maximum for the guessed number of moves.
+- **Byo-yomi:** 2 × main time + 2 × periods × period length (every period used to the
+  end). A real maximum.
+- **Simple timer:** 2 × main time. Also a real maximum.
 
 Why: seen in another clock app (Ankabuti), whose box says "Nie länger, als die Uhr
-erlaubt" but never names that limit. Open: the Fischer maximum depends on the number of
-moves, so use the same move guess as for the upper end of the range (by board size).
+erlaubt" but never names that limit.
+
+Open: spelling, "1:30–2:15 h, max. 2:35 h" (comma, preferred) or "(max. 2:35 h)".
 
 ## 2026-10-22 · Expected game length in the settings
 
