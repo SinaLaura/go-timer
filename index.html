@@ -125,6 +125,8 @@
   :root[data-theme=yinyang] body:has(#white:is(.critical, .flagged)) { background: #0b0b0b; }
   :root[data-theme=yinyang] .low .time { color: inherit; text-decoration: underline dotted; text-decoration-thickness: .04em; text-underline-offset: .08em; }
   :root[data-theme=yinyang] .heart-btn svg { display: none; }
+  /* On White's half no outline: the white part blends into the half, as the black outline does on Black's. */
+  :root[data-theme=yinyang] #white .heart-btn::before { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23fff'/><path d='M50 0A50 50 0 0 1 50 100A25 25 0 0 1 50 50A25 25 0 0 0 50 0Z' fill='%23000'/><circle cx='50' cy='25' r='7' fill='%23000'/><circle cx='50' cy='75' r='7' fill='%23fff'/></svg>"); }
   :root[data-theme=yinyang] .heart-btn::before { content: ""; width: 21px; height: 21px; background: var(--yinyang) center / contain no-repeat; }
   :root[data-theme=yinyang] :is(#white, #black) .heart-btn { padding-bottom: 12px; } /* no turn strip behind it, so a little room from the screen edge, where the phone's bar or camera could cut it off */
   :root[data-theme=yinyang] .chart .avg { border-color: currentColor; }
@@ -639,7 +641,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 11:20</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 11:40</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
