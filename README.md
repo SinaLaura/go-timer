@@ -40,17 +40,24 @@ It is the same timer everywhere, and changes reach all of them by themselves.
 
 ## Themes
 
-Five colour themes, from pink to Yin/Yang. During a game, tap the little heart on the running clock to pick one. The choice is kept on your phone. The pictures show the time settings in each theme.
+Five colour themes, from pink to Yin/Yang. Tap the little heart on the clock to pick one. The choice is kept on your phone. The pictures show the time settings and a game in each theme.
 
 <img src="images/t-picker.png" alt="The theme picker, opened with the heart on the running clock" width="200">
 
 <table>
 <tr>
-<td align="center"><img src="images/t-pink.png" alt="Go Girls* theme" width="150"><br><b>Go Girls*</b></td>
-<td align="center"><img src="images/t-wlw.png" alt="wlw theme" width="150"><br><b>wlw</b></td>
-<td align="center"><img src="images/t-trans.png" alt="Trans theme" width="150"><br><b>Trans</b></td>
-<td align="center"><img src="images/t-pride.png" alt="Pride theme" width="150"><br><b>Pride</b></td>
-<td align="center"><img src="images/t-yinyang.png" alt="Yin/Yang theme" width="150"><br><b>Yin/Yang</b></td>
+<td align="center"><img src="images/t-pink.png" alt="Go Girls* theme" width="140"><br><b>Go Girls*</b></td>
+<td align="center"><img src="images/t-wlw.png" alt="wlw theme" width="140"><br><b>wlw</b></td>
+<td align="center"><img src="images/t-trans.png" alt="Trans theme" width="140"><br><b>Trans</b></td>
+<td align="center"><img src="images/t-pride.png" alt="Pride theme" width="140"><br><b>Pride</b></td>
+<td align="center"><img src="images/t-yinyang.png" alt="Yin/Yang theme" width="140"><br><b>Yin/Yang</b></td>
+</tr>
+<tr>
+<td align="center"><img src="images/t-game-pink.png" alt="Go Girls* theme during a game" width="140"></td>
+<td align="center"><img src="images/t-game-wlw.png" alt="wlw theme during a game" width="140"></td>
+<td align="center"><img src="images/t-game-trans.png" alt="Trans theme during a game" width="140"></td>
+<td align="center"><img src="images/t-game-pride.png" alt="Pride theme during a game" width="140"></td>
+<td align="center"><img src="images/t-game-yinyang.png" alt="Yin/Yang theme during a game" width="140"></td>
 </tr>
 </table>
 
@@ -61,7 +68,7 @@ Write to [sinadenzel@googlemail.com](mailto:sinadenzel@googlemail.com) (there is
 
 ## How it's built
 
-One `index.html` file, with no framework, no build step and no server. Built by Sina with [Claude](https://claude.com/claude-code), starting in October 2026: the first version took one day. Her first app.
+One `index.html` file, with no framework, no build step and no server. Built by me, Sina, with [Claude](https://claude.com/claude-code), starting in October 2026: the first version took one day. My first app.
 
 ## Licence
 
