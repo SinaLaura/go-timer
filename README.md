@@ -53,11 +53,7 @@ During a game, tap the little heart on the running clock. Here are three of the 
 
 ## Found a bug or have an idea?
 
-- 🐛 **[Report a bug](https://github.com/SinaLaura/go-timer/issues/new?template=bug_report.yml)**: a short form asks what happened.
-- 💡 **[Suggest a feature](https://github.com/SinaLaura/go-timer/issues/new?template=feature_request.yml)** for a concrete wish.
-- 💬 **[Ideas, questions and general feedback](https://github.com/SinaLaura/go-timer/discussions)**: start a discussion, no need for it to be formal.
-
-Both links are also in the app, in the time settings. English or German is fine.
+Write to [sinadenzel@googlemail.com](mailto:sinadenzel@googlemail.com) (there is a **Feedback** link in the app's time settings too), or start a [discussion](https://github.com/SinaLaura/go-timer/discussions) here on GitHub. English or German is fine.
 
 ## How it's built
 

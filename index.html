@@ -527,8 +527,8 @@
   }
   dialog input.wrong { border-color: var(--dlg-ac); background: var(--dlg-tint); color: var(--dlg-tt); }
   dialog .error { margin: 0 4px 10px; font-size: 14px; font-weight: 700; color: var(--dlg-ac); }
-  dialog .feedback { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 8px; font-size: 13px; font-weight: 700; }
-  dialog .feedback a { color: var(--dlg-gp); text-underline-offset: 2px; }
+  dialog .vrow { display: flex; align-items: baseline; gap: 6px; }
+  dialog .vrow a { font-size: 11px; font-weight: 800; color: var(--dlg-gp); text-decoration: none; } /* feedback by mail, next to the version */
   dialog .check { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-size: 16px; }
   dialog .check input, dialog .option input { flex: none; width: 24px; height: 24px; padding: 0; accent-color: var(--dlg-rr); }
   dialog .option {
@@ -671,7 +671,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 12:12</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><div class="vrow"><small class="version">Version 04.11. 12:12</small><a id="feedback" href="mailto:sinadenzel@googlemail.com" data-t="feedback">Feedback</a></div></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -721,11 +721,6 @@
     </div>
     <p id="formError" class="error" role="alert" hidden></p>
     <label class="check"><input id="sound" type="checkbox"> <span data-t="sound">Sounds and voice</span></label>
-    <!-- Opens GitHub: a bug report form (the app version is filled in by the script) or the discussions. -->
-    <p class="feedback">
-      <a id="reportBug" href="https://github.com/SinaLaura/go-timer/issues/new?template=bug_report.yml" target="_blank" rel="noopener" data-t="reportBug">Report a bug</a>
-      <a href="https://github.com/SinaLaura/go-timer/discussions" target="_blank" rel="noopener" data-t="feedback">Ideas and feedback</a>
-    </p>
     <div class="actions">
       <!-- Set comes first: the phone's Done key presses the first button in the form. -->
       <button value="set" class="primary" data-t="set">Set</button>
@@ -807,7 +802,7 @@
       // spelt for the voice, so it says "bee-oh-yoh-mee"
       byoSay: (n, start) => (start ? 'Bee-oh-yoh-mee. ' : '') + (n === 1 ? 'Last period!' : start ? `${n} periods.` : `${n} periods left.`),
       cancel: 'Cancel', set: 'Set', colours: 'Colours',
-      reportBug: 'Report a bug', feedback: 'Ideas and feedback',
+      feedback: 'Feedback',
       outOfRange: (min, max) => `Please enter a number from ${min} to ${max}.`,
       noTime: 'The time cannot be 0.',
     },
@@ -835,7 +830,7 @@
       // für die Stimme geschrieben, damit sie "Bio-jo-mi" sagt
       byoSay: (n, start) => (start ? 'Bio-jomi. ' : '') + (n === 1 ? 'Letzte Periode!' : start ? `${n} Perioden.` : `Noch ${n} Perioden.`),
       cancel: 'Abbrechen', set: 'OK', colours: 'Farben',
-      reportBug: 'Fehler melden', feedback: 'Ideen und Feedback',
+      feedback: 'Feedback',
       outOfRange: (min, max) => `Bitte eine Zahl von ${min} bis ${max} eingeben.`,
       noTime: 'Die Zeit darf nicht 0 sein.',
     },
@@ -1376,8 +1371,8 @@
     if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close();
   });
 
-  // The bug report form opens with the app version already filled in (nothing else is sent).
-  document.getElementById('reportBug').href += '&version=' + encodeURIComponent(document.querySelector('#settings .version').textContent.trim());
+  // The feedback mail starts with the app version in the subject (nothing else is added).
+  document.getElementById('feedback').href += '?subject=' + encodeURIComponent('Go timer feedback (' + document.querySelector('#settings .version').textContent.trim() + ')');
 
   function setLang(l) {
     lang = l;
