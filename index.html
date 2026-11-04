@@ -544,10 +544,9 @@
   dialog .option b { display: block; font-size: 16px; font-weight: 800; }
   dialog .option small { display: block; font-size: 13px; }
   dialog .own { padding: 6px 4px 0; }
-  /* Both extra rows lie in the same spot; the one that is off stays invisible but keeps its space, so the window is always the same height. */
-  dialog .extra { display: grid; }
-  dialog .extra > * { grid-area: 1 / 1; }
-  dialog .extra > [hidden] { display: block; visibility: hidden; }
+  /* The window keeps its height: with the simple timer (no extra row) the room below Reset is empty. */
+  dialog .room { visibility: hidden; }
+  dialog .own:has(#incRow:not([hidden]), #byoRow:not([hidden])) .room { display: none; }
   dialog .again {
     display: flex;
     align-items: center;
@@ -666,7 +665,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 13:30</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 14:00</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
@@ -688,25 +687,25 @@
         <input id="mainMin" type="number" inputmode="numeric" min="0" max="600"> min
         <input id="mainSec" type="number" inputmode="numeric" min="0" max="59"> s
       </div>
-      <div class="extra"><!-- always as tall as one extra row, so the window does not jump between the time systems -->
-        <div id="incRow">
-          <label data-t="added">Added after each move</label>
-          <div class="fields">
-            <input id="incSec" type="number" inputmode="numeric" min="0" max="600"> s
-          </div>
+      <div id="incRow">
+        <label data-t="added">Added after each move</label>
+        <div class="fields">
+          <input id="incSec" type="number" inputmode="numeric" min="0" max="600"> s
         </div>
-        <div id="byoRow">
-          <label data-t="periodsLabel">Periods</label>
-          <div class="fields">
-            <input id="periods" type="number" inputmode="numeric" min="1" max="30"> ×
-            <input id="periodSec" type="number" inputmode="numeric" min="1" max="600"> s
-          </div>
+      </div>
+      <div id="byoRow">
+        <label data-t="periodsLabel">Periods</label>
+        <div class="fields">
+          <input id="periods" type="number" inputmode="numeric" min="1" max="30"> ×
+          <input id="periodSec" type="number" inputmode="numeric" min="1" max="600"> s
         </div>
       </div>
       <button type="button" id="again" class="again">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
         <span id="againText"></span>
       </button>
+      <!-- Empty room as tall as one extra row, below Reset: with the simple timer (no extra row) the window keeps its height. -->
+      <div class="room" aria-hidden="true"><label>&nbsp;</label><div class="fields"><input disabled tabindex="-1"></div></div>
     </div>
     <!-- How long a game will probably take; a tap on it explains the guess, a tap on the board size switches it. -->
     <div class="estimate">
@@ -1264,7 +1263,14 @@
     for (const i of list) i.enterKeyHint = i === list.at(-1) ? 'done' : 'next';
     setText(field('againText'), t('resetTo')(describe(DEFAULTS[s.system])));
     showEstimate(s);
+    showReset();
     fitSettings();
+  }
+  // Reset only shows while something differs from the standard (it keeps its place, so nothing jumps).
+  function showReset() {
+    const s = readForm(), d = DEFAULTS[picked];
+    const same = ['main', 'inc', 'periods', 'period'].every(k => s[k] === d[k]);
+    field('again').style.visibility = same ? 'hidden' : '';
   }
   function readForm() {
     const num = id => Math.max(0, Math.floor(Number(field(id).value) || 0));
@@ -1307,7 +1313,7 @@
     field('board').ariaLabel = `${t('boardSize')}: ${board}×${board}`;
     setText(field('estWhy'), t('estWhy')(...MOVES[board]));
   }
-  dialog.addEventListener('input', () => picked && showEstimate());
+  dialog.addEventListener('input', () => { if (picked) { showEstimate(); showReset(); } });
   field('board').addEventListener('click', () => {
     board = BOARDS[(BOARDS.indexOf(board) + 1) % BOARDS.length];
     try { localStorage.setItem('board', board); } catch (e) { /* storage blocked */ }
