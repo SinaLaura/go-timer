@@ -410,13 +410,14 @@
      Resuming: all three slide back together; End and Adjust time are faster and disappear under ▶,
      and when ▶ is home its symbol fades back into the pause symbol. No circle grows or shrinks.
      The script sets where each one stops (--to) and the short delays going out (--in). */
-  #pause { transform: translateX(var(--shift, 0px)); transition: opacity 0s .9s, transform .5s cubic-bezier(.4, 0, .2, 1); } /* resuming: back under ▶ the moment it arrives */
-  /* Before and after a game ▶ stands in the middle, next to the time-setting button; during a game it is at the left.
-     The script sets --start-x: where the two stand (side by side, centred). */
+  #pause { z-index: 2; transform: translateX(var(--shift, 0px)); transition: opacity 0s .9s, transform .9s cubic-bezier(.4, 0, .2, 1); } /* resuming: back under ▶ the moment it arrives */
+  /* Before and after a game ▶ and the time-setting button stand in the middle, side by side; during a game ▶ is at the left.
+     The script sets --start-x: where the two stand (centred). They move like the pause buttons: when a game starts both slide
+     to the left and the time-setting button vanishes under ▶; after a game it comes out from under ▶, the furthest first, a little later ▶. */
   #bar { --start-x: calc((100vw - 120px) / 2); } /* the script sets the exact value; this one keeps ▶ from sliding in when the page opens */
-  body:is(.ready, .over) #pause { --shift: calc(var(--start-x) - 16px); color: var(--start-ic); }
-  #bar #timeBtn { position: absolute; top: -4px; left: calc(var(--start-x, 0px) + 68px); margin: 0; color: var(--start-ic); opacity: 0; pointer-events: none; transition: opacity .3s; }
-  body:is(.ready, .over) #bar #timeBtn { opacity: 1; pointer-events: auto; }
+  body:is(.ready, .over) #pause { --shift: calc(var(--start-x) - 16px); color: var(--start-ic); transition: opacity 0s .9s, transform .9s cubic-bezier(.25, 1.15, .4, 1) .47s; }
+  #bar #timeBtn { position: absolute; z-index: 1; top: -4px; left: 16px; margin: 0; color: var(--start-ic); opacity: 0; pointer-events: none; transform: none; transition: transform .9s cubic-bezier(.4, 0, .2, 1), opacity 0s .9s; }
+  body:is(.ready, .over) #bar #timeBtn { opacity: 1; pointer-events: auto; transform: translateX(calc(var(--start-x) + 52px)); transition: transform .9s cubic-bezier(.25, 1.15, .4, 1) .35s, opacity 0s .35s; }
   body.paused #pause { opacity: 0; pointer-events: none; transition: opacity 0s .35s; } /* pausing: gone once ▶ covers it */
   #bar .trio { position: absolute; inset: 0; pointer-events: none; }
   #bar .trio button {
@@ -455,7 +456,7 @@
   #end.wide .end-label { max-width: 220px; margin-left: 8px; opacity: 1; transition: max-width .35s ease, margin .35s ease, opacity .25s .1s; }
   body.confirm-end #bar .trio :is(#resume, #adjustBtn) { filter: opacity(0); }
   #endShield { position: fixed; inset: 0; z-index: 4; }
-  @media (prefers-reduced-motion: reduce) { #bar .trio button, #pause { transition: none !important; } }
+  @media (prefers-reduced-motion: reduce) { #bar .trio button, #pause, #timeBtn { transition: none !important; } }
   button {
     min-height: 48px;
     padding: 0 20px;
@@ -664,7 +665,7 @@
 <dialog id="settings">
   <form method="dialog" novalidate>
     <div class="top">
-      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 11:56</small></div>
+      <div class="group"><a href="https://sinalaura.github.io/#apps" target="_blank" rel="noopener">An Ankabuti Application</a> <svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.2 0 3.7 1.2 5.2 3 1.5-1.8 3-3 5.2-3 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg><small class="version">Version 04.11. 12:00</small></div>
       <div class="lang"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></div>
     </div>
     <h2 data-t="timeSetting">Time setting</h2>
