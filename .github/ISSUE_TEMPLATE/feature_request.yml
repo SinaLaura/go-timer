@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest something the timer should do
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! You can write in English or German.
+        Not sure it is a concrete feature? Start a [discussion](https://github.com/SinaLaura/go-timer/discussions) instead.
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: Describe the idea, and when you would use it (for example in a tournament or a practice game).
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown in the time settings, under "An Ankabuti Application".
+      placeholder: Version 04.11. 12:12

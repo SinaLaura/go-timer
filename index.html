@@ -527,6 +527,8 @@
   }
   dialog input.wrong { border-color: var(--dlg-ac); background: var(--dlg-tint); color: var(--dlg-tt); }
   dialog .error { margin: 0 4px 10px; font-size: 14px; font-weight: 700; color: var(--dlg-ac); }
+  dialog .feedback { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 8px; font-size: 13px; font-weight: 700; }
+  dialog .feedback a { color: var(--dlg-gp); text-underline-offset: 2px; }
   dialog .check { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-size: 16px; }
   dialog .check input, dialog .option input { flex: none; width: 24px; height: 24px; padding: 0; accent-color: var(--dlg-rr); }
   dialog .option {
@@ -719,6 +721,11 @@
     </div>
     <p id="formError" class="error" role="alert" hidden></p>
     <label class="check"><input id="sound" type="checkbox"> <span data-t="sound">Sounds and voice</span></label>
+    <!-- Opens GitHub: a bug report form (the app version is filled in by the script) or the discussions. -->
+    <p class="feedback">
+      <a id="reportBug" href="https://github.com/SinaLaura/go-timer/issues/new?template=bug_report.yml" target="_blank" rel="noopener" data-t="reportBug">Report a bug</a>
+      <a href="https://github.com/SinaLaura/go-timer/discussions" target="_blank" rel="noopener" data-t="feedback">Ideas and feedback</a>
+    </p>
     <div class="actions">
       <!-- Set comes first: the phone's Done key presses the first button in the form. -->
       <button value="set" class="primary" data-t="set">Set</button>
@@ -800,6 +807,7 @@
       // spelt for the voice, so it says "bee-oh-yoh-mee"
       byoSay: (n, start) => (start ? 'Bee-oh-yoh-mee. ' : '') + (n === 1 ? 'Last period!' : start ? `${n} periods.` : `${n} periods left.`),
       cancel: 'Cancel', set: 'Set', colours: 'Colours',
+      reportBug: 'Report a bug', feedback: 'Ideas and feedback',
       outOfRange: (min, max) => `Please enter a number from ${min} to ${max}.`,
       noTime: 'The time cannot be 0.',
     },
@@ -827,6 +835,7 @@
       // für die Stimme geschrieben, damit sie "Bio-jo-mi" sagt
       byoSay: (n, start) => (start ? 'Bio-jomi. ' : '') + (n === 1 ? 'Letzte Periode!' : start ? `${n} Perioden.` : `Noch ${n} Perioden.`),
       cancel: 'Abbrechen', set: 'OK', colours: 'Farben',
+      reportBug: 'Fehler melden', feedback: 'Ideen und Feedback',
       outOfRange: (min, max) => `Bitte eine Zahl von ${min} bis ${max} eingeben.`,
       noTime: 'Die Zeit darf nicht 0 sein.',
     },
@@ -1366,6 +1375,9 @@
     const r = d.getBoundingClientRect();
     if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close();
   });
+
+  // The bug report form opens with the app version already filled in (nothing else is sent).
+  document.getElementById('reportBug').href += '&version=' + encodeURIComponent(document.querySelector('#settings .version').textContent.trim());
 
   function setLang(l) {
     lang = l;

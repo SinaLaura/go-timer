@@ -1,0 +1,26 @@
+name: Bug report
+description: Something isn't working
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping! You can write in English or German.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown in the time settings, under "An Ankabuti Application".
+      placeholder: Version 04.11. 12:12
+  - type: input
+    id: device
+    attributes:
+      label: Phone and browser
+      description: For example "Pixel 8, Chrome" or "iPhone 14, Safari". Say if it is installed on the home screen.
