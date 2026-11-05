@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="yinyang">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -897,7 +897,7 @@
     for (const b of picker.querySelectorAll('[data-pick]')) b.classList.toggle('on', b.dataset.pick === name);
     paintStatusBar();
   }
-  try { setTheme(localStorage.getItem('theme')); } catch (e) { setTheme('pink'); }
+  try { setTheme(localStorage.getItem('theme') || 'yinyang'); } catch (e) { setTheme('yinyang'); } // a new user starts with Yin/Yang; after a pick, the last theme
   // The rainbow moving through the Pride hearts: still with reduced motion, and while paused (see render).
   const prideDefs = document.getElementById('pride-defs');
   const stillMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
