@@ -148,3 +148,10 @@ screen through the manifest. Keep it in the normal browser. Risk: on some phones
 strip around the camera stays in the bar colour. Needs a check on a real Android phone.
 No new app version needed, the website change is enough, so it is safe during the
 closed test.
+
+## Statistics on one full screen
+
+Idea for later: show the statistics on one full screen, shared by both players, instead
+of one part in each half. Today each player reads their own half (turned around for
+White), which makes the chart small. One full screen could give the chart more room,
+especially in long games.
