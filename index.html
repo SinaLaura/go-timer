@@ -372,6 +372,7 @@
   /* The bars: plain boxes in a row, so they stay crisp and keep round tops however many there are. */
   .chart .bars { position: relative; display: flex; align-items: flex-end; height: 34px; border-bottom: 1px solid color-mix(in srgb, currentColor 35%, transparent); }
   .chart .bars i { flex: none; width: var(--w); min-height: 2px; background: currentColor; border-radius: 4px 4px 0 0; transition: opacity .15s; }
+  .chart .bars.fit i { flex: 1 1 0; width: auto; border-radius: 1px 1px 0 0; }
   .chart .has-sel i { opacity: .35; }
   .chart .has-sel i.sel { opacity: 1; }
   /* The player's average move time, as a pink dashed line across the bars. */
@@ -1446,19 +1447,9 @@
 
   // Time per move: one bar per move, from the first move (left) to the last (right),
   // on the same scale for both players. Tapping or sliding along the bars shows a move's time.
-  // One bar per move up to 200 moves each; only in longer games do
-  // neighbouring moves share a bar (their average), so it never gets too crowded.
-  const MAX_BARS = 200;
+  // Always one bar per move, however long the game; the bars just get thinner.
   const moveNo = (p, i) => i + 1; // each player's own count: 1, 2, 3 …
-  function barsFor(p) {
-    const k = Math.ceil(Math.max(stats.black.times.length, stats.white.times.length) / MAX_BARS) || 1;
-    const times = stats[p].times, bars = [];
-    for (let from = 0; from < times.length; from += k) {
-      const part = times.slice(from, from + k);
-      bars.push({ from, to: from + part.length - 1, ms: part.reduce((a, b) => a + b, 0) / part.length });
-    }
-    return bars;
-  }
+  const barsFor = p => stats[p].times.map((ms, i) => ({ from: i, to: i, ms }));
   function chartFor(p) {
     const bars = barsFor(p), n = bars.length, sel = chosen[p], b = bars[sel];
     if (!n) return '';
@@ -1474,10 +1465,11 @@
     const px = window.devicePixelRatio || 1, room = Math.floor(Math.min(innerWidth * .86, 420) * px);
     let gap = Math.round((n > 100 ? .5 : n > 60 ? 1 : n > 30 ? 2 : 3) * px) || 1;
     let w = Math.min(Math.floor((room - (n - 1) * gap) / n), Math.round(18 * px) - gap);
-    if (w < 1) { gap = 0; w = Math.max(1, Math.floor(room / n)); } // hundreds of bars on a tiny screen
-    const style = `width: ${(n * w + (n - 1) * gap) / px}px; gap: ${gap / px}px; --w: ${w / px}px`;
+    let fit = '';
+    if (w < 1) { gap = 0; w = 1; fit = ' fit'; } // more bars than screen pixels: they share the width evenly
+    const style = fit ? `width: ${room / px}px` : `width: ${(n * w + (n - 1) * gap) / px}px; gap: ${gap / px}px; --w: ${w / px}px`;
     return `<div class="chart">`
-      + `<div class="bars${b ? ' has-sel' : ''}" style="${style}" aria-hidden="true">${rects}${line}</div>`
+      + `<div class="bars${b ? ' has-sel' : ''}${fit}" style="${style}" aria-hidden="true">${rects}${line}</div>`
       + (b ? `<b class="readout">${readout}</b>` : `<small class="readout">${t('chartTitle')}</small>`) + '</div>';
   }
   function pickBar(p, e) {
