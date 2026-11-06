@@ -1449,7 +1449,7 @@
   // One bar per move up to 200 moves each; only in longer games do
   // neighbouring moves share a bar (their average), so it never gets too crowded.
   const MAX_BARS = 200;
-  const moveNo = (p, i) => (p === 'black' ? 2 * i + 1 : 2 * i + 2); // Black moves first
+  const moveNo = (p, i) => i + 1; // each player's own count: 1, 2, 3 …
   function barsFor(p) {
     const k = Math.ceil(Math.max(stats.black.times.length, stats.white.times.length) / MAX_BARS) || 1;
     const times = stats[p].times, bars = [];
